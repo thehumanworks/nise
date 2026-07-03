@@ -5763,6 +5763,34 @@ packages:
           asset: checksums.txt
           algorithm: sha256
   - type: github_release
+    repo_owner: Mic92
+    repo_name: nixfmt-rs
+    description: Rust reimplementation of nixfmt with byte-identical output
+    files:
+      - name: nixfmt
+    version_constraint: "false"
+    version_overrides:
+      - version_constraint: Version == "0.1.1"
+        no_asset: true
+      - version_constraint: "true"
+        asset: nixfmt-{{.Arch}}-{{.OS}}
+        format: raw
+        replacements:
+          arm64: aarch64
+        checksum:
+          type: github_release
+          asset: SHA256SUMS
+          algorithm: sha256
+        overrides:
+          - goos: linux
+            replacements:
+              amd64: x86_64
+        github_artifact_attestations:
+          signer_workflow: Mic92/nixfmt-rs/.github/workflows/release-assets.yml
+        supported_envs:
+          - linux
+          - darwin/arm64
+  - type: github_release
     repo_owner: Mikescher
     repo_name: better-docker-ps
     description: Because `docker ps` is annoying and does not fit my monitor/terminal width
@@ -12305,6 +12333,13 @@ packages:
         supported_envs:
           - linux
           - darwin
+      - version_constraint: semver("<= 1.6.4")
+        asset: opencodereview-{{.OS}}-{{.Arch}}
+        format: raw
+        checksum:
+          type: github_release
+          asset: sha256sum.txt
+          algorithm: sha256
       - version_constraint: "true"
         asset: opencodereview-{{.OS}}-{{.Arch}}
         format: raw
@@ -12312,6 +12347,8 @@ packages:
           type: github_release
           asset: sha256sum.txt
           algorithm: sha256
+        github_artifact_attestations:
+          signer_workflow: alibaba/open-code-review/.github/workflows/release.yml
   - type: github_release
     repo_owner: allero-io
     repo_name: allero
@@ -59020,6 +59057,13 @@ packages:
           - linux/amd64
           - darwin
           - windows
+      - version_constraint: semver("< 4.0.10")
+        asset: kubescape_{{trimV .Version}}_{{.OS}}_{{.Arch}}.{{.Format}}
+        format: tar.gz
+        checksum:
+          type: github_release
+          asset: checksums.sha256
+          algorithm: sha256
       - version_constraint: "true"
         asset: kubescape_{{trimV .Version}}_{{.OS}}_{{.Arch}}.{{.Format}}
         format: tar.gz
@@ -59027,6 +59071,8 @@ packages:
           type: github_release
           asset: checksums.sha256
           algorithm: sha256
+        github_artifact_attestations:
+          signer_workflow: kubescape/kubescape/.github/workflows/02-release.yaml
   - type: github_release
     repo_owner: kubeshark
     repo_name: kubeshark
@@ -67324,6 +67370,16 @@ packages:
           algorithm: sha256
         supported_envs:
           - linux/amd64
+      - version_constraint: semver("<= 0.24.0")
+        asset: sqly_{{trimV .Version}}_{{.OS}}_{{.Arch}}.{{.Format}}
+        format: tar.gz
+        checksum:
+          type: github_release
+          asset: checksums.txt
+          algorithm: sha256
+        overrides:
+          - goos: windows
+            format: zip
       - version_constraint: "true"
         asset: sqly_{{trimV .Version}}_{{.OS}}_{{.Arch}}.{{.Format}}
         format: tar.gz
@@ -67331,6 +67387,15 @@ packages:
           type: github_release
           asset: checksums.txt
           algorithm: sha256
+          cosign:
+            bundle:
+              type: github_release
+              asset: checksums.txt.sigstore.json
+            opts:
+              - --certificate-identity
+              - https://github.com/nao1215/sqly/.github/workflows/release.yml@refs/tags/{{.Version}}
+              - --certificate-oidc-issuer
+              - https://token.actions.githubusercontent.com
         overrides:
           - goos: windows
             format: zip

@@ -1,5 +1,46 @@
 # Changelog
 
+## [2026.7.1](https://github.com/jdx/mise/compare/v2026.7.0..v2026.7.1) - 2026-07-03
+
+### 🐛 Bug Fixes
+
+- **(env)** match redaction wildcards as globs by @jdx in [#10729](https://github.com/jdx/mise/pull/10729)
+- **(lockfile)** preserve header url while restoring asset host by @jdx in [#10728](https://github.com/jdx/mise/pull/10728)
+- **(lockfile)** avoid provenance guesses for opaque tags by @jdx in [#10722](https://github.com/jdx/mise/pull/10722)
+
+### 📚 Documentation
+
+- **(errors)** replace TODO stub with error message reference by @jdx in [#10724](https://github.com/jdx/mise/pull/10724)
+
+### 📦️ Dependency Updates
+
+- update rust docker digest to 1f0dbad by @renovate[bot] in [#10738](https://github.com/jdx/mise/pull/10738)
+- update zizmorcore/zizmor-action action to v0.5.7 by @renovate[bot] in [#10742](https://github.com/jdx/mise/pull/10742)
+- update docker/build-push-action digest to 53b7df9 by @renovate[bot] in [#10733](https://github.com/jdx/mise/pull/10733)
+- update docker/login-action digest to c99871d by @renovate[bot] in [#10734](https://github.com/jdx/mise/pull/10734)
+- update docker/setup-buildx-action digest to bb05f3f by @renovate[bot] in [#10736](https://github.com/jdx/mise/pull/10736)
+- update docker/metadata-action digest to dc80280 by @renovate[bot] in [#10735](https://github.com/jdx/mise/pull/10735)
+- update rust crate usage-lib to v3.5.3 by @renovate[bot] in [#10741](https://github.com/jdx/mise/pull/10741)
+- update ubuntu:26.04 docker digest to b7f4819 by @renovate[bot] in [#10739](https://github.com/jdx/mise/pull/10739)
+- update rust crate rmcp to v1.8.0 by @renovate[bot] in [#10744](https://github.com/jdx/mise/pull/10744)
+- update rust crate env_logger to v0.11.11 by @renovate[bot] in [#10740](https://github.com/jdx/mise/pull/10740)
+
+### 📦 Registry
+
+- prefer aqua for pi by @jdx in [#10727](https://github.com/jdx/mise/pull/10727)
+
+### 📦 Aqua Registry Updates
+
+#### New Packages (1)
+
+- [`Mic92/nixfmt-rs`](https://github.com/Mic92/nixfmt-rs)
+
+#### Updated Packages (3)
+
+- [`alibaba/open-code-review`](https://github.com/alibaba/open-code-review)
+- [`kubescape/kubescape`](https://github.com/kubescape/kubescape)
+- [`nao1215/sqly`](https://github.com/nao1215/sqly)
+
 ## [2026.7.0](https://github.com/jdx/mise/compare/v2026.6.14..v2026.7.0) - 2026-07-02
 
 ### 🚀 Features
