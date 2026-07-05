@@ -77,15 +77,15 @@ impl Settings {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
     # list all settings
-    $ <bold>mise settings</bold>
+    $ <bold>nise settings</bold>
 
     # get the value of the setting "always_keep_download"
-    $ <bold>mise settings always_keep_download</bold>
+    $ <bold>nise settings always_keep_download</bold>
 
     # set the value of the setting "always_keep_download" to "true"
-    $ <bold>mise settings always_keep_download=true</bold>
+    $ <bold>nise settings always_keep_download=true</bold>
 
     # set the value of the setting "node.mirror_url" to "https://npm.taobao.org/mirrors/node"
-    $ <bold>mise settings node.mirror_url https://npm.taobao.org/mirrors/node</bold>
+    $ <bold>nise settings node.mirror_url https://npm.taobao.org/mirrors/node</bold>
 "#
 );

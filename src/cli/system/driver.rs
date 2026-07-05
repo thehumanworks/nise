@@ -1,4 +1,4 @@
-//! Shared per-manager execution loop for `mise bootstrap packages apply`/`upgrade`/`use`.
+//! Shared per-manager execution loop for `nise bootstrap packages apply`/`upgrade`/`use`.
 
 use std::collections::HashMap;
 
@@ -105,7 +105,7 @@ pub(crate) async fn run(mgrs: Vec<ManagerPackages>, action: Action, d: &DriverOp
         let skipped = statuses.len() - targets.len();
         if action == Action::Upgrade && skipped > 0 {
             warn!(
-                "{name}: {skipped} package(s) not installed — run `mise bootstrap packages apply` first"
+                "{name}: {skipped} package(s) not installed — run `nise bootstrap packages apply` first"
             );
         }
         // a pin this manager can never satisfy must not block the rest

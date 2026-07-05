@@ -83,8 +83,8 @@ fn default_task() -> String {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tasks edit build</bold>
-    $ <bold>mise tasks edit test</bold>
+    $ <bold>nise tasks edit build</bold>
+    $ <bold>nise tasks edit test</bold>
 "#
 );
 

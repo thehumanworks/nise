@@ -11,10 +11,10 @@ use crate::toolset::{InstallOptions, ToolSource, ToolsetBuilder};
 
 /// Sets a tool version for the current session.
 ///
-/// Only works in a session where mise is already activated.
+/// Only works in a session where nise is already activated.
 ///
 /// This works by setting environment variables for the current shell session
-/// such as `MISE_NODE_VERSION=20` which is "eval"ed as a shell function created by `mise activate`.
+/// such as `MISE_NODE_VERSION=20` which is "eval"ed as a shell function created by `nise activate`.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, visible_alias = "sh", after_long_help = AFTER_LONG_HELP)]
 pub struct Shell {
@@ -60,7 +60,7 @@ impl Shell {
         for ta in &self.tool {
             if ta.tvr.is_none() {
                 bail!(
-                    "no version specified for tool {tool}\nuse `mise shell {tool}@VERSION` to set a version",
+                    "no version specified for tool {tool}\nuse `nise shell {tool}@VERSION` to set a version",
                     tool = ta.ba.short,
                 );
             }
@@ -105,7 +105,7 @@ fn err_inactive() -> Result<()> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise shell node@20</bold>
+    $ <bold>nise shell node@20</bold>
     $ <bold>node -v</bold>
     v20.0.0
 "#

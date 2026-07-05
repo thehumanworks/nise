@@ -204,12 +204,12 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # Show dependencies for all tasks
-    $ <bold>mise tasks deps</bold>
+    $ <bold>nise tasks deps</bold>
 
     # Show dependencies for the "lint", "test" and "check" tasks
-    $ <bold>mise tasks deps lint test check</bold>
+    $ <bold>nise tasks deps lint test check</bold>
 
     # Show dependencies in DOT format
-    $ <bold>mise tasks deps --dot</bold>
+    $ <bold>nise tasks deps --dot</bold>
 "#
 );

@@ -22,21 +22,21 @@ use crate::toolset::{
 use crate::ui::ctrlc;
 use crate::{config, env, exit, file};
 
-/// Installs a tool and adds the version to mise.toml.
+/// Installs a tool and adds the version to nise.toml.
 ///
 /// This will install the tool version if it is not already installed.
-/// By default, this will use a `mise.toml` file in the current directory.
-/// If multiple config files exist (e.g., both `mise.toml` and `mise.local.toml`),
-/// the lowest precedence file (`mise.toml`) will be used.
+/// By default, this will use a `nise.toml` file in the current directory.
+/// If multiple config files exist (e.g., both `nise.toml` and `nise.local.toml`),
+/// the lowest precedence file (`nise.toml`) will be used.
 /// See https://mise.en.dev/configuration.html#target-file-for-write-operations
 ///
 /// In the following order:
 ///   - If `--global` is set, it will use the global config file.
 ///   - If `--path` is set, it will use the config file at the given path.
-///   - If `--env` is set, it will use `mise.<env>.toml`.
+///   - If `--env` is set, it will use `nise.<env>.toml`.
 ///   - If [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) is set, it will use that instead.
 ///   - If `MISE_OVERRIDE_CONFIG_FILENAMES` is set, it will the first from that list.
-///   - Otherwise just "mise.toml" or global config if cwd is home directory.
+///   - Otherwise just "nise.toml" or global config if cwd is home directory.
 ///
 /// Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
 ///
@@ -55,7 +55,7 @@ pub struct Use {
     #[clap(value_name = "TOOL@VERSION", verbatim_doc_comment)]
     tool: Vec<ToolArg>,
 
-    /// Create/modify an environment-specific config file like .mise.<env>.toml
+    /// Create/modify an environment-specific config file like .nise.<env>.toml
     #[clap(long, short, overrides_with_all = & ["global", "path"])]
     env: Option<String>,
 
@@ -91,7 +91,7 @@ pub struct Use {
 
     /// Save fuzzy version to config file
     ///
-    /// e.g.: `mise use --fuzzy node@20` will save 20 as the version
+    /// e.g.: `nise use --fuzzy node@20` will save 20 as the version
     /// this is the default behavior unless `MISE_PIN=1`
     #[clap(long, verbatim_doc_comment, overrides_with = "pin")]
     fuzzy: bool,
@@ -103,10 +103,10 @@ pub struct Use {
     minimum_release_age: Option<String>,
 
     /// Save exact version to config file
-    /// e.g.: `mise use --pin node@20` will save 20.0.0 as the version
+    /// e.g.: `nise use --pin node@20` will save 20.0.0 as the version
     /// Set `MISE_PIN=1` to make this the default behavior
     ///
-    /// Consider using mise.lock as a better alternative to pinning in mise.toml:
+    /// Consider using nise.lock as a better alternative to pinning in nise.toml:
     /// https://mise.en.dev/configuration/settings.html#lockfile
     #[clap(long, verbatim_doc_comment, overrides_with = "fuzzy")]
     pin: bool,
@@ -388,20 +388,20 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # run with no arguments to use the interactive selector
-    $ <bold>mise use</bold>
+    $ <bold>nise use</bold>
 
-    # set the current version of node to 20.x in mise.toml of current directory
+    # set the current version of node to 20.x in nise.toml of current directory
     # will write the fuzzy version (e.g.: 20)
-    $ <bold>mise use node@20</bold>
+    $ <bold>nise use node@20</bold>
 
     # set the current version of node to 20.x in ~/.config/mise/config.toml
     # will write the precise version (e.g.: 20.0.0)
-    $ <bold>mise use -g --pin node@20</bold>
+    $ <bold>nise use -g --pin node@20</bold>
 
-    # sets .mise.local.toml (which is intended not to be committed to a project)
-    $ <bold>mise use --env local node@20</bold>
+    # sets .nise.local.toml (which is intended not to be committed to a project)
+    $ <bold>nise use --env local node@20</bold>
 
-    # sets .mise.staging.toml (which is used if MISE_ENV=staging)
-    $ <bold>mise use --env staging node@20</bold>
+    # sets .nise.staging.toml (which is used if MISE_ENV=staging)
+    $ <bold>nise use --env staging node@20</bold>
 "#
 );

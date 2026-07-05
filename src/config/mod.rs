@@ -1171,24 +1171,24 @@ static LOCAL_CONFIG_FILENAMES: Lazy<IndexSet<&'static str>> = Lazy::new(|| {
         )
     } else {
         paths.extend([
-            ".config/mise/conf.d/*.toml",
-            ".config/mise/config.toml",
-            ".config/mise/mise.toml",
-            ".config/mise.toml",
-            ".mise/config.toml",
-            "mise/config.toml",
+            ".config/nise/conf.d/*.toml",
+            ".config/nise/config.toml",
+            ".config/nise/nise.toml",
+            ".config/nise.toml",
+            ".nise/config.toml",
+            "nise/config.toml",
             ".rtx.toml",
-            "mise.toml",
-            &*env::MISE_DEFAULT_CONFIG_FILENAME, // mise.toml
-            ".mise.toml",
-            ".config/mise/config.local.toml",
-            ".config/mise/mise.local.toml",
-            ".config/mise.local.toml",
-            ".mise/config.local.toml",
-            "mise/config.local.toml",
+            "nise.toml",
+            &*env::MISE_DEFAULT_CONFIG_FILENAME, // nise.toml
+            ".nise.toml",
+            ".config/nise/config.local.toml",
+            ".config/nise/nise.local.toml",
+            ".config/nise.local.toml",
+            ".nise/config.local.toml",
+            "nise/config.local.toml",
             ".rtx.local.toml",
-            "mise.local.toml",
-            ".mise.local.toml",
+            "nise.local.toml",
+            ".nise.local.toml",
         ]);
     }
 
@@ -1198,18 +1198,18 @@ static LOCAL_CONFIG_FILENAMES: Lazy<IndexSet<&'static str>> = Lazy::new(|| {
 /// (later wins, matching LOCAL_CONFIG_FILENAMES ordering)
 fn env_config_patterns(env: &str) -> Vec<String> {
     vec![
-        format!(".config/mise/config.{env}.toml"),
-        format!(".config/mise.{env}.toml"),
-        format!("mise/config.{env}.toml"),
-        format!("mise.{env}.toml"),
-        format!(".mise/config.{env}.toml"),
-        format!(".mise.{env}.toml"),
-        format!(".config/mise/config.{env}.local.toml"),
-        format!(".config/mise.{env}.local.toml"),
-        format!("mise/config.{env}.local.toml"),
-        format!("mise.{env}.local.toml"),
-        format!(".mise/config.{env}.local.toml"),
-        format!(".mise.{env}.local.toml"),
+        format!(".config/nise/config.{env}.toml"),
+        format!(".config/nise.{env}.toml"),
+        format!("nise/config.{env}.toml"),
+        format!("nise.{env}.toml"),
+        format!(".nise/config.{env}.toml"),
+        format!(".nise.{env}.toml"),
+        format!(".config/nise/config.{env}.local.toml"),
+        format!(".config/nise.{env}.local.toml"),
+        format!("nise/config.{env}.local.toml"),
+        format!("nise.{env}.local.toml"),
+        format!(".nise/config.{env}.local.toml"),
+        format!(".nise.{env}.local.toml"),
     ]
 }
 
@@ -1568,9 +1568,9 @@ fn detect_auto_env_candidate_files() -> Vec<PathBuf> {
         for env_name in &candidate_envs {
             for filename in [
                 format!("config.{env_name}.toml"),
-                format!("mise.{env_name}.toml"),
+                format!("nise.{env_name}.toml"),
                 format!("config.{env_name}.local.toml"),
-                format!("mise.{env_name}.local.toml"),
+                format!("nise.{env_name}.local.toml"),
             ] {
                 let p = dir.join(filename);
                 if p.is_file() {
@@ -1721,16 +1721,16 @@ pub fn system_config_files() -> IndexSet<PathBuf> {
 }
 
 static CONFIG_FILENAMES: Lazy<Vec<String>> = Lazy::new(|| {
-    let mut filenames = vec!["config.toml".to_string(), "mise.toml".to_string()];
+    let mut filenames = vec!["config.toml".to_string(), "nise.toml".to_string()];
     for env in &*env::MISE_ENV_WITH_AUTO {
         filenames.push(format!("config.{env}.toml"));
-        filenames.push(format!("mise.{env}.toml"));
+        filenames.push(format!("nise.{env}.toml"));
     }
     filenames.push("config.local.toml".to_string());
-    filenames.push("mise.local.toml".to_string());
+    filenames.push("nise.local.toml".to_string());
     for env in &*env::MISE_ENV_WITH_AUTO {
         filenames.push(format!("config.{env}.local.toml"));
-        filenames.push(format!("mise.{env}.local.toml"));
+        filenames.push(format!("nise.{env}.local.toml"));
     }
     filenames
 });
@@ -1853,11 +1853,11 @@ pub fn resolve_target_config_path(opts: ConfigPathOptions) -> Result<PathBuf> {
 
     // If env-specific config is requested
     if let Some(ref env_name) = opts.env {
-        let dotfile_path = cwd.join(format!(".mise.{}.toml", env_name));
+        let dotfile_path = cwd.join(format!(".nise.{}.toml", env_name));
         if dotfile_path.exists() {
             return Ok(dotfile_path);
         } else {
-            return Ok(cwd.join(format!("mise.{}.toml", env_name)));
+            return Ok(cwd.join(format!("nise.{}.toml", env_name)));
         }
     }
 

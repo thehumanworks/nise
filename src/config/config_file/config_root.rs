@@ -50,7 +50,7 @@ pub fn config_root(path: &Path) -> PathBuf {
     let grandparent_path = || parent_path().parent().unwrap().to_path_buf();
     let great_grandparent_path = || grandparent_path().parent().unwrap().to_path_buf();
     let great_great_grandparent_path = || great_grandparent_path().parent().unwrap().to_path_buf();
-    let is_mise_dir = |d: &str| d == "mise" || d == ".mise";
+    let is_mise_dir = |d: &str| d == "mise" || d == ".mise" || d == "nise" || d == ".nise";
     let is_config_filename = |f: &str| {
         f == "config.toml" || f == "config.local.toml" || regex!(r"config\..+\.toml").is_match(f)
     };

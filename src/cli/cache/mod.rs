@@ -7,9 +7,9 @@ mod clear;
 mod path;
 mod prune;
 
-/// Manage the mise cache
+/// Manage the nise cache
 ///
-/// Run `mise cache` with no args to view the current cache directory.
+/// Run `nise cache` with no args to view the current cache directory.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment)]
 pub struct Cache {

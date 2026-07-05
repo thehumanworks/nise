@@ -13,13 +13,13 @@ use crate::oci::{BuildOptions, LayerOwner};
 /// [experimental] Build an OCI image and push it to a registry
 ///
 /// Requires `skopeo` (or `crane`) on PATH. If `--image-dir` is not passed,
-/// builds fresh from the current mise.toml first, then shells out to
+/// builds fresh from the current nise.toml first, then shells out to
 /// `skopeo copy oci:<dir> docker://<ref>` (or `crane push <dir> <ref>`).
 /// Authentication is handled by the underlying tool — configure it the same
 /// way you would for a plain `skopeo` / `crane` push (e.g. `docker login`,
 /// `REGISTRY_AUTH_FILE`, `~/.config/containers/auth.json`).
 ///
-/// Requires `mise settings experimental=true` (or `MISE_EXPERIMENTAL=1`).
+/// Requires `nise settings experimental=true` (or `MISE_EXPERIMENTAL=1`).
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Push {
@@ -32,12 +32,12 @@ pub struct Push {
     from: Option<String>,
 
     /// Push an already-built OCI image layout (skip the build step)
-    #[clap(long, value_hint = ValueHint::DirPath, conflicts_with_all = &["from", "mount_point", "no_mise", "owner", "include_global"])]
+    #[clap(long, value_hint = ValueHint::DirPath, conflicts_with_all = &["from", "mount_point", "no_nise", "owner", "include_global"])]
     image_dir: Option<PathBuf>,
 
     /// Also include tools from the global / system config (default: project-only)
     ///
-    /// See `mise oci build --help` for details.
+    /// See `nise oci build --help` for details.
     #[clap(long)]
     include_global: bool,
 
@@ -45,9 +45,9 @@ pub struct Push {
     #[clap(long)]
     mount_point: Option<String>,
 
-    /// Don't embed the mise binary (ignored with --image-dir)
-    #[clap(long)]
-    no_mise: bool,
+    /// Don't embed the nise binary (ignored with --image-dir)
+    #[clap(long = "no-nise", alias = "no-mise")]
+    no_nise: bool,
 
     /// UID[:GID] to assign to every tar entry when building (conflicts with --image-dir)
     ///
@@ -71,7 +71,7 @@ enum Tool {
 
 impl Push {
     pub async fn run(self) -> Result<()> {
-        Settings::get().ensure_experimental("mise oci push")?;
+        Settings::get().ensure_experimental("nise oci push")?;
 
         // Validate arguments BEFORE we go looking for an external tool,
         // so argument errors always win over "tool not installed" errors.
@@ -95,7 +95,7 @@ impl Push {
                 }
                 (d.clone(), None)
             } else {
-                let td = TempDir::with_prefix("mise-oci-push-")
+                let td = TempDir::with_prefix("nise-oci-push-")
                     .wrap_err("creating temp dir for oci build output")?;
                 let out_dir = td.path().join("image");
                 let opts = BuildOptions {
@@ -104,7 +104,7 @@ impl Push {
                     tag: Some(self.reference.clone()),
                     mount_point: self.mount_point.clone(),
                     owner: self.owner,
-                    include_mise: !self.no_mise,
+                    include_mise: !self.no_nise,
                 };
                 let built = perform_build(opts, self.include_global).await?;
                 info!("built image: {}", built.manifest_digest);
@@ -183,14 +183,14 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     Build and push to GHCR:
-    $ <bold>mise oci push ghcr.io/me/devenv:latest</bold>
+    $ <bold>nise oci push ghcr.io/me/devenv:latest</bold>
 
     Push an image built earlier:
-    $ <bold>mise oci build -o ./img</bold>
-    $ <bold>mise oci push --image-dir ./img ghcr.io/me/devenv:v1</bold>
+    $ <bold>nise oci build -o ./img</bold>
+    $ <bold>nise oci push --image-dir ./img ghcr.io/me/devenv:v1</bold>
 
     Force a specific push tool:
-    $ <bold>mise oci push --tool crane ghcr.io/me/devenv:latest</bold>
+    $ <bold>nise oci push --tool crane ghcr.io/me/devenv:latest</bold>
 
 <bold><underline>Auth:</underline></bold>
 

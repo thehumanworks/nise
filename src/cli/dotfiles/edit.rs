@@ -156,7 +156,7 @@ async fn apply_target(target: &str) -> Result<()> {
             dry_run: false,
             verbose: false,
             force: false,
-            force_hint: "use `mise dotfiles apply --force`",
+            force_hint: "use `nise dotfiles apply --force`",
             yes: true,
         };
         system::files::apply(&config, &files, &opts)?;
@@ -175,7 +175,7 @@ async fn apply_target(target: &str) -> Result<()> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise dotfiles edit ~/.zshrc</bold>
-    $ <bold>mise dotfiles edit --apply ~/.config/starship.toml</bold>
+    $ <bold>nise dotfiles edit ~/.zshrc</bold>
+    $ <bold>nise dotfiles edit --apply ~/.config/starship.toml</bold>
 "#
 );

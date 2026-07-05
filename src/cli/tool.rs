@@ -299,12 +299,12 @@ struct ToolInfo {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tool node</bold>
+    $ <bold>nise tool node</bold>
     Backend:            core
     Installed Versions: 20.0.0 22.0.0
     Active Version:     20.0.0
     Requested Version:  20
-    Config Source:      ~/.config/mise/mise.toml
+    Config Source:      ~/.config/mise/nise.toml
     Tool Options:       [none]
 "#
 );

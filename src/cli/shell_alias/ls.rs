@@ -7,7 +7,7 @@ use crate::ui::table;
 /// List shell aliases
 ///
 /// Shows the shell aliases that are set in the current directory.
-/// These are defined in `mise.toml` under the `[shell_alias]` section.
+/// These are defined in `nise.toml` under the `[shell_alias]` section.
 #[derive(Debug, clap::Args)]
 #[clap(visible_alias = "list", after_long_help = AFTER_LONG_HELP, verbatim_doc_comment)]
 pub struct ShellAliasLs {
@@ -43,7 +43,7 @@ struct Row {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise shell-alias ls</bold>
+    $ <bold>nise shell-alias ls</bold>
     alias    command
     ll       ls -la
     gs       git status

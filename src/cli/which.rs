@@ -19,7 +19,7 @@ pub struct Which {
     pub bin_name: Option<String>,
 
     /// Use a specific tool@version
-    /// e.g.: `mise which npm --tool=node@20`
+    /// e.g.: `nise which npm --tool=node@20`
     #[clap(short, long, value_name = "TOOL@VERSION", verbatim_doc_comment)]
     pub tool: Option<ToolArg>,
 
@@ -59,7 +59,7 @@ impl Which {
             None => {
                 if self.has_shim(&bin_name) {
                     bail!(
-                        "{bin_name} is a mise bin however it is not currently active. Use `mise use` to activate it in this directory."
+                        "{bin_name} is a mise bin however it is not currently active. Use `nise use` to activate it in this directory."
                     )
                 } else {
                     bail!("{bin_name} is not a mise bin. Perhaps you need to install it first.",)
@@ -99,13 +99,13 @@ impl Which {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise which node</bold>
+    $ <bold>nise which node</bold>
     /home/username/.local/share/mise/installs/node/20.0.0/bin/node
 
-    $ <bold>mise which node --plugin</bold>
+    $ <bold>nise which node --plugin</bold>
     node
 
-    $ <bold>mise which node --version</bold>
+    $ <bold>nise which node --version</bold>
     20.0.0
 "#
 );

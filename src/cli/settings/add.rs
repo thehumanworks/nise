@@ -38,6 +38,6 @@ impl SettingsAdd {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise settings add disable_hints python_multi</bold>
+    $ <bold>nise settings add disable_hints python_multi</bold>
 "#
 );

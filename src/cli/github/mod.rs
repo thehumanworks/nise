@@ -19,7 +19,7 @@ impl Github {
             "2026.5.1",
             "2027.5.0",
             "cli.github",
-            "`mise github ...` is deprecated. Use `mise token github` instead."
+            "`nise github ...` is deprecated. Use `nise token github` instead."
         );
         match self.subcommand {
             Commands::Token(cmd) => cmd.run(),

@@ -6,10 +6,10 @@ use clap::ValueHint;
 use std::path::PathBuf;
 use xx::file::display_path;
 
-/// Generates shims to run mise tasks
+/// Generates shims to run nise tasks
 ///
-/// By default, this will build shims like ./bin/<task>. These can be paired with `mise generate bootstrap`
-/// so contributors to a project can execute mise tasks without installing mise into their system.
+/// By default, this will build shims like ./bin/<task>. These can be paired with `nise generate bootstrap`
+/// so contributors to a project can execute nise tasks without installing nise into their system.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct TaskStubs {
@@ -17,10 +17,10 @@ pub struct TaskStubs {
     #[clap(long, short, verbatim_doc_comment, default_value="bin", value_hint=ValueHint::DirPath)]
     dir: PathBuf,
 
-    /// Path to a mise bin to use when running the task stub.
+    /// Path to a nise bin to use when running the task stub.
     ///
-    /// Use `--mise-bin=./bin/mise` to use a mise bin generated from `mise generate bootstrap`
-    #[clap(long, short, verbatim_doc_comment, default_value = "mise")]
+    /// Use `--mise-bin=./bin/nise` to use a nise bin generated from `nise generate bootstrap`
+    #[clap(long, short, verbatim_doc_comment, default_value = "nise")]
     mise_bin: PathBuf,
 }
 
@@ -57,8 +57,8 @@ exec {mise_bin} run {display_name} "$@"
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tasks add test -- echo 'running tests'</bold>
-    $ <bold>mise generate task-stubs</bold>
+    $ <bold>nise tasks add test -- echo 'running tests'</bold>
+    $ <bold>nise generate task-stubs</bold>
     $ <bold>./bin/test</bold>
     running tests
 "#

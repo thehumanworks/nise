@@ -25,6 +25,6 @@ impl ShellAliasUnset {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise shell-alias unset ll</bold>
+    $ <bold>nise shell-alias unset ll</bold>
 "#
 );

@@ -16,13 +16,13 @@ impl Usage {
         let cli = Cli::command().version(Resettable::Reset);
         let mut spec: usage::Spec = cli.into();
 
-        // Enable "naked" task completions: `mise foo` completes like `mise run foo`
+        // Enable "naked" task completions: `nise foo` completes like `nise run foo`
         spec.default_subcommand = Some("run".to_string());
 
         // The `run`/`tasks run` subcommands redeclare some root globals as their own
         // non-global flags (see `cli::run::Run`). When the usage parser descends into
         // a mounted task subcommand it keeps only inherited global flags, so a leading
-        // `mise -C <dir> run <task>` (or `mise run <flag> <task>`) used to mis-parse
+        // `nise -C <dir> run <task>` (or `nise run <flag> <task>`) used to mis-parse
         // the redeclared flag during completion. See mise#10069.
         //
         // jdx/usage#649 fixes the common case in the parser: when a subcommand
@@ -66,7 +66,7 @@ impl Usage {
         if let Some(run) = spec.cmd.subcommands.get_mut("run") {
             run.args = vec![];
             run.mounts.push(usage::SpecMount {
-                run: "mise tasks --usage".to_string(),
+                run: "nise tasks --usage".to_string(),
             });
             // Enable completions after ::: separator for multi-task invocations
             run.restart_token = Some(":::".to_string());
@@ -80,7 +80,7 @@ impl Usage {
             .and_then(|tasks| tasks.subcommands.get_mut("run"))
         {
             tasks_run.mounts.push(usage::SpecMount {
-                run: "mise tasks --usage".to_string(),
+                run: "nise tasks --usage".to_string(),
             });
             tasks_run.restart_token = Some(":::".to_string());
             promote_orphan_shorts(tasks_run);

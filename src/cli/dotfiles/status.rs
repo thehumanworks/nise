@@ -158,10 +158,10 @@ impl DotfilesStatus {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise dotfiles status</bold>
-    $ <bold>mise bootstrap dotfiles status</bold>
-    $ <bold>mise dotfiles status ~/.zshrc</bold>
-    $ <bold>mise dotfiles status --json</bold>
-    $ <bold>mise dotfiles status --missing</bold> # exit 1 if anything is out of sync
+    $ <bold>nise dotfiles status</bold>
+    $ <bold>nise bootstrap dotfiles status</bold>
+    $ <bold>nise dotfiles status ~/.zshrc</bold>
+    $ <bold>nise dotfiles status --json</bold>
+    $ <bold>nise dotfiles status --missing</bold> # exit 1 if anything is out of sync
 "#
 );

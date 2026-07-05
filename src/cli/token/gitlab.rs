@@ -39,13 +39,13 @@ impl Gitlab {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise token gitlab</bold>
+    $ <bold>nise token gitlab</bold>
     gitlab.com: glpa…xxxx (source: GITLAB_TOKEN)
 
-    $ <bold>mise token gitlab --unmask</bold>
+    $ <bold>nise token gitlab --unmask</bold>
     gitlab.com: glpat-xxxxxxxxxxxx (source: GITLAB_TOKEN)
 
-    $ <bold>mise token gitlab gitlab.mycompany.com</bold>
+    $ <bold>nise token gitlab gitlab.mycompany.com</bold>
     gitlab.mycompany.com: (none)
 "#
 );

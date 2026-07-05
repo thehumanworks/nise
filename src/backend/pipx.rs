@@ -12,7 +12,7 @@ use crate::env;
 use crate::file;
 use crate::github::{self, GithubRelease};
 use crate::http::HTTP_FETCH;
-use crate::install_context::InstallContext;
+use crate::install_context::{InstallContext, NiseStoreInstallMode};
 use crate::plugins::PEP440_PRERELEASE_REGEX;
 use crate::semver::semver_is_older_than;
 use crate::timeout;
@@ -509,6 +509,7 @@ impl PIPXBackend {
                 force: true,
                 dry_run: false,
                 locked: false,
+                nise_store_install_mode: NiseStoreInstallMode::Legacy,
                 before_date: None,
             };
             b.install_version(ctx, tv).await?;

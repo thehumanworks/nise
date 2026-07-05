@@ -32,16 +32,16 @@ pub struct Ls {
     #[clap(conflicts_with = "tool_flag")]
     installed_tool: Option<Vec<BackendArg>>,
 
-    /// Only show tool versions currently specified in a mise.toml
+    /// Only show tool versions currently specified in a nise.toml
     #[clap(long, short)]
     current: bool,
 
-    /// Only show tool versions currently specified in the global mise.toml
+    /// Only show tool versions currently specified in the global nise.toml
     #[clap(long, short, conflicts_with = "local")]
     global: bool,
 
     /// Only show tool versions that are installed
-    /// (Hides tools defined in mise.toml but not installed)
+    /// (Hides tools defined in nise.toml but not installed)
     #[clap(long, short)]
     installed: bool,
 
@@ -49,7 +49,7 @@ pub struct Ls {
     #[clap(long, short = 'J')]
     json: bool,
 
-    /// Only show tool versions currently specified in the local mise.toml
+    /// Only show tool versions currently specified in the local nise.toml
     #[clap(long, short, conflicts_with = "global")]
     local: bool,
 
@@ -92,7 +92,7 @@ pub struct Ls {
     #[clap(long, requires = "installed_tool")]
     prefix: Option<String>,
 
-    /// List only tools that can be pruned with `mise prune`
+    /// List only tools that can be pruned with `nise prune`
     #[clap(long)]
     prunable: bool,
 }
@@ -629,32 +629,32 @@ async fn resolve_version_status(
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise ls</bold>
+    $ <bold>nise ls</bold>
     node    20.0.0 ~/src/myapp/.tool-versions latest
     python  3.11.0 ~/.tool-versions           3.10
     python  3.10.0
 
-    $ <bold>mise ls --current</bold>
+    $ <bold>nise ls --current</bold>
     node    20.0.0 ~/src/myapp/.tool-versions 20
     python  3.11.0 ~/.tool-versions           3.11.0
 
-    $ <bold>mise ls --json</bold>
+    $ <bold>nise ls --json</bold>
     {
       "node": [
         {
           "version": "20.0.0",
           "install_path": "/Users/jdx/.mise/installs/node/20.0.0",
           "source": {
-            "type": "mise.toml",
-            "path": "/Users/jdx/mise.toml"
+            "type": "nise.toml",
+            "path": "/Users/jdx/nise.toml"
           }
         }
       ],
       "python": [...]
     }
 
-    $ <bold>mise ls --all-sources</bold>
-    node    20.0.0  ~/src/myapp/mise.toml  20
+    $ <bold>nise ls --all-sources</bold>
+    node    20.0.0  ~/src/myapp/nise.toml  20
                     ~/.config/mise/config.toml  latest
 "#
 );

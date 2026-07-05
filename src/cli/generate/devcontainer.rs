@@ -135,6 +135,6 @@ impl Devcontainer {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise generate devcontainer</bold>
+    $ <bold>nise generate devcontainer</bold>
 "#
 );

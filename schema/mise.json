@@ -676,8 +676,8 @@
           "type": "boolean"
         },
         "default_config_filename": {
-          "default": "mise.toml",
-          "description": "The default config filename read. `mise use` and other commands that create new config files will use this value. This must be an env var.",
+          "default": "nise.toml",
+          "description": "The default config filename read. `nise use` and other commands that create new config files will use this value. This must be an env var.",
           "type": "string"
         },
         "default_tool_versions_filename": {
@@ -1310,7 +1310,7 @@
         },
         "override_config_filenames": {
           "default": [],
-          "description": "If set, mise will ignore default config files like `mise.toml` and use these filenames instead.",
+          "description": "If set, nise will ignore default config files like `nise.toml` and use these filenames instead.",
           "type": "array",
           "items": {
             "type": "string"

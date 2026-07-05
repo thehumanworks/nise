@@ -73,8 +73,8 @@ description = 'Generate usage documentation'
 depends = ["build"]
 env = { CLICOLOR_FORCE = "0" }
 run = [
-  "mise usage > mise.usage.kdl",
-  "mise generate task-docs > tasks.md",
+  "nise usage > mise.usage.kdl",
+  "nise generate task-docs > tasks.md",
   "rm -rf docs/cli && mkdir -p docs/cli",
   "usage generate markdown -m --out-dir docs/cli --url-prefix /cli --html-encode --file mise.usage.kdl --replace-pre-with-code-fences",
   # usage-lib renders <SUBCOMMAND> for any command with subcommands. `mise bootstrap`
@@ -91,10 +91,10 @@ env = { NO_COLOR = "1" }
 run = '''
 #!/usr/bin/env bash
 set -xeuo pipefail
-mise completion bash > completions/mise.bash
-mise completion zsh > completions/_mise
-mise completion fish > completions/mise.fish
-mise completion powershell > completions/mise.ps1
+nise completion bash > completions/nise.bash
+nise completion zsh > completions/_nise
+nise completion fish > completions/nise.fish
+nise completion powershell > completions/nise.ps1
 '''
 
 ["render:mangen"]

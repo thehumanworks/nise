@@ -1,4 +1,4 @@
-//! Shared helpers for `mise oci` subcommands.
+//! Shared helpers for `nise oci` subcommands.
 
 use eyre::{Result, bail};
 
@@ -36,12 +36,12 @@ pub fn merged_oci_config(config: &Config) -> OciConfig {
 }
 
 /// Load config + toolset, merge the `[oci]` section, and build the image.
-/// Used by `mise oci build`, `mise oci run`, and `mise oci push`.
+/// Used by `nise oci build`, `nise oci run`, and `nise oci push`.
 ///
 /// By default both the toolset and the `[oci]` section are scoped to configs
 /// at-or-below the project root — i.e. the user's global config, system
-/// config, and parent-directory configs above the project (e.g. a `~/mise.toml`
-/// setting personal Node defaults) are excluded. Rationale: `mise oci build`
+/// config, and parent-directory configs above the project (e.g. a `~/nise.toml`
+/// setting personal Node defaults) are excluded. Rationale: `nise oci build`
 /// is conceptually "package *this project's* tools into a deployable image" —
 /// personal dev tools (neovim, ripgrep, …) sitting in
 /// `~/.config/mise/config.toml` have no business in a project image, and
@@ -80,7 +80,7 @@ pub async fn perform_build(opts: BuildOptions, include_global: bool) -> Result<B
 ///
 /// `cf.project_root().is_some()` is the right scope: it's None for the global
 /// config, the system config, and parent-dir configs that live directly under
-/// $HOME (e.g. `~/mise.toml` someone uses to set their default Node). It's
+/// $HOME (e.g. `~/nise.toml` someone uses to set their default Node). It's
 /// Some for any project config, including those walked up from CWD into a
 /// monorepo root — which we *do* want included (sub-project + monorepo root
 /// share the toolset of the deployable).
@@ -93,8 +93,8 @@ fn project_config_files(config: &Config) -> Result<ConfigMap> {
         .collect();
     if project_files.is_empty() {
         bail!(
-            "mise oci: no project mise config found in the current directory or any parent. \
-             Add a `mise.toml` to the project, or pass `--include-global` to use tools and \
+            "nise oci: no project nise config found in the current directory or any parent. \
+             Add a `nise.toml` to the project, or pass `--include-global` to use tools and \
              [oci] settings from your global config (note: asdf/vfox plugins remain \
              unsupported)."
         );
@@ -128,7 +128,7 @@ fn reject_unsupported_system_defaults(config_files: &ConfigMap) -> Result<()> {
 
     if defaults > 0 {
         bail!(
-            "mise oci does not support [bootstrap.macos.*] defaults (found {defaults} default entries); \
+            "nise oci does not support [bootstrap.macos.*] defaults (found {defaults} default entries); \
              macOS defaults do not apply to OCI images."
         );
     }

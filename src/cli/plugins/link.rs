@@ -73,9 +73,9 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # essentially just `ln -s ./vfox-cmake ~/.local/share/mise/plugins/cmake`
-    $ <bold>mise plugins link cmake ./vfox-cmake</bold>
+    $ <bold>nise plugins link cmake ./vfox-cmake</bold>
 
     # infer plugin name as "cmake"
-    $ <bold>mise plugins link ./vfox-cmake</bold>
+    $ <bold>nise plugins link ./vfox-cmake</bold>
 "#
 );

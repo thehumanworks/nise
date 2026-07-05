@@ -28,15 +28,15 @@ use crate::toolset::{ToolVersion, Toolset};
 pub struct BuildOptions {
     /// Output directory for the OCI image layout.
     pub out_dir: PathBuf,
-    /// Base image reference (overrides mise.toml and default setting).
+    /// Base image reference (overrides nise.toml and default setting).
     pub from: Option<String>,
     /// Tag to write into index.json (ref.name annotation).
     pub tag: Option<String>,
-    /// Where mise tools get installed inside the image.
+    /// Where nise tools get installed inside the image.
     pub mount_point: Option<String>,
     /// Numeric owner assigned to every tar entry in generated layers.
     pub owner: Option<LayerOwner>,
-    /// Embed the current mise binary at /usr/local/bin/mise.
+    /// Embed the current nise binary at /usr/local/bin/nise.
     pub include_mise: bool,
 }
 
@@ -89,7 +89,7 @@ impl Builder {
     pub async fn build(self) -> Result<BuildOutput> {
         let versions = self.ts.list_current_versions();
         if versions.is_empty() {
-            warn!("mise oci build: no tools in the toolset — image will have only the base layer");
+            warn!("nise oci build: no tools in the toolset — image will have only the base layer");
         }
         reject_unsupported_backends(&versions)?;
 
@@ -194,14 +194,14 @@ impl Builder {
         // Tool installs are host-native binaries. On non-linux hosts they'll
         // fail at runtime inside the linux container with `Exec format error`
         // — emit a single warning up front so the user isn't surprised after
-        // the image appears to build successfully. (`--no-mise` silences the
-        // mise-binary warning below but doesn't help with tool binaries; only
+        // the image appears to build successfully. (`--no-nise` silences the
+        // nise-binary warning below but doesn't help with tool binaries; only
         // running the build on a linux host does.)
         if !versions.is_empty() && std::env::consts::OS != "linux" {
             warn!(
                 "building on {host} host — the {n} tool layer(s) contain {host} binaries that \
                  will fail with `Exec format error` inside a linux container. Run \
-                 `mise oci build` on a linux host (or in a linux container) for a working image.",
+                 `nise oci build` on a linux host (or in a linux container) for a working image.",
                 host = std::env::consts::OS,
                 n = versions.len()
             );
@@ -210,7 +210,7 @@ impl Builder {
             let install_path = tv.install_path();
             if !install_path.is_dir() {
                 bail!(
-                    "{} install path does not exist: {}. Run `mise install` first.",
+                    "{} install path does not exist: {}. Run `nise install` first.",
                     tv.style(),
                     install_path.display()
                 );
@@ -238,29 +238,29 @@ impl Builder {
             tool_layers.push((tv.ba().short.clone(), tv.version.clone(), blob));
         }
 
-        // --- 5. mise binary layer (optional) ---
+        // --- 5. nise binary layer (optional) ---
         let mut mise_layer: Option<LayerBlob> = None;
         if self.opts.include_mise {
             // OCI images are linux-targeted in v1 (we normalize `os` to
-            // "linux" above). Embedding a darwin/windows mise binary would
+            // "linux" above). Embedding a darwin/windows nise binary would
             // pass the build but explode with `Exec format error` the first
-            // time anything inside the container invokes `mise`. Warn loudly.
+            // time anything inside the container invokes `nise`. Warn loudly.
             if std::env::consts::OS != "linux" {
                 warn!(
-                    "embedding a {} mise binary in a linux OCI image — it will fail at runtime. \
-                     Run `mise oci build` on linux, or pass --no-mise to skip embedding.",
+                    "embedding a {} nise binary in a linux OCI image — it will fail at runtime. \
+                     Run `nise oci build` on linux, or pass --no-nise to skip embedding.",
                     std::env::consts::OS
                 );
             }
             match std::env::current_exe() {
                 Ok(exe) => {
                     let bytes = std::fs::read(&exe)
-                        .wrap_err_with(|| format!("reading mise binary at {}", exe.display()))?;
-                    let files = vec![("usr/local/bin/mise".to_string(), bytes, 0o755u32)];
+                        .wrap_err_with(|| format!("reading nise binary at {}", exe.display()))?;
+                    let files = vec![("usr/local/bin/nise".to_string(), bytes, 0o755u32)];
                     mise_layer = Some(layer::build_layer_from_files(&files, owner)?);
                 }
                 Err(e) => {
-                    warn!("could not locate mise binary to embed in image: {e}");
+                    warn!("could not locate nise binary to embed in image: {e}");
                 }
             }
         }
@@ -459,7 +459,7 @@ impl Builder {
             }
         }
 
-        // User env from mise.toml (best-effort: use the already-merged config.env).
+        // User env from nise.toml (best-effort: use the already-merged config.env).
         // NOTE: we don't re-resolve templates here — they were resolved at load time.
         //
         // WARNING: values sourced from `.env` files or `_.file = "..."` can
@@ -474,7 +474,7 @@ impl Builder {
             .wrap_err("resolving [env] for oci build (template error, missing file, etc.)")?;
         if !env.is_empty() {
             warn!(
-                "mise oci build: baking {} [env] var(s) into the image config. \
+                "nise oci build: baking {} [env] var(s) into the image config. \
                  These are visible via `docker inspect` / `skopeo inspect`; \
                  if you have secrets in [env] or referenced .env files, move \
                  them to runtime (e.g. `docker run -e` or secret mounts) and \
@@ -514,8 +514,8 @@ impl Builder {
             env_pairs.insert(k.clone(), v.clone());
         }
 
-        // Mise data/config dirs — insert LAST so the user's [env] section
-        // can't accidentally shadow them (the embedded mise binary inside
+        // nise data/config dirs — insert LAST so the user's [env] section
+        // can't accidentally shadow them (the embedded nise binary inside
         // the container must see these in-image paths, not whatever was
         // baked in from the host config).
         env_pairs.insert("MISE_DATA_DIR".to_string(), mount_point.to_string());
@@ -592,7 +592,7 @@ impl Builder {
         );
         labels.insert(
             "org.opencontainers.image.source".to_string(),
-            "mise oci build".to_string(),
+            "nise oci build".to_string(),
         );
         labels.insert(
             "dev.mise.version".to_string(),
@@ -857,7 +857,7 @@ fn reject_unsupported_backends(
         .collect();
     if !bad.is_empty() {
         bail!(
-            "mise oci build does not support asdf/vfox plugins in v1 (their install scripts can \
+            "nise oci build does not support asdf/vfox plugins in v1 (their install scripts can \
              write outside the per-version directory, breaking the one-layer-per-tool invariant). \
              Affected tools: {}",
             bad.join(", ")
@@ -909,7 +909,7 @@ fn synthesize_embedded_config_toml(
     versions: &[(Arc<dyn crate::backend::Backend>, ToolVersion)],
     _mount_point: &str,
 ) -> String {
-    let mut s = String::from("# Auto-generated by `mise oci build`. Do not edit.\n[tools]\n");
+    let mut s = String::from("# Auto-generated by `nise oci build`. Do not edit.\n[tools]\n");
     for (_, tv) in versions {
         // Tool short names and versions can contain `"` and `\` (rare, but
         // possible for e.g. ref/branch specifiers), so serialize via the

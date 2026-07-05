@@ -15,7 +15,7 @@ use itertools::Itertools;
 ///
 /// This means mise is allowed to parse the file when it needs to read config
 /// that may execute code or affect the environment. mise checks trust before
-/// parsing `mise.toml`. Without trust, mise may prompt, skip the config in some
+/// parsing `nise.toml`. Without trust, mise may prompt, skip the config in some
 /// discovery paths, fail with an untrusted-config error when it cannot prompt,
 /// or assume trust in detected CI unless paranoid mode is enabled.
 ///
@@ -23,8 +23,8 @@ use itertools::Itertools;
 /// `min_version`, `[tools]` entries with plain version strings (or arrays
 /// of them), and `[tasks]` (no templates and no tool options) are loaded
 /// without prompting, since nothing in them executes code at load time —
-/// tools install and tasks run only on explicit commands like `mise install`
-/// or `mise run`.
+/// tools install and tasks run only on explicit commands like `nise install`
+/// or `nise run`.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Trust {
@@ -211,10 +211,10 @@ impl Trust {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    # trusts ~/some_dir/mise.toml
-    $ <bold>mise trust ~/some_dir/mise.toml</bold>
+    # trusts ~/some_dir/nise.toml
+    $ <bold>nise trust ~/some_dir/nise.toml</bold>
 
-    # trusts mise.toml in the current or parent directory
-    $ <bold>mise trust</bold>
+    # trusts nise.toml in the current or parent directory
+    $ <bold>nise trust</bold>
 "#
 );

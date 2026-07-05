@@ -6,7 +6,7 @@ use crate::system;
 
 #[derive(Debug, Default)]
 pub(crate) struct BootstrapApplyReport {
-    /// Whether top-level `mise bootstrap` should print a user follow-up item
+    /// Whether top-level `nise bootstrap` should print a user follow-up item
     /// for this phase after a successful apply or dry-run.
     pub needs_follow_up: bool,
     pub skipped_reason: Option<String>,
@@ -138,7 +138,7 @@ pub(crate) async fn apply_defaults_with_report(
     })
 }
 
-/// Apply `[bootstrap.user].login_shell` when it differs for `mise bootstrap`.
+/// Apply `[bootstrap.user].login_shell` when it differs for `nise bootstrap`.
 /// Inert off-Unix or when `chsh` is missing.
 pub(crate) fn apply_login_shell(
     request: Option<system::login_shell::LoginShellRequest>,
@@ -384,9 +384,9 @@ pub(crate) async fn apply_systemd_with_report(
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap packages apply</bold>
-    $ <bold>mise bootstrap packages apply apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835</bold>
-    $ <bold>mise bootstrap packages apply --dry-run</bold>
-    $ <bold>mise bootstrap packages apply --manager apt --yes</bold>
+    $ <bold>nise bootstrap packages apply</bold>
+    $ <bold>nise bootstrap packages apply apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835</bold>
+    $ <bold>nise bootstrap packages apply --dry-run</bold>
+    $ <bold>nise bootstrap packages apply --manager apt --yes</bold>
 "#
 );

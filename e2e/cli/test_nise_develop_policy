@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+export CLICOLOR=0
+
+mkdir -p toml-bin system-bin
+printf '#!/usr/bin/env bash\nprintf toml-bin-ok\n' >toml-bin/from-nise-toml
+printf '#!/usr/bin/env bash\nprintf system-bin-leaked\n' >system-bin/from-system-path
+chmod +x toml-bin/from-nise-toml system-bin/from-system-path
+
+cat >nise.toml <<'EOF'
+[env]
+_.path = ["./toml-bin"]
+EOF
+
+assert_contains "PATH=\"$PWD/system-bin:\$PATH\" nise develop -- /bin/sh -c 'printf \"%s\" \"\$PATH\"'" "$PWD/toml-bin"
+assert_contains "PATH=\"$PWD/system-bin:\$PATH\" nise develop -- /bin/sh -c 'command -v nise'" "/nise"
+assert_contains "PATH=\"$PWD/system-bin:\$PATH\" nise develop -- /bin/sh -c 'command -v ls'" "/bin/ls"
+assert_not_contains "PATH=\"$PWD/system-bin:\$PATH\" nise develop -- /bin/sh -c 'printf \"%s\" \"\$PATH\"'" "$PWD/system-bin"
+assert_fail "PATH=\"$PWD/system-bin:\$PATH\" nise develop -- /bin/sh -c 'command -v from-system-path'"
+assert_contains "PATH=\"$PWD/system-bin:\$PATH\" nise develop --impure -- /bin/sh -c 'printf \"%s\" \"\$PATH\"'" "$PWD/system-bin"
+
+mkdir -p legacy-only/legacy-bin
+printf '#!/usr/bin/env bash\nprintf legacy-config-leaked\n' >legacy-only/legacy-bin/from-legacy-mise-toml
+chmod +x legacy-only/legacy-bin/from-legacy-mise-toml
+cat >legacy-only/mise.toml <<'EOF'
+[env]
+_.path = ["./legacy-bin"]
+EOF
+assert_fail "(cd legacy-only && nise develop -- /bin/sh -c 'command -v from-legacy-mise-toml')"
+
+assert "nise develop --offline=artifact --isolate=off -- /bin/sh -c 'printf \"%s:%s\" \"\$__NISE_OFFLINE_MODE\" \"\$__NISE_ISOLATE\"'" "artifact:off"
+assert_fail "nise develop --isolate=strict -- /bin/echo no" "strict nise develop isolation is not implemented"
+
+cat >mise.lock <<'EOF'
+[tools]
+dummy = [
+  { version = "1.0.0", backend = "asdf:dummy", platforms = { "macos-arm64" = { url = "https://example.test/dummy.tar.gz", checksum = "sha256:dummy" } } },
+]
+EOF
+
+nise lock import mise.lock
+assert_fail "nise --locked develop --offline=full --isolate=off -- /bin/echo no" "legacy-unverified"

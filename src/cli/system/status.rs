@@ -114,8 +114,8 @@ impl SystemStatus {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap packages status</bold>
-    $ <bold>mise bootstrap packages status --json</bold>
-    $ <bold>mise bootstrap packages status --missing</bold> # exit 1 if anything is out of sync
+    $ <bold>nise bootstrap packages status</bold>
+    $ <bold>nise bootstrap packages status --json</bold>
+    $ <bold>nise bootstrap packages status --missing</bold> # exit 1 if anything is out of sync
 "#
 );

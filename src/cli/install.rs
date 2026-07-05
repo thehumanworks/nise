@@ -22,9 +22,9 @@ use std::path::PathBuf;
 ///
 /// Installs a tool version to `~/.local/share/mise/installs/<TOOL>/<VERSION>`
 /// Installing alone will not activate the tools so they won't be in PATH.
-/// To install and/or activate in one command, use `mise use` which will create a `mise.toml` file
+/// To install and/or activate in one command, use `nise use` which will create a `nise.toml` file
 /// in the current directory to activate this tool when inside the directory.
-/// Alternatively, run `mise exec <TOOL>@<VERSION> -- <COMMAND>` to execute a tool without creating config files.
+/// Alternatively, run `nise exec <TOOL>@<VERSION> -- <COMMAND>` to execute a tool without creating config files.
 ///
 /// Tools will be installed in parallel. To disable, set `--jobs=1` or `MISE_JOBS=1`
 #[derive(Debug, Default, clap::Args)]
@@ -94,8 +94,8 @@ pub struct Install {
 }
 
 impl Install {
-    /// a bare `mise install` (install everything missing from config), as run
-    /// by `mise bootstrap`
+    /// a bare `nise install` (install everything missing from config), as run
+    /// by `nise bootstrap`
     pub(crate) fn new_bare(dry_run: bool) -> Self {
         Self {
             dry_run,
@@ -282,7 +282,7 @@ impl Install {
         let tool_versions = self.get_requested_tool_versions(&ts, &expanded_runtimes)?;
         let (mut versions, install_error) = if tool_versions.is_empty() {
             warn!("no runtimes to install");
-            warn!("specify a version with `mise install <TOOL>@<VERSION>`");
+            warn!("specify a version with `nise install <TOOL>@<VERSION>`");
             (vec![], Ok(()))
         } else {
             if let Some(monorepo_union) = &monorepo_union {
@@ -572,9 +572,9 @@ impl Install {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise install node@20.0.0</bold>  # install specific node version
-    $ <bold>mise install node@20</bold>      # install fuzzy node version
-    $ <bold>mise install node</bold>         # install version specified in mise.toml
-    $ <bold>mise install</bold>              # installs everything specified in mise.toml
+    $ <bold>nise install node@20.0.0</bold>  # install specific node version
+    $ <bold>nise install node@20</bold>      # install fuzzy node version
+    $ <bold>nise install node</bold>         # install version specified in nise.toml
+    $ <bold>nise install</bold>              # installs everything specified in nise.toml
 "#
 );

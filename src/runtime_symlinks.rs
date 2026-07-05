@@ -6,7 +6,8 @@ use crate::config::{Alias, Config};
 use crate::file::make_symlink_or_file;
 use crate::plugins::VERSION_REGEX;
 use crate::semver::split_version_prefix;
-use crate::toolset::Toolset;
+use crate::store::StoreRoot;
+use crate::toolset::{Toolset, installed_versions};
 use crate::{backend, env, file};
 use eyre::Result;
 use indexmap::IndexMap;
@@ -54,7 +55,7 @@ fn rebuild_symlinks_in_dir(
     backend: &Arc<dyn Backend>,
     installs_dir: &Path,
 ) -> Result<()> {
-    let concrete_installs = installed_versions_in_dir(installs_dir)
+    let concrete_installs = installed_versions_in_dir(backend, installs_dir)
         .into_iter()
         .filter(|v| is_concrete_install(v))
         .collect::<std::collections::HashSet<_>>();
@@ -95,7 +96,7 @@ fn migrate_real_dirs_in_dir(
     backend: &Arc<dyn Backend>,
     installs_dir: &Path,
 ) -> Result<()> {
-    let concrete_installs = installed_versions_in_dir(installs_dir)
+    let concrete_installs = installed_versions_in_dir(backend, installs_dir)
         .into_iter()
         .filter(|v| is_concrete_install(v))
         .collect::<std::collections::HashSet<_>>();
@@ -121,7 +122,7 @@ fn list_symlinks_for_dir(
 ) -> IndexMap<String, PathBuf> {
     let mut symlinks = IndexMap::new();
     let rel_path = |x: &String| PathBuf::from(".").join(x.clone());
-    for v in installed_versions_in_dir(installs_dir) {
+    for v in installed_versions_in_dir(backend, installs_dir) {
         if is_temporary_runtime_label(&v) {
             continue;
         }
@@ -160,16 +161,24 @@ fn list_symlinks_for_dir(
 }
 
 /// List real (non-symlink) installed versions in a specific directory.
-fn installed_versions_in_dir(installs_dir: &Path) -> Vec<String> {
+fn installed_versions_in_dir(backend: &Arc<dyn Backend>, installs_dir: &Path) -> Vec<String> {
+    installed_versions_in_dir_for_store(
+        installs_dir,
+        &backend.ba().tool_dir_name(),
+        &StoreRoot::default(),
+    )
+}
+
+fn installed_versions_in_dir_for_store(
+    installs_dir: &Path,
+    tool_dir_name: &str,
+    store: &StoreRoot,
+) -> Vec<String> {
     if !installs_dir.is_dir() {
         return vec![];
     }
-    file::dir_subdirs(installs_dir)
-        .unwrap_or_default()
+    installed_versions::list_concrete_versions_in(installs_dir, tool_dir_name, store)
         .into_iter()
-        .filter(|v| !v.starts_with('.'))
-        .filter(|v| !is_runtime_symlink(&installs_dir.join(v)))
-        .filter(|v| !installs_dir.join(v).join("incomplete").exists())
         .filter(|v| !VERSION_REGEX.is_match(v))
         .sorted_by_cached_key(|v| (Versioning::new(v), v.to_string()))
         .collect()
@@ -220,4 +229,53 @@ pub fn is_runtime_symlink(path: &Path) -> bool {
         return link.starts_with("./");
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::store::{InstallRefManifest, InstallRefMode, SCHEMA_VERSION, write_manifest};
+
+    #[test]
+    fn installed_versions_for_runtime_symlinks_ignores_runtime_aliases() -> Result<()> {
+        let tmp = tempfile::tempdir()?;
+        let store = StoreRoot::new(tmp.path().join("store"));
+        let installs_dir = tmp.path().join("installs").join("demo");
+        file::create_dir_all(installs_dir.join("1.0.0"))?;
+        file::create_dir_all(installs_dir.join("1.1.0"))?;
+        file::make_symlink_or_file(&PathBuf::from("./1.1.0"), &installs_dir.join("latest"))?;
+
+        let versions = installed_versions_in_dir_for_store(&installs_dir, "demo", &store);
+
+        assert_eq!(versions, vec!["1.0.0", "1.1.0"]);
+        Ok(())
+    }
+
+    #[test]
+    fn installed_versions_for_runtime_symlinks_includes_valid_store_refs() -> Result<()> {
+        let tmp = tempfile::tempdir()?;
+        let store = StoreRoot::new(tmp.path().join("store"));
+        let installs_dir = tmp.path().join("installs").join("demo");
+        let compatibility_path = installs_dir.join("1.0.0");
+        file::create_dir_all(&compatibility_path)?;
+        let manifest = InstallRefManifest {
+            schema_version: SCHEMA_VERSION,
+            tool: "demo".to_string(),
+            version: "1.0.0".to_string(),
+            backend: "test:demo".to_string(),
+            compatibility_path,
+            realisation_id: "sha256:demo-realisation".to_string(),
+            object_id: "sha256:demo-object".to_string(),
+            mode: InstallRefMode::StoreSymlink,
+        };
+        write_manifest(
+            store.install_refs_dir().join("demo").join("1.0.0.toml"),
+            &manifest,
+        )?;
+
+        let versions = installed_versions_in_dir_for_store(&installs_dir, "demo", &store);
+
+        assert_eq!(versions, vec!["1.0.0"]);
+        Ok(())
+    }
 }

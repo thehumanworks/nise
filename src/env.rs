@@ -108,6 +108,9 @@ pub static MISE_CONFIG_DIR_OVERRIDDEN: Lazy<bool> = Lazy::new(|| {
 });
 pub static MISE_DATA_DIR: Lazy<PathBuf> =
     Lazy::new(|| var_path("MISE_DATA_DIR").unwrap_or_else(|| XDG_DATA_HOME.join("mise")));
+pub static NISE_STORE_DIR: Lazy<PathBuf> = Lazy::new(|| {
+    var_path("NISE_STORE_DIR").unwrap_or_else(|| MISE_DATA_DIR.join("nise").join("store"))
+});
 pub static MISE_STATE_DIR: Lazy<PathBuf> =
     Lazy::new(|| var_path("MISE_STATE_DIR").unwrap_or_else(|| XDG_STATE_HOME.join("mise")));
 pub static MISE_TMP_DIR: Lazy<PathBuf> =
@@ -239,7 +242,7 @@ pub static MISE_DEFAULT_CONFIG_FILENAME: Lazy<String> = Lazy::new(|| {
     var("MISE_DEFAULT_CONFIG_FILENAME")
         .ok()
         .or(MISE_OVERRIDE_CONFIG_FILENAMES.first().cloned())
-        .unwrap_or_else(|| "mise.toml".into())
+        .unwrap_or_else(|| "nise.toml".into())
 });
 pub static MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES: Lazy<Option<IndexSet<String>>> =
     Lazy::new(|| match var("MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES") {
@@ -444,10 +447,15 @@ pub static IS_RUNNING_AS_SHIM: Lazy<bool> = Lazy::new(|| {
     !is_mise_binary(bin_name)
 });
 
-/// Returns true if the given binary name refers to mise itself (not a shim).
-/// Handles "mise", "mise.exe", "mise.bat", "mise.cmd", "mise-doctor", etc.
+/// Returns true if the given binary name refers to nise itself (not a shim).
+/// Handles "nise", "nise.exe", "nise.bat", "nise.cmd", "nise-doctor", etc.
 pub fn is_mise_binary(bin_name: &str) -> bool {
-    bin_name == "mise" || bin_name.starts_with("mise.") || bin_name.starts_with("mise-")
+    bin_name == "mise"
+        || bin_name.starts_with("mise.")
+        || bin_name.starts_with("mise-")
+        || bin_name == "nise"
+        || bin_name.starts_with("nise.")
+        || bin_name.starts_with("nise-")
 }
 
 #[cfg(test)]

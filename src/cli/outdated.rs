@@ -12,7 +12,7 @@ use tabled::settings::location::ByColumnName;
 
 /// Shows outdated tool versions
 ///
-/// See `mise upgrade` to upgrade these versions.
+/// See `nise upgrade` to upgrade these versions.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Outdated {
@@ -28,7 +28,7 @@ pub struct Outdated {
 
     /// Compares against the latest versions available, not what matches the current config
     ///
-    /// For example, if you have `node = "20"` in your config by default `mise outdated` will only
+    /// For example, if you have `node = "20"` in your config by default `nise outdated` will only
     /// show other 20.x versions, not 21.x or 22.x versions.
     ///
     /// Using this flag, if there are 21.x or newer versions it will display those instead of 20.x.
@@ -37,18 +37,18 @@ pub struct Outdated {
 
     /// Show outdated tools including installed-but-inactive tools not present in the current config
     ///
-    /// By default, `mise outdated` only shows tools that come from the current config.
+    /// By default, `nise outdated` only shows tools that come from the current config.
     #[clap(long, verbatim_doc_comment, conflicts_with = "local")]
     pub inactive: bool,
 
     /// Only show outdated tools defined in local config files
     ///
-    /// This will only show tools that are defined in project-local mise.toml and
+    /// This will only show tools that are defined in project-local nise.toml and
     /// will skip tools defined in the global config (~/.config/mise/config.toml).
     #[clap(long, verbatim_doc_comment)]
     pub local: bool,
 
-    /// Placeholder for future monorepo outdated checks; `mise outdated --monorepo` is not implemented yet.
+    /// Placeholder for future monorepo outdated checks; `nise outdated --monorepo` is not implemented yet.
     #[clap(long, verbatim_doc_comment)]
     pub monorepo: bool,
 
@@ -108,7 +108,7 @@ impl Outdated {
             if !self.bump {
                 hint!(
                     "outdated_bump",
-                    r#"By default, `mise outdated` only shows versions that match your config. Use `mise outdated --bump` to see all new versions."#,
+                    r#"By default, `nise outdated` only shows versions that match your config. Use `nise outdated --bump` to see all new versions."#,
                     ""
                 );
             }
@@ -136,19 +136,19 @@ impl Outdated {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise outdated</bold>
+    $ <bold>nise outdated</bold>
     Plugin  Requested  Current  Latest
     python  3.11       3.11.0   3.11.1
     node    20         20.0.0   20.1.0
 
-    $ <bold>mise outdated node</bold>
+    $ <bold>nise outdated node</bold>
     Plugin  Requested  Current  Latest
     node    20         20.0.0   20.1.0
 
-    $ <bold>mise outdated --json</bold>
+    $ <bold>nise outdated --json</bold>
     {"python": {"requested": "3.11", "current": "3.11.0", "latest": "3.11.1"}, ...}
 
-    $ <bold>mise outdated --local</bold>
+    $ <bold>nise outdated --local</bold>
     Plugin  Requested  Current  Latest
     node    20         20.0.0   20.1.0
 "#

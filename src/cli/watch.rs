@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 /// Run task(s) and watch for changes to rerun it
 ///
 /// This command uses the `watchexec` tool to watch for changes to files and rerun the specified task(s).
-/// It must be installed for this command to work, but you can install it with `mise use -g watchexec@latest`.
+/// It must be installed for this command to work, but you can install it with `nise use -g watchexec@latest`.
 ///
 /// For more advanced process management (daemon management, auto-restart, readiness checks,
 /// cron scheduling), see mise's sister project: https://pitchfork.jdx.dev
@@ -29,7 +29,7 @@ use std::path::{Path, PathBuf};
 pub struct Watch {
     /// Tasks to run
     /// Can specify multiple tasks by separating with `:::`
-    /// e.g.: `mise run task1 arg1 arg2 ::: task2 arg1 arg2`
+    /// e.g.: `nise run task1 arg1 arg2 ::: task2 arg1 arg2`
     #[clap(allow_hyphen_values = true, verbatim_doc_comment)]
     task: Option<String>,
 
@@ -150,7 +150,7 @@ impl Watch {
         }
         // Forward --wrap-process to watchexec when it differs from watchexec's
         // default ("group"). Without this the flag is parsed but dropped, so e.g.
-        // `mise watch --wrap-process none` had no effect and a TUI task launched in
+        // `nise watch --wrap-process none` had no effect and a TUI task launched in
         // the default process group would block on terminal I/O (#10212).
         if self.watchexec.wrap_process != WrapMode::Group {
             args.push("--wrap-process".to_string());
@@ -532,18 +532,18 @@ where
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise watch build</bold>
+    $ <bold>nise watch build</bold>
     Runs the "build" tasks. Will re-run the tasks when any of its sources change.
     Uses "sources" from the tasks definition to determine which files to watch.
 
-    $ <bold>mise watch build --glob src/**/*.rs</bold>
+    $ <bold>nise watch build --glob src/**/*.rs</bold>
     Runs the "build" tasks but specify the files to watch with a glob pattern.
     This overrides the "sources" from the tasks definition.
 
-    $ <bold>mise watch build --clear</bold>
+    $ <bold>nise watch build --clear</bold>
     Extra arguments are passed to watchexec. See `watchexec --help` for details.
 
-    $ <bold>mise watch serve --watch src --exts rs --restart</bold>
+    $ <bold>nise watch serve --watch src --exts rs --restart</bold>
     Starts an api server, watching for changes to "*.rs" files in "./src" and kills/restarts the server when they change.
 "#
 );

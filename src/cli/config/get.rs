@@ -3,16 +3,16 @@ use crate::file::display_path;
 use eyre::bail;
 use std::path::PathBuf;
 
-/// Display the value of a setting in a mise.toml file
+/// Display the value of a setting in a nise.toml file
 #[derive(Debug, clap::Args)]
 #[clap(after_long_help = AFTER_LONG_HELP, verbatim_doc_comment)]
 pub struct ConfigGet {
     /// The path of the config to display
     pub key: Option<String>,
 
-    /// The path to the mise.toml file to edit
+    /// The path to the nise.toml file to edit
     ///
-    /// If not provided, the nearest mise.toml file will be used
+    /// If not provided, the nearest nise.toml file will be used
     #[clap(short, long)]
     pub file: Option<PathBuf>,
 }
@@ -63,7 +63,7 @@ impl ConfigGet {
                 }
             }
         } else {
-            bail!("No mise.toml file found");
+            bail!("No nise.toml file found");
         }
         Ok(())
     }
@@ -72,7 +72,7 @@ impl ConfigGet {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise toml get tools.python</bold>
+    $ <bold>nise toml get tools.python</bold>
     3.12
 "#
 );

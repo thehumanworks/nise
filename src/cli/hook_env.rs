@@ -288,7 +288,7 @@ impl HookEnv {
                 // Find paths in current that are not in original and not mise-managed.
                 // Split them into "pre" (before the original PATH entries) and "post_user"
                 // (after the original PATH entries) to preserve their intended position.
-                // This prevents paths appended after `mise activate` in shell rc from
+                // This prevents paths appended after `nise activate` in shell rc from
                 // being moved to the front of PATH.
                 //
                 // Also collect orig paths in their current order to preserve any

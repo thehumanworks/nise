@@ -12,7 +12,7 @@ mod remove;
 /// (e.g., package-lock.json vs node_modules/) and runs install commands
 /// if needed.
 ///
-/// Providers with `auto = true` are automatically invoked before `mise x` and `mise run`
+/// Providers with `auto = true` are automatically invoked before `nise x` and `nise run`
 /// unless skipped with the --no-deps flag.
 #[derive(Debug, clap::Args)]
 #[clap(
@@ -66,13 +66,13 @@ pub fn parse_package_spec(spec: &str) -> Result<(&str, &str)> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise deps</bold>                    # Install all project dependencies
-    $ <bold>mise deps install</bold>            # Same as bare `mise deps`
-    $ <bold>mise deps install --force</bold>    # Force reinstall even if fresh
-    $ <bold>mise deps install --dry-run</bold>  # Show what would run
-    $ <bold>mise deps add npm:react</bold>      # Add a dependency
-    $ <bold>mise deps add -D npm:vitest</bold>  # Add a dev dependency
-    $ <bold>mise deps remove npm:lodash</bold>  # Remove a dependency
+    $ <bold>nise deps</bold>                    # Install all project dependencies
+    $ <bold>nise deps install</bold>            # Same as bare `nise deps`
+    $ <bold>nise deps install --force</bold>    # Force reinstall even if fresh
+    $ <bold>nise deps install --dry-run</bold>  # Show what would run
+    $ <bold>nise deps add npm:react</bold>      # Add a dependency
+    $ <bold>nise deps add -D npm:vitest</bold>  # Add a dev dependency
+    $ <bold>nise deps remove npm:lodash</bold>  # Remove a dependency
 
 <bold><underline>Configuration:</underline></bold>
 

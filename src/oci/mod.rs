@@ -1,4 +1,4 @@
-//! OCI image building from a mise.toml.
+//! OCI image building from a nise.toml.
 //!
 //! The core invariant: each installed tool version becomes its own OCI layer.
 //! Because mise installs tools to isolated, non-overlapping directories, layer
@@ -42,7 +42,7 @@ pub fn normalize_os(o: &str) -> &str {
     }
 }
 
-/// The `[oci]` section of a `mise.toml`. All fields optional.
+/// The `[oci]` section of a `nise.toml`. All fields optional.
 #[derive(Debug, Default, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct OciConfig {
@@ -75,7 +75,7 @@ pub struct OciConfig {
     #[serde(default)]
     pub mount_point: Option<String>,
     /// Extra env vars baked into the image config in addition to those derived
-    /// from the mise.toml `[env]` section and per-tool `exec_env()`.
+    /// from the nise.toml `[env]` section and per-tool `exec_env()`.
     #[serde(default)]
     pub env: IndexMap<String, String>,
     /// Labels baked into the image config.

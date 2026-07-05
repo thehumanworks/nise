@@ -5,7 +5,7 @@ use clap::ValueHint;
 use crate::Result;
 use crate::cli::edit::Edit;
 
-/// Generate a mise.toml file
+/// Generate a nise.toml file
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Config {
@@ -34,10 +34,10 @@ impl Config {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise generate config</bold>             <dim># generate mise.toml interactively</dim>
-    $ <bold>mise generate config .mise.toml</bold>  <dim># generate a specific file</dim>
-    $ <bold>mise generate config -g</bold>          <dim># generate the global config file</dim>
-    $ <bold>mise generate config -y</bold>          <dim># skip interactive editor</dim>
-    $ <bold>mise generate config -n</bold>          <dim># preview without writing</dim>
+    $ <bold>nise generate config</bold>             <dim># generate nise.toml interactively</dim>
+    $ <bold>nise generate config .nise.toml</bold>  <dim># generate a specific file</dim>
+    $ <bold>nise generate config -g</bold>          <dim># generate the global config file</dim>
+    $ <bold>nise generate config -y</bold>          <dim># skip interactive editor</dim>
+    $ <bold>nise generate config -n</bold>          <dim># preview without writing</dim>
 "#
 );

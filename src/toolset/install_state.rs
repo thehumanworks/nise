@@ -3,25 +3,15 @@ use crate::cli::args::BackendArg;
 use crate::file::display_path;
 use crate::git::Git;
 use crate::plugins::PluginType;
-use crate::toolset::{EPHEMERAL_OPT_KEYS, parse_tool_options};
-use crate::{dirs, env, file, runtime_symlinks};
+use crate::toolset::{EPHEMERAL_OPT_KEYS, installed_versions, parse_tool_options};
+use crate::{dirs, env, file};
 use eyre::{Ok, Result};
 use heck::ToKebabCase;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use versions::Versioning;
-
-/// Normalize a version string for sorting by stripping leading 'v' or 'V' prefix.
-/// This ensures "v1.0.0" and "1.0.0" are sorted together correctly.
-fn normalize_version_for_sort(v: &str) -> &str {
-    v.strip_prefix('v')
-        .or_else(|| v.strip_prefix('V'))
-        .unwrap_or(v)
-}
 
 type InstallStatePlugins = BTreeMap<String, PluginType>;
 type InstallStateTools = BTreeMap<String, InstallStateTool>;
@@ -241,21 +231,7 @@ async fn init_tools() -> MutexResult<InstallStateTools> {
         } else {
             None
         };
-        // Read versions from filesystem (1 syscall per tool — unavoidable)
-        let versions: Vec<String> = file::dir_subdirs(&dir)
-            .unwrap_or_else(|err| {
-                warn!("reading versions in {} failed: {err:?}", display_path(&dir));
-                Default::default()
-            })
-            .into_iter()
-            .filter(|v| !v.starts_with('.'))
-            .filter(|v| !runtime_symlinks::is_runtime_symlink(&dir.join(v)))
-            .filter(|v| !dir.join(v).join("incomplete").exists())
-            .sorted_by_cached_key(|v| {
-                let normalized = normalize_version_for_sort(v);
-                (Versioning::new(normalized), v.to_string())
-            })
-            .collect();
+        let versions = installed_versions::list_concrete_versions(&dir, &dir_name);
 
         if versions.is_empty() {
             continue;
@@ -352,20 +328,7 @@ async fn init_tools() -> MutexResult<InstallStateTools> {
             let manifest_tool = tool_manifest
                 .as_ref()
                 .or_else(|| shared_manifest.get(&dir_name));
-            let versions: Vec<String> = file::dir_subdirs(&dir)
-                .unwrap_or_else(|err| {
-                    warn!("reading versions in {} failed: {err:?}", display_path(&dir));
-                    Default::default()
-                })
-                .into_iter()
-                .filter(|v| !v.starts_with('.'))
-                .filter(|v| !runtime_symlinks::is_runtime_symlink(&dir.join(v)))
-                .filter(|v| !dir.join(v).join("incomplete").exists())
-                .sorted_by_cached_key(|v| {
-                    let normalized = normalize_version_for_sort(v);
-                    (Versioning::new(normalized), v.to_string())
-                })
-                .collect();
+            let versions = installed_versions::list_concrete_versions(&dir, &dir_name);
 
             if versions.is_empty() {
                 continue;
@@ -399,11 +362,7 @@ async fn init_tools() -> MutexResult<InstallStateTools> {
                     tool.versions.push(v);
                 }
             }
-            // Re-sort after merging
-            tool.versions.sort_by_cached_key(|v| {
-                let normalized = normalize_version_for_sort(v);
-                (Versioning::new(normalized), v.to_string())
-            });
+            tool.versions.sort();
             // Fill in metadata if not yet set
             if tool.full.is_none() {
                 tool.full = full;
@@ -639,51 +598,7 @@ pub fn reset() {
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_version_for_sort;
-    use itertools::Itertools;
     use std::collections::BTreeMap;
-    use versions::Versioning;
-
-    #[test]
-    fn test_normalize_version_for_sort() {
-        assert_eq!(normalize_version_for_sort("v1.0.0"), "1.0.0");
-        assert_eq!(normalize_version_for_sort("V1.0.0"), "1.0.0");
-        assert_eq!(normalize_version_for_sort("1.0.0"), "1.0.0");
-        assert_eq!(normalize_version_for_sort("latest"), "latest");
-    }
-
-    #[test]
-    fn test_version_sorting_with_v_prefix() {
-        // Test that mixed v-prefix and non-v-prefix versions sort correctly
-        let versions = ["v2.0.51", "2.0.35", "2.0.52"];
-
-        // Without normalization - demonstrates the problem
-        let sorted_without_norm: Vec<_> = versions
-            .iter()
-            .sorted_by_cached_key(|v| (Versioning::new(v), v.to_string()))
-            .collect();
-        println!("Without normalization: {:?}", sorted_without_norm);
-
-        // With normalization - the fix
-        let sorted_with_norm: Vec<_> = versions
-            .iter()
-            .sorted_by_cached_key(|v| {
-                let normalized = normalize_version_for_sort(v);
-                (Versioning::new(normalized), v.to_string())
-            })
-            .collect();
-        println!("With normalization: {:?}", sorted_with_norm);
-
-        // With the fix, v2.0.51 should sort between 2.0.35 and 2.0.52
-        // The highest version should be 2.0.52
-        assert_eq!(**sorted_with_norm.last().unwrap(), "2.0.52");
-
-        // v2.0.51 should be second to last
-        assert_eq!(**sorted_with_norm.get(1).unwrap(), "v2.0.51");
-
-        // 2.0.35 should be first
-        assert_eq!(**sorted_with_norm.first().unwrap(), "2.0.35");
-    }
 
     #[test]
     fn test_manifest_roundtrip() {

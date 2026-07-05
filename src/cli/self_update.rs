@@ -44,7 +44,7 @@ pub fn upgrade_instructions_text() -> Option<String> {
 /// Appends self-update guidance and packaging instructions (if any) to a message.
 pub fn append_self_update_instructions(mut message: String) -> String {
     if SelfUpdate::is_available() {
-        message.push_str("\nRun `mise self-update` to update mise");
+        message.push_str("\nRun `nise self-update` to update mise");
     }
     if let Some(instructions) = upgrade_instructions_text() {
         message.push('\n');
@@ -53,13 +53,13 @@ pub fn append_self_update_instructions(mut message: String) -> String {
     message
 }
 
-/// Updates mise itself.
+/// Updates nise itself.
 ///
 /// Uses the GitHub Releases API to find the latest release and binary.
 /// By default, this will also update any installed plugins.
-/// Uses mise's GitHub token resolution chain for authenticated requests.
+/// Uses nise's GitHub token resolution chain for authenticated requests.
 ///
-/// This command is not available if mise is installed via a package manager.
+/// This command is not available if nise is installed via a package manager.
 #[derive(Debug, Default, clap::Args)]
 #[clap(verbatim_doc_comment)]
 pub struct SelfUpdate {
@@ -184,7 +184,7 @@ impl SelfUpdate {
     }
 
     // Rebuild the Windows shim copies in-process instead of shelling out to
-    // `mise reshim --force`. Mirrors `cli::reshim::Reshim::run`.
+    // `nise reshim --force`. Mirrors `cli::reshim::Reshim::run`.
     #[cfg(windows)]
     async fn reshim_after_update() -> Result<()> {
         use crate::config::Config;

@@ -8,7 +8,7 @@ use crate::ui::prompt;
 use crate::{dirs, env, file};
 use std::collections::BTreeSet;
 
-/// Removes mise CLI and all related data
+/// Removes nise CLI and all related data
 ///
 /// Skips config directory by default.
 #[derive(Debug, clap::Args)]
@@ -31,7 +31,7 @@ impl Implode {
         if self.config {
             files.insert(&dirs::CONFIG);
         }
-        // include system data dir (e.g. /usr/local/share/mise) used by `mise install --system`
+        // include system data dir (e.g. /usr/local/share/mise) used by `nise install --system`
         let system_data: &Path = &env::MISE_SYSTEM_DATA_DIR;
         files.insert(system_data);
         for f in files.into_iter().filter(|d| d.exists()) {

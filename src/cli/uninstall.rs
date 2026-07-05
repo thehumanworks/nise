@@ -7,13 +7,14 @@ use itertools::Itertools;
 use crate::backend::Backend;
 use crate::cli::args::ToolArg;
 use crate::config::Config;
+use crate::toolset::installed_versions::{self, InstalledVersionEntry};
 use crate::toolset::{ToolRequest, ToolSource, ToolVersion, ToolsetBuilder};
 use crate::ui::multi_progress_report::MultiProgressReport;
 use crate::{config, dirs, exit, file};
 
 /// Removes installed tool versions
 ///
-/// This only removes the installed version, it does not modify mise.toml.
+/// This only removes the installed version, it does not modify nise.toml.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Uninstall {
@@ -66,7 +67,29 @@ impl Uninstall {
 
             has_work = true;
             let pr = mpr.add(&tv.style());
-            if let Err(err) = plugin
+            let store_ref = installed_versions::find(
+                &plugin.ba().installs_path,
+                &plugin.ba().short,
+                &tv.tv_pathname(),
+            );
+            if let Some(InstalledVersionEntry::StoreRef { ref_manifest }) = store_ref {
+                match installed_versions::remove_store_ref(&ref_manifest, self.is_dry_run()) {
+                    Ok(true) => {}
+                    Ok(false) => {
+                        if let Err(err) = plugin
+                            .uninstall_version(&config, &tv, pr.as_ref(), self.is_dry_run())
+                            .await
+                        {
+                            error!("{err}");
+                            return Err(eyre!(err).wrap_err(format!("failed to uninstall {tv}")));
+                        }
+                    }
+                    Err(err) => {
+                        error!("{err}");
+                        return Err(eyre!(err).wrap_err(format!("failed to uninstall {tv}")));
+                    }
+                }
+            } else if let Err(err) = plugin
                 .uninstall_version(&config, &tv, pr.as_ref(), self.is_dry_run())
                 .await
             {
@@ -168,12 +191,12 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # will uninstall specific version
-    $ <bold>mise uninstall node@18.0.0</bold>
+    $ <bold>nise uninstall node@18.0.0</bold>
 
     # will uninstall the current node version (if only one version is installed)
-    $ <bold>mise uninstall node</bold>
+    $ <bold>nise uninstall node</bold>
 
     # will uninstall all installed versions of node
-    $ <bold>mise uninstall --all node@18.0.0</bold> # will uninstall all node versions
+    $ <bold>nise uninstall --all node@18.0.0</bold> # will uninstall all node versions
 "#
 );

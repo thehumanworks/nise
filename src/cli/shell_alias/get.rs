@@ -27,7 +27,7 @@ impl ShellAliasGet {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise shell-alias get ll</bold>
+    $ <bold>nise shell-alias get ll</bold>
     ls -la
 "#
 );

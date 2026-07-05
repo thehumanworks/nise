@@ -1,15 +1,15 @@
 min_usage_version "3.5"
-name mise
-bin mise
+name nise
+bin nise
 about "Dev tools, env vars, and tasks in one CLI"
-long_about "mise prepares your development environment before each command runs. https://github.com/jdx/mise"
+long_about "nise prepares your development environment before each command runs."
 default_subcommand run
-usage "Usage: mise [OPTIONS] [TASK] [COMMAND]"
+usage "Usage: nise [OPTIONS] [TASK] [COMMAND]"
 flag "-c --continue-on-error" help="Continue running tasks even if one fails" hide=#true
 flag "-C --cd" help="Change directory before running command" global=#true {
     arg <DIR>
 }
-flag "-E --env" help="Set the environment for loading `mise.<ENV>.toml`" var=#true global=#true {
+flag "-E --env" help="Set the environment for loading `nise.<ENV>.toml`" var=#true global=#true {
     arg <ENV>
 }
 flag "-f --force" help="Force the operation" hide=#true
@@ -24,7 +24,7 @@ flag "-q --quiet" help="Suppress non-error messages" global=#true
 flag "-s --shell" hide=#true {
     arg <SHELL>
 }
-flag "-t --tool" help="Tool(s) to run in addition to what is in mise.toml files e.g.: node@20 python@3.10" var=#true hide=#true {
+flag "-t --tool" help="Tool(s) to run in addition to what is in nise.toml files e.g.: node@20 python@3.10" var=#true hide=#true {
     arg <TOOL@VERSION>
 }
 flag "-v --verbose" help="Show extra output (use -vv for even more)" var=#true global=#true count=#true
@@ -77,7 +77,7 @@ This prevents API calls to GitHub, aqua registry, etc.
 Can also be enabled via MISE_LOCKED=1 or settings.locked=true
 """#
 }
-flag --silent help="Suppress all task output and mise non-error messages" global=#true
+flag --silent help="Suppress all task output and nise non-error messages" global=#true
 flag --timings help="Shows elapsed time after each task completes" hide=#true {
     long_help #"""
 Shows elapsed time after each task completes
@@ -89,13 +89,13 @@ flag --trace help="Sets log level to trace" hide=#true global=#true
 arg "[TASK]" help="Task to run" help_long=#"""
 Task to run.
 
-Shorthand for `mise tasks run <TASK>`.
+Shorthand for `nise tasks run <TASK>`.
 """# required=#false
 arg "[TASK_ARGS]…" help="Task arguments" required=#false var=#true hide=#true
 arg "[-- TASK_ARGS_LAST]…" required=#false var=#true hide=#true
-cmd activate help="Initializes mise in the current shell session" {
+cmd activate help="Initializes nise in the current shell session" {
     long_help #"""
-Initializes mise in the current shell session
+Initializes nise in the current shell session
 
 This should go into your shell's rc file or login shell.
 Otherwise, it will only take effect in the current session.
@@ -103,23 +103,23 @@ Otherwise, it will only take effect in the current session.
 
 Typically, this can be added with something like the following:
 
-    echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
+    echo 'eval "$(nise activate zsh)"' >> ~/.zshrc
 
-However, this requires that "mise" is in your PATH. If it is not, you need to
+However, this requires that "nise" is in your PATH. If it is not, you need to
 specify the full path like this:
 
-    echo 'eval "$(/path/to/mise activate zsh)"' >> ~/.zshrc
+    echo 'eval "$(/path/to/nise activate zsh)"' >> ~/.zshrc
 
 Customize status output with `status` settings.
 """#
     after_long_help #"""
 Examples:
 
-    $ eval "$(mise activate bash)"
-    $ eval "$(mise activate zsh)"
-    $ mise activate fish | source
-    $ execx($(mise activate xonsh))
-    $ (&mise activate pwsh) | Out-String | Invoke-Expression
+    $ eval "$(nise activate bash)"
+    $ eval "$(nise activate zsh)"
+    $ nise activate fish | source
+    $ execx($(nise activate xonsh))
+    $ (&nise activate pwsh) | Out-String | Invoke-Expression
 
 """#
     flag "-q --quiet" help="Suppress non-error messages"
@@ -132,7 +132,7 @@ Examples:
         long_help #"""
 Do not automatically call hook-env
 
-This can be helpful for debugging mise. If you run `eval "$(mise activate --no-hook-env)"`, then you can call `mise hook-env` manually which will output the env vars to stdout without actually modifying the environment. That way you can do things like `mise hook-env --trace` to get more information or just see the values that hook-env is outputting.
+This can be helpful for debugging nise. If you run `eval "$(nise activate --no-hook-env)"`, then you can call `nise hook-env` manually which will output the env vars to stdout without actually modifying the environment. That way you can do things like `nise hook-env --trace` to get more information or just see the values that hook-env is outputting.
 """#
     }
     flag --shims help=#"""
@@ -145,11 +145,11 @@ Effectively the same as:
 
     PATH="$HOME/.local/share/mise/shims:$PATH"
 
-`mise activate --shims` does not support all the features of `mise activate`.
+`nise activate --shims` does not support all the features of `nise activate`.
 See https://mise.en.dev/dev-tools/shims.html#shims-vs-path for more information
 """#
     }
-    flag --status help="Show \"mise: <TOOL>@<VERSION>\" message when changing directories" hide=#true
+    flag --status help="Show \"nise: <TOOL>@<VERSION>\" message when changing directories" hide=#true
     arg "[SHELL_TYPE]" help="Shell type to generate the script for" required=#false {
         choices bash elvish fish nu xonsh zsh pwsh
     }
@@ -169,7 +169,7 @@ This is the contents of a tool_alias.<TOOL> entry in ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise tool-alias get node lts-hydrogen
+    $ nise tool-alias get node lts-hydrogen
     20.0.0
 
 """#
@@ -195,7 +195,7 @@ For user config, aliases are defined like the following in `~/.config/mise/confi
         after_long_help #"""
 Examples:
 
-    $ mise tool-alias ls
+    $ nise tool-alias ls
     node  lts-jod      22
 
 """#
@@ -212,8 +212,8 @@ This modifies the contents of ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise tool-alias set maven asdf:mise-plugins/mise-maven
-    $ mise tool-alias set node lts-jod 22.0.0
+    $ nise tool-alias set maven asdf:mise-plugins/mise-maven
+    $ nise tool-alias set node lts-jod 22.0.0
 
 """#
         arg <TOOL> help="The tool/backend to set the alias for"
@@ -230,8 +230,8 @@ This modifies the contents of ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise tool-alias unset maven
-    $ mise tool-alias unset node lts-jod
+    $ nise tool-alias unset maven
+    $ nise tool-alias unset node lts-jod
 
 """#
         arg <TOOL> help="The tool/backend to remove the alias from"
@@ -246,8 +246,8 @@ cmd backends help="Manage backends" {
     after_long_help #"""
 Deprecation:
 
-The `mise b` alias is deprecated and will be removed in mise 2027.4.0.
-Use `mise backends` instead.
+The `nise b` alias is deprecated and will be removed in nise 2027.4.0.
+Use `nise backends` instead.
 
 """#
     cmd ls help="List built-in backends" {
@@ -255,7 +255,7 @@ Use `mise backends` instead.
         after_long_help #"""
 Examples:
 
-    $ mise backends ls
+    $ nise backends ls
     aqua
     asdf
     cargo
@@ -287,28 +287,28 @@ cmd bootstrap help="[experimental] Set up a machine for the current config in on
 Runs the bootstrap steps for the current config in order:
 
 0. `[bootstrap.hooks.pre-packages]` — optional setup hook
-1. `mise bootstrap packages apply` — install missing
+1. `nise bootstrap packages apply` — install missing
    `[bootstrap.packages]`
    then `[bootstrap.hooks.post-packages]`
-2. `mise bootstrap repos apply` — clone/update `[bootstrap.repos]`
+2. `nise bootstrap repos apply` — clone/update `[bootstrap.repos]`
    surrounded by `pre-repos`/`post-repos` hooks
-3. `mise bootstrap dotfiles apply` — apply dotfiles from `[dotfiles]`
+3. `nise bootstrap dotfiles apply` — apply dotfiles from `[dotfiles]`
    surrounded by `pre-dotfiles`/`post-dotfiles` hooks
-4. `mise bootstrap mise-shell-activate apply` — configure shell activation
+4. `nise bootstrap mise-shell-activate apply` — configure shell activation
    from `[bootstrap.mise_shell_activate]`
-5. `mise bootstrap macos defaults apply` — write
+5. `nise bootstrap macos defaults apply` — write
    `[bootstrap.macos.defaults]` entries (macOS)
    surrounded by `pre-defaults`/`post-defaults` hooks
-6. `mise bootstrap macos launchd-agents apply` — install/load
+6. `nise bootstrap macos launchd-agents apply` — install/load
    `[bootstrap.macos.launchd.agents]`
-7. `mise bootstrap linux systemd-units apply` — install/start
+7. `nise bootstrap linux systemd-units apply` — install/start
    `[bootstrap.linux.systemd.units]`
-8. `mise bootstrap user apply` — set `[bootstrap.user].login_shell`
+8. `nise bootstrap user apply` — set `[bootstrap.user].login_shell`
    (Unix)
    surrounded by `pre-user`/`post-user` hooks
-9. `mise install` — install missing tools from `[tools]`
+9. `nise install` — install missing tools from `[tools]`
    surrounded by `pre-tools`/`post-tools` hooks
-10. `mise run bootstrap` — if a task named `bootstrap` is defined
+10. `nise run bootstrap` — if a task named `bootstrap` is defined
 11. `[bootstrap.hooks.final]` — optional final hook
 
 The declarative steps converge — anything already in its desired state
@@ -324,20 +324,20 @@ cannot be used together.
     after_long_help #"""
 Examples:
 
-    $ mise bootstrap                    # packages + repos + dotfiles + tools + bootstrap task
-    $ mise bootstrap --force-dotfiles   # replace conflicting dotfile targets
-    $ mise bootstrap --skip tools,task  # skip tool installation and the bootstrap task
-    $ mise bootstrap --only tools       # run just tool installation
-    $ mise bootstrap status --missing
-    $ mise bootstrap packages apply --yes
-    $ mise bootstrap repos status
-    $ mise bootstrap repos apply --dry-run
-    $ mise bootstrap dotfiles status
-    $ mise bootstrap mise-shell-activate apply --dry-run
-    $ mise bootstrap macos defaults status
-    $ mise bootstrap macos launchd-agents apply --dry-run
-    $ mise bootstrap linux systemd-units apply --dry-run
-    $ mise bootstrap user apply --dry-run
+    $ nise bootstrap                    # packages + repos + dotfiles + tools + bootstrap task
+    $ nise bootstrap --force-dotfiles   # replace conflicting dotfile targets
+    $ nise bootstrap --skip tools,task  # skip tool installation and the bootstrap task
+    $ nise bootstrap --only tools       # run just tool installation
+    $ nise bootstrap status --missing
+    $ nise bootstrap packages apply --yes
+    $ nise bootstrap repos status
+    $ nise bootstrap repos apply --dry-run
+    $ nise bootstrap dotfiles status
+    $ nise bootstrap mise-shell-activate apply --dry-run
+    $ nise bootstrap macos defaults status
+    $ nise bootstrap macos launchd-agents apply --dry-run
+    $ nise bootstrap linux systemd-units apply --dry-run
+    $ nise bootstrap user apply --dry-run
 
 """#
     flag "-n --dry-run" help="Print what would happen without installing anything"
@@ -372,14 +372,14 @@ Apply dotfiles from `[dotfiles]`
 Applies configured whole-file entries and edits that aren't in their
 desired state. Whole-file entries may symlink, copy, or render templates.
 Edit entries manage a marker-delimited block or a single line in a file
-mise doesn't otherwise own.
+nise doesn't otherwise own.
 """#
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap dotfiles apply
-    $ mise bootstrap dotfiles apply --dry-run
-    $ mise bootstrap dotfiles apply --force --yes
+    $ nise bootstrap dotfiles apply
+    $ nise bootstrap dotfiles apply --dry-run
+    $ nise bootstrap dotfiles apply --force --yes
 
 """#
             flag "-f --force" help="Overwrite existing files that conflict with whole-file dotfile entries"
@@ -392,10 +392,10 @@ Examples:
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap dotfiles status
-    $ mise bootstrap dotfiles status ~/.zshrc
-    $ mise bootstrap dotfiles status --json
-    $ mise bootstrap dotfiles status --missing # exit 1 if anything is out of sync
+    $ nise bootstrap dotfiles status
+    $ nise bootstrap dotfiles status ~/.zshrc
+    $ nise bootstrap dotfiles status --json
+    $ nise bootstrap dotfiles status --missing # exit 1 if anything is out of sync
 
 """#
             flag "-J --json" help="Output in JSON format"
@@ -462,7 +462,7 @@ state (missing, source missing, differs)
             flag --missing help="Exit with code 1 if any configured defaults are not in their desired state"
         }
     }
-    cmd mise-shell-activate subcommand_required=#true help="Manage mise shell activation from `[bootstrap.mise_shell_activate]`" {
+    cmd mise-shell-activate subcommand_required=#true help="Manage nise shell activation from `[bootstrap.mise_shell_activate]`" {
         alias shell hide=#true
         cmd apply {
             flag "-n --dry-run" help="Print the actions that would run without writing anything"
@@ -492,10 +492,10 @@ only. `install` is accepted as an alias for this command.
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages apply
-    $ mise bootstrap packages apply apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835
-    $ mise bootstrap packages apply --dry-run
-    $ mise bootstrap packages apply --manager apt --yes
+    $ nise bootstrap packages apply
+    $ nise bootstrap packages apply apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835
+    $ nise bootstrap packages apply --dry-run
+    $ nise bootstrap packages apply --manager apt --yes
 
 """#
             flag "-m --manager" help="Only install packages for this manager, e.g. `apk`, `apt`, `brew`, `brew-cask`, or `mas`" {
@@ -513,14 +513,14 @@ Examples:
 Manage Homebrew taps used by bootstrap packages
 
 These commands edit `[bootstrap.brew.taps]` so tapped formulae and casks
-can be fetched directly by mise without a Homebrew installation.
+can be fetched directly by nise without a Homebrew installation.
 """#
             cmd tap help="Add a Homebrew tap URL to [bootstrap.brew.taps]" {
                 after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages brew tap railwaycat/emacsmacport
-    $ mise bootstrap packages brew tap acme/tools https://github.com/acme/homebrew-tools.git
+    $ nise bootstrap packages brew tap railwaycat/emacsmacport
+    $ nise bootstrap packages brew tap acme/tools https://github.com/acme/homebrew-tools.git
 
 """#
                 flag "-l --local" help="Write to the local config instead of the global config"
@@ -536,7 +536,7 @@ Examples:
                 after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages brew untap railwaycat/emacsmacport
+    $ nise bootstrap packages brew untap railwaycat/emacsmacport
 
 """#
                 flag "-l --local" help="Write to the local config instead of the global config"
@@ -558,13 +558,13 @@ Pass `--all` to import every linked formula, including dependencies.
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages import --manager brew
-    $ mise bootstrap packages import --manager brew --all
-    $ mise bootstrap packages import --manager brew --global
-    $ mise bootstrap packages import --manager brew --dry-run
+    $ nise bootstrap packages import --manager brew
+    $ nise bootstrap packages import --manager brew --all
+    $ nise bootstrap packages import --manager brew --global
+    $ nise bootstrap packages import --manager brew --dry-run
 
 """#
-            flag "-e --env" help="Write to the config file for this environment (mise.<ENV>.toml)" {
+            flag "-e --env" help="Write to the config file for this environment (nise.<ENV>.toml)" {
                 arg <ENV>
             }
             flag "-g --global" help="Write to the global config (~/.config/mise/config.toml)"
@@ -590,9 +590,9 @@ configs.
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages prune --manager brew
-    $ mise bootstrap packages prune --manager brew --dry-run
-    $ mise bootstrap packages prune --manager brew --yes
+    $ nise bootstrap packages prune --manager brew
+    $ nise bootstrap packages prune --manager brew --dry-run
+    $ nise bootstrap packages prune --manager brew --yes
 
 """#
             flag "-m --manager" help="Only prune packages for this manager. Currently only `brew` is supported" default=brew {
@@ -608,9 +608,9 @@ Examples:
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages status
-    $ mise bootstrap packages status --json
-    $ mise bootstrap packages status --missing # exit 1 if anything is out of sync
+    $ nise bootstrap packages status
+    $ nise bootstrap packages status --json
+    $ nise bootstrap packages status --missing # exit 1 if anything is out of sync
 
 """#
             flag "-J --json" help="Output in JSON format"
@@ -626,7 +626,7 @@ that are already installed: apk/apt/dnf/pacman upgrade to the newest available
 version (apk, apt, and dnf honor a version pinned in config), brew pours the
 formula's current bottle and replaces the old keg, brew-cask installs
 the current cask artifact, and mas upgrades App Store apps. Packages that
-are not installed yet are skipped — use `mise bootstrap packages apply`
+are not installed yet are skipped — use `nise bootstrap packages apply`
 for those.
 
 Packages can also be given explicitly in `manager:package` form.
@@ -634,12 +634,12 @@ Packages can also be given explicitly in `manager:package` form.
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages upgrade
-    $ mise bootstrap packages upgrade brew:postgresql@17
-    $ mise bootstrap packages upgrade --manager brew-cask
-    $ mise bootstrap packages upgrade --manager mas
-    $ mise bootstrap packages upgrade --manager apt --yes
-    $ mise bootstrap packages upgrade --dry-run
+    $ nise bootstrap packages upgrade
+    $ nise bootstrap packages upgrade brew:postgresql@17
+    $ nise bootstrap packages upgrade --manager brew-cask
+    $ nise bootstrap packages upgrade --manager mas
+    $ nise bootstrap packages upgrade --manager apt --yes
+    $ nise bootstrap packages upgrade --dry-run
 
 """#
             flag "-m --manager" help="Only upgrade packages for this manager, e.g. `apk`, `apt`, `brew`, `brew-cask`, or `mas`" {
@@ -656,25 +656,25 @@ Examples:
             long_help #"""
 Add bootstrap packages to [bootstrap.packages] and install them
 
-Like `mise use` for tools: writes `"manager:package" = "version"` entries
-to mise.toml (the local config by default, the global one with `-g`) and
+Like `nise use` for tools: writes `"manager:package" = "version"` entries
+to nise.toml (the local config by default, the global one with `-g`) and
 then installs whatever is missing.
 
-Versions are pinned with `@`: `mise bootstrap packages use apt:curl@8.5.0-2`. Without
+Versions are pinned with `@`: `nise bootstrap packages use apt:curl@8.5.0-2`. Without
 `@` (or with `@latest`) no pin is written. brew formulae and casks
 version through their names instead (for example `brew:postgresql@17`,
 `brew-cask:temurin@17`), where `@` is part of the Homebrew name rather than
-a mise version selector. mas uses numeric ADAM IDs and does not support pins.
+a nise version selector. mas uses numeric ADAM IDs and does not support pins.
 """#
             after_long_help #"""
 Examples:
 
-    $ mise bootstrap packages use apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835
-    $ mise bootstrap packages use -g brew:postgresql@17
-    $ mise bootstrap packages use apt:curl@8.5.0-2
+    $ nise bootstrap packages use apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835
+    $ nise bootstrap packages use -g brew:postgresql@17
+    $ nise bootstrap packages use apt:curl@8.5.0-2
 
 """#
-            flag "-e --env" help="Write to the config file for this environment (mise.<ENV>.toml)" {
+            flag "-e --env" help="Write to the config file for this environment (nise.<ENV>.toml)" {
                 arg <ENV>
             }
             flag "-g --global" help="Write to the global config (~/.config/mise/config.toml) instead of the local one"
@@ -722,13 +722,13 @@ Examples:
         }
     }
 }
-cmd cache help="Manage the mise cache" {
+cmd cache help="Manage the nise cache" {
     long_help #"""
-Manage the mise cache
+Manage the nise cache
 
-Run `mise cache` with no args to view the current cache directory.
+Run `nise cache` with no args to view the current cache directory.
 """#
-    cmd clear help="Deletes all cache files in mise" {
+    cmd clear help="Deletes all cache files in nise" {
         alias c
         alias clean hide=#true
         flag --outdate help="Mark all cache files as old" hide=#true
@@ -737,10 +737,10 @@ Run `mise cache` with no args to view the current cache directory.
     cmd path help="Show the cache directory path" {
         alias dir
     }
-    cmd prune help="Removes stale mise cache files" {
+    cmd prune help="Removes stale nise cache files" {
         alias p
         long_help #"""
-Removes stale mise cache files
+Removes stale nise cache files
 
 By default, this command will remove files that have not been accessed in 30 days.
 Change this with the MISE_CACHE_PRUNE_AGE environment variable.
@@ -755,10 +755,10 @@ cmd completion help="Generate shell completions" {
     after_long_help #"""
 Examples:
 
-    $ mise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
-    $ mise completion zsh  > /usr/local/share/zsh/site-functions/_mise
-    $ mise completion fish > ~/.config/fish/completions/mise.fish
-    $ mise completion powershell >> $PROFILE
+    $ nise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/nise
+    $ nise completion zsh  > /usr/local/share/zsh/site-functions/_nise
+    $ nise completion fish > ~/.config/fish/completions/nise.fish
+    $ nise completion powershell >> $PROFILE
 
 """#
     flag "-s --shell" help="Shell type to generate completions for" hide=#true {
@@ -798,28 +798,28 @@ cmd config help="Manage config files" {
     after_long_help #"""
 Examples:
 
-    $ mise config ls
+    $ nise config ls
     Path                        Tools
     ~/.config/mise/config.toml  pitchfork
-    ~/src/mise/mise.toml        actionlint, bun, cargo-binstall, cargo:cargo-edit, cargo:cargo-insta
+    ~/src/mise/nise.toml        actionlint, bun, cargo-binstall, cargo:cargo-edit, cargo:cargo-insta
 
 """#
     flag "-J --json" help="Output in JSON format"
     flag --no-header help="Do not print table header"
     flag --tracked-configs help="List all tracked config files"
-    cmd get help="Display the value of a setting in a mise.toml file" {
+    cmd get help="Display the value of a setting in a nise.toml file" {
         after_long_help #"""
 Examples:
 
-    $ mise toml get tools.python
+    $ nise toml get tools.python
     3.12
 
 """#
-        flag "-f --file" help="The path to the mise.toml file to edit" {
+        flag "-f --file" help="The path to the nise.toml file to edit" {
             long_help #"""
-The path to the mise.toml file to edit
+The path to the nise.toml file to edit
 
-If not provided, the nearest mise.toml file will be used
+If not provided, the nearest nise.toml file will be used
 """#
             arg <FILE>
         }
@@ -830,34 +830,34 @@ If not provided, the nearest mise.toml file will be used
         after_long_help #"""
 Examples:
 
-    $ mise config ls
+    $ nise config ls
     Path                        Tools
     ~/.config/mise/config.toml  pitchfork
-    ~/src/mise/mise.toml        actionlint, bun, cargo-binstall, cargo:cargo-edit, cargo:cargo-insta
+    ~/src/mise/nise.toml        actionlint, bun, cargo-binstall, cargo:cargo-edit, cargo:cargo-insta
 
 """#
         flag "-J --json" help="Output in JSON format"
         flag --no-header help="Do not print table header"
         flag --tracked-configs help="List all tracked config files"
     }
-    cmd set help="Set the value of a setting in a mise.toml file" {
+    cmd set help="Set the value of a setting in a nise.toml file" {
         after_long_help #"""
 Examples:
 
-    $ mise config set tools.python 3.12
-    $ mise config set settings.always_keep_download true
-    $ mise config set env.TEST_ENV_VAR ABC
-    $ mise config set settings.disable_tools node,rust
+    $ nise config set tools.python 3.12
+    $ nise config set settings.always_keep_download true
+    $ nise config set env.TEST_ENV_VAR ABC
+    $ nise config set settings.disable_tools node,rust
 
     # Type for `settings` is inferred
-    $ mise config set settings.jobs 4
+    $ nise config set settings.jobs 4
 
 """#
-        flag "-f --file" help="The path to the mise.toml file to edit" {
+        flag "-f --file" help="The path to the nise.toml file to edit" {
             long_help #"""
-The path to the mise.toml file to edit
+The path to the nise.toml file to edit
 
-If not provided, the nearest mise.toml file will be used
+If not provided, the nearest nise.toml file will be used
 """#
             arg <FILE>
         }
@@ -874,45 +874,45 @@ cmd current hide=#true help="Shows current active and installed runtime versions
     long_help #"""
 Shows current active and installed runtime versions
 
-This is similar to `mise ls --current`, but this only shows the runtime
+This is similar to `nise ls --current`, but this only shows the runtime
 and/or version. It's designed to fit into scripts more easily.
 """#
     after_long_help #"""
 Examples:
 
     # outputs `.tool-versions` compatible format
-    $ mise current
+    $ nise current
     python 3.11.0 3.10.0
     shfmt 3.6.0
     shellcheck 0.9.0
     node 20.0.0
 
-    $ mise current node
+    $ nise current node
     20.0.0
 
     # can output multiple versions
-    $ mise current python
+    $ nise current python
     3.11.0 3.10.0
 
 """#
     arg "[PLUGIN]" help="Plugin to show versions of e.g.: ruby, node, cargo:eza, npm:prettier, etc" required=#false
 }
-cmd deactivate help="Disable mise for current shell session" {
+cmd deactivate help="Disable nise for current shell session" {
     long_help #"""
-Disable mise for current shell session
+Disable nise for current shell session
 
-This can be used to temporarily disable mise in a shell session.
+This can be used to temporarily disable nise in a shell session.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise deactivate
+    $ nise deactivate
 
 """#
 }
-cmd direnv hide=#true help="Output direnv function to use mise inside direnv" {
+cmd direnv hide=#true help="Output direnv function to use nise inside direnv" {
     long_help #"""
-Output direnv function to use mise inside direnv
+Output direnv function to use nise inside direnv
 
 See https://mise.en.dev/direnv.html for more information
 
@@ -920,9 +920,9 @@ Because this generates the idiomatic files based on currently installed plugins,
 you should run this command after installing new plugins. Otherwise
 direnv may not know to update environment variables when idiomatic file versions change.
 """#
-    cmd activate hide=#true help="Output direnv function to use mise inside direnv" {
+    cmd activate hide=#true help="Output direnv function to use nise inside direnv" {
         long_help #"""
-Output direnv function to use mise inside direnv
+Output direnv function to use nise inside direnv
 
 See https://mise.en.dev/direnv.html for more information
 
@@ -933,8 +933,8 @@ direnv may not know to update environment variables when idiomatic file versions
         after_long_help #"""
 Examples:
 
-    $ mise direnv activate > ~/.config/direnv/lib/use_mise.sh
-    $ echo 'use mise' > .envrc
+    $ nise direnv activate > ~/.config/direnv/lib/use_mise.sh
+    $ echo 'use nise' > .envrc
     $ direnv allow
 
 """#
@@ -953,9 +953,9 @@ cmd dotfiles subcommand_required=#true help="[experimental] Manage dotfiles from
 [experimental] Manage dotfiles from `[dotfiles]`
 
 Dotfiles are config files symlinked, copied, or rendered to target paths,
-plus marker-delimited blocks or single lines in files mise doesn't own.
+plus marker-delimited blocks or single lines in files nise doesn't own.
 Unlike `[tools]`, dotfiles are only acted on when explicitly requested with
-`mise dotfiles apply`, `mise bootstrap dotfiles apply`, or `mise bootstrap`.
+`nise dotfiles apply`, `nise bootstrap dotfiles apply`, or `nise bootstrap`.
 """#
     cmd add help="Add or update dotfiles in `[dotfiles]`" {
         long_help #"""
@@ -968,9 +968,9 @@ under `dotfiles.root` unless `--source` is provided.
         after_long_help #"""
 Examples:
 
-    $ mise dotfiles add ~/.zshrc
-    $ mise dotfiles add --mode copy ~/.config/starship.toml
-    $ mise dotfiles add --source dotfiles/gitconfig ~/.gitconfig
+    $ nise dotfiles add ~/.zshrc
+    $ nise dotfiles add --mode copy ~/.config/starship.toml
+    $ nise dotfiles add --source dotfiles/gitconfig ~/.gitconfig
 
 """#
         flag "-f --force" help="Overwrite existing sources without prompting"
@@ -996,15 +996,15 @@ Apply dotfiles from `[dotfiles]`
 Applies configured whole-file entries and edits that aren't in their
 desired state. Whole-file entries may symlink, copy, or render templates.
 Edit entries manage a marker-delimited block or a single line in a file
-mise doesn't otherwise own.
+nise doesn't otherwise own.
 """#
         after_long_help #"""
 Examples:
 
-    $ mise dotfiles apply
-    $ mise bootstrap dotfiles apply
-    $ mise dotfiles apply --dry-run
-    $ mise dotfiles apply --force --yes
+    $ nise dotfiles apply
+    $ nise bootstrap dotfiles apply
+    $ nise dotfiles apply --dry-run
+    $ nise dotfiles apply --force --yes
 
 """#
         flag "-f --force" help="Overwrite existing files that conflict with whole-file dotfile entries"
@@ -1016,8 +1016,8 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise dotfiles edit ~/.zshrc
-    $ mise dotfiles edit --apply ~/.config/starship.toml
+    $ nise dotfiles edit ~/.zshrc
+    $ nise dotfiles edit --apply ~/.config/starship.toml
 
 """#
         flag --apply help="Apply this target after the editor exits"
@@ -1035,11 +1035,11 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise dotfiles status
-    $ mise bootstrap dotfiles status
-    $ mise dotfiles status ~/.zshrc
-    $ mise dotfiles status --json
-    $ mise dotfiles status --missing # exit 1 if anything is out of sync
+    $ nise dotfiles status
+    $ nise bootstrap dotfiles status
+    $ nise dotfiles status ~/.zshrc
+    $ nise dotfiles status --json
+    $ nise dotfiles status --missing # exit 1 if anything is out of sync
 
 """#
         flag "-J --json" help="Output in JSON format"
@@ -1050,51 +1050,51 @@ state (missing, source missing, differs)
         arg "[TARGET]…" help="Only show these targets" required=#false var=#true
     }
 }
-cmd doctor help="Check mise installation for possible problems" {
+cmd doctor help="Check nise installation for possible problems" {
     alias dr
     after_long_help #"""
 Examples:
 
-    $ mise doctor
+    $ nise doctor
     [WARN] plugin node is not installed
 
 """#
     flag "-J --json"
-    cmd path help="Print the current PATH entries mise is providing" {
+    cmd path help="Print the current PATH entries nise is providing" {
         alias paths hide=#true
         after_long_help #"""
 Examples:
 
-    Get the current PATH entries mise is providing
-    $ mise doctor path
+    Get the current PATH entries nise is providing
+    $ nise doctor path
     /home/user/.local/share/mise/installs/node/24.0.0/bin
     /home/user/.local/share/mise/installs/rust/1.90.0/bin
     /home/user/.local/share/mise/installs/python/3.10.0/bin
 
 """#
-        flag "-f --full" help="Print all entries including those not provided by mise"
+        flag "-f --full" help="Print all entries including those not provided by nise"
     }
 }
-cmd en help="Starts a new shell with the mise environment built from the current configuration" {
+cmd en help="Starts a new shell with the nise environment built from the current configuration" {
     long_help #"""
-Starts a new shell with the mise environment built from the current configuration
+Starts a new shell with the nise environment built from the current configuration
 
-This is an alternative to `mise activate` that allows you to explicitly start a mise session.
+This is an alternative to `nise activate` that allows you to explicitly start a nise session.
 It will have the tools and environment variables in the configs loaded.
-Note that changing directories will not update the mise environment.
+Note that changing directories will not update the nise environment.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise en .
+    $ nise en .
     $ node -v
     v20.0.0
 
     Skip loading bashrc:
-    $ mise en -s "bash --norc"
+    $ nise en -s "bash --norc"
 
     Skip loading zshrc:
-    $ mise en -s "zsh -f"
+    $ nise en -s "zsh -f"
 
 """#
     flag "-s --shell" help="Shell to start" {
@@ -1107,21 +1107,21 @@ Defaults to $SHELL
     }
     arg "[DIR]" help="Directory to start the shell in" required=#false default=.
 }
-cmd env help="Exports env vars to activate mise a single time" {
+cmd env help="Exports env vars to activate nise a single time" {
     alias e
     long_help #"""
-Exports env vars to activate mise a single time
+Exports env vars to activate nise a single time
 
-Use this if you don't want to permanently install mise. It's not necessary to
-use this if you have `mise activate` in your shell rc file.
+Use this if you don't want to permanently install nise. It's not necessary to
+use this if you have `nise activate` in your shell rc file.
 """#
     after_long_help #"""
 Examples:
 
-    $ eval "$(mise env -s bash)"
-    $ eval "$(mise env -s zsh)"
-    $ mise env -s fish | source
-    $ execx($(mise env -s xonsh))
+    $ eval "$(nise env -s bash)"
+    $ eval "$(nise env -s zsh)"
+    $ nise env -s fish | source
+    $ execx($(nise env -s xonsh))
 
 """#
     flag "-D --dotenv" help="Output in dotenv format"
@@ -1141,25 +1141,25 @@ cmd exec help="Execute a command with tool(s) set" {
     long_help #"""
 Execute a command with tool(s) set
 
-use this to avoid modifying the shell session or running ad-hoc commands with mise tools set.
+use this to avoid modifying the shell session or running ad-hoc commands with nise tools set.
 
-Tools will be loaded from mise.toml, though they can be overridden with <RUNTIME> args
-Note that only the plugin specified will be overridden, so if a `mise.toml` file
-includes "node 20" but you run `mise exec python@3.11`; it will still load node@20.
+Tools will be loaded from nise.toml, though they can be overridden with <RUNTIME> args
+Note that only the plugin specified will be overridden, so if a `nise.toml` file
+includes "node 20" but you run `nise exec python@3.11`; it will still load node@20.
 
 The "--" separates runtimes from the commands to pass along to the subprocess.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise exec node@20 -- node ./app.js  # launch app.js using node-20.x
-    $ mise x node@20 -- node ./app.js     # shorter alias
+    $ nise exec node@20 -- node ./app.js  # launch app.js using node-20.x
+    $ nise x node@20 -- node ./app.js     # shorter alias
 
     # Specify command as a string:
-    $ mise exec node@20 python@3.11 --command "node -v && python -V"
+    $ nise exec node@20 python@3.11 --command "node -v && python -V"
 
     # Run a command in a different directory:
-    $ mise x -C /path/to/project node@20 -- node ./app.js
+    $ nise x -C /path/to/project node@20 -- node ./app.js
 
 """#
     flag "-c --command" help="Command string to execute" {
@@ -1200,16 +1200,16 @@ macOS only in v1; on Linux falls back to allowing all network
     arg "[TOOL@VERSION]…" help="Tool(s) to start e.g.: node@20 python@3.10" required=#false var=#true
     arg "[-- COMMAND]…" help="Command string to execute (same as --command)" required=#false var=#true
 }
-cmd fmt help="Formats mise.toml" {
+cmd fmt help="Formats nise.toml" {
     long_help #"""
-Formats mise.toml
+Formats nise.toml
 
-Sorts keys and cleans up whitespace in mise.toml
+Sorts keys and cleans up whitespace in nise.toml
 """#
     after_long_help #"""
 Examples:
 
-    $ mise fmt
+    $ nise fmt
 
 """#
     flag "-a --all" help="Format all files from the current directory"
@@ -1219,28 +1219,28 @@ Examples:
 cmd generate subcommand_required=#true help="Generate files for various tools/services" {
     alias gen
     alias g hide=#true
-    cmd bootstrap help="Generate a script to download+execute mise" {
+    cmd bootstrap help="Generate a script to download+execute nise" {
         long_help #"""
-Generate a script to download+execute mise
+Generate a script to download+execute nise
 
-This is designed to be used in a project where contributors may not have mise installed.
+This is designed to be used in a project where contributors may not have nise installed.
 """#
         after_long_help #"""
 Examples:
 
-    $ mise generate bootstrap >./bin/mise
-    $ chmod +x ./bin/mise
-    $ ./bin/mise install – automatically downloads mise to .mise if not already installed
+    $ nise generate bootstrap >./bin/nise
+    $ chmod +x ./bin/nise
+    $ ./bin/nise install – automatically downloads nise to .mise if not already installed
 
 """#
-        flag "-l --localize" help="Sandboxes mise internal directories like MISE_DATA_DIR and MISE_CACHE_DIR into a `.mise` directory in the project" {
+        flag "-l --localize" help="Sandboxes nise internal directories like MISE_DATA_DIR and MISE_CACHE_DIR into a `.mise` directory in the project" {
             long_help #"""
-Sandboxes mise internal directories like MISE_DATA_DIR and MISE_CACHE_DIR into a `.mise` directory in the project
+Sandboxes nise internal directories like MISE_DATA_DIR and MISE_CACHE_DIR into a `.mise` directory in the project
 
-This is necessary if users may use a different version of mise outside the project.
+This is necessary if users may use a different version of nise outside the project.
 """#
         }
-        flag "-V --version" help="Specify mise version to fetch" {
+        flag "-V --version" help="Specify nise version to fetch" {
             arg <VERSION>
         }
         flag "-w --write" help="instead of outputting the script to stdout, write to a file and make it executable" {
@@ -1250,15 +1250,15 @@ This is necessary if users may use a different version of mise outside the proje
             arg <LOCALIZED_DIR>
         }
     }
-    cmd config help="Generate a mise.toml file" {
+    cmd config help="Generate a nise.toml file" {
         after_long_help #"""
 Examples:
 
-    $ mise generate config             # generate mise.toml interactively
-    $ mise generate config .mise.toml  # generate a specific file
-    $ mise generate config -g          # generate the global config file
-    $ mise generate config -y          # skip interactive editor
-    $ mise generate config -n          # preview without writing
+    $ nise generate config             # generate nise.toml interactively
+    $ nise generate config .nise.toml  # generate a specific file
+    $ nise generate config -g          # generate the global config file
+    $ nise generate config -y          # skip interactive editor
+    $ nise generate config -n          # preview without writing
 
 """#
         flag "-g --global" help="Generate the global config file (~/.config/mise/config.toml)"
@@ -1268,11 +1268,11 @@ Examples:
         }
         arg "[PATH]" help="Path to the config file to create" required=#false
     }
-    cmd devcontainer help="Generate a devcontainer to execute mise" {
+    cmd devcontainer help="Generate a devcontainer to execute nise" {
         after_long_help #"""
 Examples:
 
-    $ mise generate devcontainer
+    $ nise generate devcontainer
 
 """#
         flag "-i --image" help="The image to use for the devcontainer" {
@@ -1289,18 +1289,18 @@ Examples:
         long_help #"""
 Generate a git pre-commit hook
 
-This command generates a git pre-commit hook that runs a mise task like `mise run pre-commit`
+This command generates a git pre-commit hook that runs a nise task like `nise run pre-commit`
 when you commit changes to your repository.
 
 Staged files are passed to the task as `STAGED`.
 
-For more advanced pre-commit functionality, see mise's sister project: https://hk.jdx.dev/
+For more advanced pre-commit functionality, see nise's sister project: https://hk.jdx.dev/
 """#
         after_long_help #"""
 Examples:
 
-    $ mise generate git-pre-commit --write --task=pre-commit
-    $ git commit -m "feat: add new feature" # runs `mise run pre-commit`
+    $ nise generate git-pre-commit --write --task=pre-commit
+    $ git commit -m "feat: add new feature" # runs `nise run pre-commit`
 
 """#
         flag "-t --task" help="The task to run when the pre-commit hook is triggered" default=pre-commit {
@@ -1315,15 +1315,15 @@ Examples:
         long_help #"""
 Generate a GitHub Action workflow file
 
-This command generates a GitHub Action workflow file that runs a mise task like `mise run ci`
+This command generates a GitHub Action workflow file that runs a nise task like `nise run ci`
 when you push changes to your repository.
 """#
         after_long_help #"""
 Examples:
 
-    $ mise generate github-action --write --task=ci
+    $ nise generate github-action --write --task=ci
     $ git commit -m "feat: add new feature"
-    $ git push # runs `mise run ci` on GitHub
+    $ git push # runs `nise run ci` on GitHub
 
 """#
         flag "-t --task" help="The task to run when the workflow is triggered" default=ci {
@@ -1338,7 +1338,7 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise generate task-docs
+    $ nise generate task-docs
 
 """#
         flag "-i --inject" help="inserts the documentation into an existing file" {
@@ -1364,18 +1364,18 @@ run multiple times on the same file to update the documentation.
             }
         }
     }
-    cmd task-stubs help="Generates shims to run mise tasks" {
+    cmd task-stubs help="Generates shims to run nise tasks" {
         long_help #"""
-Generates shims to run mise tasks
+Generates shims to run nise tasks
 
-By default, this will build shims like ./bin/<task>. These can be paired with `mise generate bootstrap`
-so contributors to a project can execute mise tasks without installing mise into their system.
+By default, this will build shims like ./bin/<task>. These can be paired with `nise generate bootstrap`
+so contributors to a project can execute nise tasks without installing nise into their system.
 """#
         after_long_help #"""
 Examples:
 
-    $ mise tasks add test -- echo 'running tests'
-    $ mise generate task-stubs
+    $ nise tasks add test -- echo 'running tests'
+    $ nise generate task-stubs
     $ ./bin/test
     running tests
 
@@ -1383,11 +1383,11 @@ Examples:
         flag "-d --dir" help="Directory to create task stubs inside of" default=bin {
             arg <DIR>
         }
-        flag "-m --mise-bin" help="Path to a mise bin to use when running the task stub." default=mise {
+        flag "-m --mise-bin" help="Path to a nise bin to use when running the task stub." default=nise {
             long_help #"""
-Path to a mise bin to use when running the task stub.
+Path to a nise bin to use when running the task stub.
 
-Use `--mise-bin=./bin/mise` to use a mise bin generated from `mise generate bootstrap`
+Use `--mise-bin=./bin/nise` to use a nise bin generated from `nise generate bootstrap`
 """#
             arg <MISE_BIN>
         }
@@ -1408,50 +1408,50 @@ to incrementally build cross-platform tool stubs.
 Examples:
 
     Generate a tool stub for a single URL:
-    $ mise generate tool-stub ./bin/gh --url "https://github.com/cli/cli/releases/download/v2.336.0/gh_2.336.0_linux_amd64.tar.gz"
+    $ nise generate tool-stub ./bin/gh --url "https://github.com/cli/cli/releases/download/v2.336.0/gh_2.336.0_linux_amd64.tar.gz"
 
     Generate a tool stub with platform-specific URLs:
-    $ mise generate tool-stub ./bin/rg \
+    $ nise generate tool-stub ./bin/rg \
         --platform-url linux-x64:https://github.com/BurntSushi/ripgrep/releases/download/14.0.3/ripgrep-14.0.3-x86_64-unknown-linux-musl.tar.gz \
         --platform-url darwin-arm64:https://github.com/BurntSushi/ripgrep/releases/download/14.0.3/ripgrep-14.0.3-aarch64-apple-darwin.tar.gz
 
     Append additional platforms to an existing stub:
-    $ mise generate tool-stub ./bin/rg \
+    $ nise generate tool-stub ./bin/rg \
         --platform-url linux-x64:https://example.com/rg-linux.tar.gz
-    $ mise generate tool-stub ./bin/rg \
+    $ nise generate tool-stub ./bin/rg \
         --platform-url darwin-arm64:https://example.com/rg-darwin.tar.gz
     # The stub now contains both platforms
 
     Use auto-detection for platform from URL:
-    $ mise generate tool-stub ./bin/node \
+    $ nise generate tool-stub ./bin/node \
         --platform-url https://nodejs.org/dist/v22.17.1/node-v22.17.1-darwin-arm64.tar.gz
     # Platform 'macos-arm64' will be auto-detected from the URL
 
     Generate with platform-specific binary paths:
-    $ mise generate tool-stub ./bin/tool \
+    $ nise generate tool-stub ./bin/tool \
         --platform-url linux-x64:https://example.com/tool-linux.tar.gz \
         --platform-url windows-x64:https://example.com/tool-windows.zip \
         --platform-bin windows-x64:tool.exe
 
     Generate without downloading (faster):
-    $ mise generate tool-stub ./bin/tool --url "https://example.com/tool.tar.gz" --skip-download
+    $ nise generate tool-stub ./bin/tool --url "https://example.com/tool.tar.gz" --skip-download
 
     Fetch checksums for an existing stub:
-    $ mise generate tool-stub ./bin/jq --fetch
+    $ nise generate tool-stub ./bin/jq --fetch
     # This will read the existing stub and download files to fill in any missing checksums/sizes
 
-    Generate a bootstrap stub that installs mise if needed:
-    $ mise generate tool-stub ./bin/tool --url "https://example.com/tool.tar.gz" --bootstrap
-    # The stub will check for mise and install it automatically before running the tool
+    Generate a bootstrap stub that installs nise if needed:
+    $ nise generate tool-stub ./bin/tool --url "https://example.com/tool.tar.gz" --bootstrap
+    # The stub will check for nise and install it automatically before running the tool
 
-    Generate a bootstrap stub with a pinned mise version:
-    $ mise generate tool-stub ./bin/tool --url "https://example.com/tool.tar.gz" --bootstrap --bootstrap-version 2025.1.0
+    Generate a bootstrap stub with a pinned nise version:
+    $ nise generate tool-stub ./bin/tool --url "https://example.com/tool.tar.gz" --bootstrap --bootstrap-version 2025.1.0
 
     Lock an existing tool stub with pinned version and platform URLs/checksums:
-    $ mise generate tool-stub ./bin/node --lock
+    $ nise generate tool-stub ./bin/node --lock
 
     Bump the version in a locked stub:
-    $ mise generate tool-stub ./bin/node --lock --version 22
+    $ nise generate tool-stub ./bin/node --lock --version 22
     # Resolves the latest node 22.x, pins it, and updates platform URLs/checksums
 
 """#
@@ -1463,19 +1463,19 @@ If not specified and the archive is downloaded, will auto-detect the most likely
 """#
             arg <BIN>
         }
-        flag --bootstrap help="Wrap stub in a bootstrap script that installs mise if not already present" {
+        flag --bootstrap help="Wrap stub in a bootstrap script that installs nise if not already present" {
             long_help #"""
-Wrap stub in a bootstrap script that installs mise if not already present
+Wrap stub in a bootstrap script that installs nise if not already present
 
 When enabled, generates a bash script that:
-1. Checks if mise is installed at the expected path
-2. If not, downloads and installs mise using the embedded installer
-3. Executes the tool stub using mise
+1. Checks if nise is installed at the expected path
+2. If not, downloads and installs nise using the embedded installer
+3. Executes the tool stub using nise
 """#
         }
-        flag --bootstrap-version help="Specify mise version for the bootstrap script" {
+        flag --bootstrap-version help="Specify nise version for the bootstrap script" {
             long_help #"""
-Specify mise version for the bootstrap script
+Specify nise version for the bootstrap script
 
 By default, uses the latest version from the install script.
 Use this to pin to a specific version (e.g., "2025.1.0").
@@ -1529,23 +1529,23 @@ Example: https://github.com/owner/repo/releases/download/v2.0.0/tool-linux-x64.t
     }
 }
 cmd github hide=#true subcommand_required=#true help="GitHub related commands" {
-    cmd token hide=#true help="Display the GitHub token mise will use for a given host" {
+    cmd token hide=#true help="Display the GitHub token nise will use for a given host" {
         long_help #"""
-Display the GitHub token mise will use for a given host
+Display the GitHub token nise will use for a given host
 
-Shows which token source mise would use, useful for debugging
+Shows which token source nise would use, useful for debugging
 authentication issues. The token is masked by default.
 """#
         after_long_help #"""
 Examples:
 
-    $ mise github token
+    $ nise github token
     github.com: ghp_…xxxx (source: GITHUB_TOKEN)
 
-    $ mise github token --unmask
+    $ nise github token --unmask
     github.com: ghp_xxxxxxxxxxxx (source: GITHUB_TOKEN)
 
-    $ mise github token github.mycompany.com
+    $ nise github token github.mycompany.com
     github.mycompany.com: (none)
 
 """#
@@ -1562,37 +1562,37 @@ Sets/gets the global tool version(s)
 
 Displays the contents of global config after writing.
 The file is `$HOME/.config/mise/config.toml` by default. It can be changed with `$MISE_GLOBAL_CONFIG_FILE`.
-If `$MISE_GLOBAL_CONFIG_FILE` is set to anything that ends in `.toml`, it will be parsed as `mise.toml`.
+If `$MISE_GLOBAL_CONFIG_FILE` is set to anything that ends in `.toml`, it will be parsed as `nise.toml`.
 Otherwise, it will be parsed as a `.tool-versions` file.
 
 Use MISE_ASDF_COMPAT=1 to default the global config to ~/.tool-versions
 
-Use `mise local` to set a tool version locally in the current directory.
+Use `nise local` to set a tool version locally in the current directory.
 """#
     after_long_help #"""
 Examples:
     # set the current version of node to 20.x
     # will use a fuzzy version (e.g.: 20) in .tool-versions file
-    $ mise global --fuzzy node@20
+    $ nise global --fuzzy node@20
 
     # set the current version of node to 20.x
     # will use a precise version (e.g.: 20.0.0) in .tool-versions file
-    $ mise global --pin node@20
+    $ nise global --pin node@20
 
     # show the current version of node in ~/.tool-versions
-    $ mise global node
+    $ nise global node
     20.0.0
 
 """#
     flag --fuzzy help=#"""
 Save fuzzy version to `~/.tool-versions`
-e.g.: `mise global --fuzzy node@20` will save `node 20` to ~/.tool-versions
+e.g.: `nise global --fuzzy node@20` will save `node 20` to ~/.tool-versions
 this is the default behavior unless MISE_ASDF_COMPAT=1
 """#
     flag --path help="Get the path of the global config file"
     flag --pin help=#"""
 Save exact version to `~/.tool-versions`
-e.g.: `mise global --pin node@20` will save `node 20.0.0` to ~/.tool-versions
+e.g.: `nise global --pin node@20` will save `node 20.0.0` to ~/.tool-versions
 """#
     flag --remove help="Remove the tool(s) from ~/.tool-versions" var=#true {
         arg <TOOL>
@@ -1617,7 +1617,7 @@ cmd hook-env hide=#true help="[internal] called by activate hook to update env v
             choices precmd chpwd
         }
     }
-    flag --status help="Show \"mise: <TOOL>@<VERSION>\" message when changing directories" hide=#true
+    flag --status help="Show \"nise: <TOOL>@<VERSION>\" message when changing directories" hide=#true
 }
 cmd hook-not-found hide=#true help="[internal] called by shell when a command is not found" {
     flag "-s --shell" help="Shell type to generate script for" {
@@ -1627,24 +1627,24 @@ cmd hook-not-found hide=#true help="[internal] called by shell when a command is
     }
     arg <BIN> help="Attempted bin to run"
 }
-cmd implode help="Removes mise CLI and all related data" {
+cmd implode help="Removes nise CLI and all related data" {
     long_help #"""
-Removes mise CLI and all related data
+Removes nise CLI and all related data
 
 Skips config directory by default.
 """#
     flag "-n --dry-run" help="List directories that would be removed without actually removing them"
     flag --config help="Also remove config directory"
 }
-cmd edit help="Edit mise.toml interactively" {
+cmd edit help="Edit nise.toml interactively" {
     after_long_help #"""
 Examples:
 
-    $ mise edit             # edit mise.toml interactively
-    $ mise edit .mise.toml  # edit a specific file
-    $ mise edit -g          # edit the global config file
-    $ mise edit -y          # skip interactive editor
-    $ mise edit -n          # preview without writing
+    $ nise edit             # edit nise.toml interactively
+    $ nise edit .nise.toml  # edit a specific file
+    $ nise edit -g          # edit the global config file
+    $ nise edit -y          # skip interactive editor
+    $ nise edit -n          # preview without writing
 
 """#
     flag "-g --global" help="Edit the global config file (~/.config/mise/config.toml)"
@@ -1661,19 +1661,19 @@ Install a tool version
 
 Installs a tool version to `~/.local/share/mise/installs/<TOOL>/<VERSION>`
 Installing alone will not activate the tools so they won't be in PATH.
-To install and/or activate in one command, use `mise use` which will create a `mise.toml` file
+To install and/or activate in one command, use `nise use` which will create a `nise.toml` file
 in the current directory to activate this tool when inside the directory.
-Alternatively, run `mise exec <TOOL>@<VERSION> -- <COMMAND>` to execute a tool without creating config files.
+Alternatively, run `nise exec <TOOL>@<VERSION> -- <COMMAND>` to execute a tool without creating config files.
 
 Tools will be installed in parallel. To disable, set `--jobs=1` or `MISE_JOBS=1`
 """#
     after_long_help #"""
 Examples:
 
-    $ mise install node@20.0.0  # install specific node version
-    $ mise install node@20      # install fuzzy node version
-    $ mise install node         # install version specified in mise.toml
-    $ mise install              # installs everything specified in mise.toml
+    $ nise install node@20.0.0  # install specific node version
+    $ nise install node@20      # install fuzzy node version
+    $ nise install node         # install version specified in nise.toml
+    $ nise install              # installs everything specified in nise.toml
 
 """#
     flag "-f --force" help="Force reinstall even if already installed"
@@ -1738,13 +1738,13 @@ cmd install-into help="Install a tool version to a specific path" {
     long_help #"""
 Install a tool version to a specific path
 
-Used for building a tool to a directory for use outside of mise
+Used for building a tool to a directory for use outside of nise
 """#
     after_long_help #"""
 Examples:
 
     # install node@20.0.0 into ./mynode
-    $ mise install-into node@20.0.0 ./mynode && ./mynode/bin/node -v
+    $ nise install-into node@20.0.0 ./mynode && ./mynode/bin/node -v
     20.0.0
 
 """#
@@ -1760,13 +1760,13 @@ Supports prefixes such as `node@20` to get the latest version of node 20.
     after_long_help #"""
 Examples:
 
-    $ mise latest node@20  # get the latest version of node 20
+    $ nise latest node@20  # get the latest version of node 20
     20.0.0
 
-    $ mise latest node     # get the latest stable version of node
+    $ nise latest node     # get the latest stable version of node
     20.0.0
 
-    $ mise latest node --minimum-release-age 2024-01-01  # latest stable node released before 2024-01-01
+    $ nise latest node --minimum-release-age 2024-01-01  # latest stable node released before 2024-01-01
 
 """#
     flag "-i --installed" help="Show latest installed instead of available version"
@@ -1782,24 +1782,24 @@ Overrides per-tool `minimum_release_age` options and the global `minimum_release
     arg <TOOL@VERSION> help="Tool to get the latest version of"
     arg "[ASDF_VERSION]" help="The version prefix to use when querying the latest version same as the first argument after the \"@\" used for asdf compatibility" required=#false hide=#true
 }
-cmd link help="Symlinks a tool version into mise" {
+cmd link help="Symlinks a tool version into nise" {
     alias ln
     long_help #"""
-Symlinks a tool version into mise
+Symlinks a tool version into nise
 
-Use this for adding installs either custom compiled outside mise or built with a different tool.
+Use this for adding installs either custom compiled outside nise or built with a different tool.
 """#
     after_long_help #"""
 Examples:
 
-    # build node-20.0.0 with node-build and link it into mise
+    # build node-20.0.0 with node-build and link it into nise
     $ node-build 20.0.0 ~/.nodes/20.0.0
-    $ mise link node@20.0.0 ~/.nodes/20.0.0
+    $ nise link node@20.0.0 ~/.nodes/20.0.0
 
-    # have mise use the node version provided by Homebrew
+    # have nise use the node version provided by Homebrew
     $ brew install node
-    $ mise link node@brew $(brew --prefix node)
-    $ mise use node@brew
+    $ nise link node@brew $(brew --prefix node)
+    $ nise use node@brew
 
 """#
     flag "-f --force" help="Overwrite an existing tool version if it exists"
@@ -1809,34 +1809,34 @@ The local path to the tool version
 e.g.: ~/.nvm/versions/node/v20.0.0
 """#
 }
-cmd local hide=#true help="Sets/gets tool version in local .tool-versions or mise.toml" {
+cmd local hide=#true help="Sets/gets tool version in local .tool-versions or nise.toml" {
     alias l hide=#true
     long_help #"""
-Sets/gets tool version in local .tool-versions or mise.toml
+Sets/gets tool version in local .tool-versions or nise.toml
 
 Use this to set a tool's version when within a directory
-Use `mise global` to set a tool version globally
-This uses `.tool-version` by default unless there is a `mise.toml` file or if `MISE_USE_TOML`
-is set. A future v2 release of mise will default to using `mise.toml`.
+Use `nise global` to set a tool version globally
+This uses `.tool-version` by default unless there is a `nise.toml` file or if `MISE_USE_TOML`
+is set. A future v2 release of nise will default to using `nise.toml`.
 """#
     after_long_help #"""
 Examples:
     # set the current version of node to 20.x for the current directory
     # will use a precise version (e.g.: 20.0.0) in .tool-versions file
-    $ mise local node@20
+    $ nise local node@20
 
     # set node to 20.x for the current project (recurses up to find .tool-versions)
-    $ mise local -p node@20
+    $ nise local -p node@20
 
     # set the current version of node to 20.x for the current directory
     # will use a fuzzy version (e.g.: 20) in .tool-versions file
-    $ mise local --fuzzy node@20
+    $ nise local --fuzzy node@20
 
     # removes node from .tool-versions
-    $ mise local --remove=node
+    $ nise local --remove=node
 
     # show the current version of node in .tool-versions
-    $ mise local node
+    $ nise local node
     20.0.0
 
 """#
@@ -1844,20 +1844,20 @@ Examples:
 Recurse up to find a .tool-versions file rather than using the current directory only
 by default this command will only set the tool in the current directory ("$PWD/.tool-versions")
 """#
-    flag --fuzzy help="Save fuzzy version to `.tool-versions` e.g.: `mise local --fuzzy node@20` will save `node 20` to .tool-versions This is the default behavior unless MISE_ASDF_COMPAT=1"
+    flag --fuzzy help="Save fuzzy version to `.tool-versions` e.g.: `nise local --fuzzy node@20` will save `node 20` to .tool-versions This is the default behavior unless MISE_ASDF_COMPAT=1"
     flag --path help="Get the path of the config file"
     flag --pin help=#"""
 Save exact version to `.tool-versions`
-e.g.: `mise local --pin node@20` will save `node 20.0.0` to .tool-versions
+e.g.: `nise local --pin node@20` will save `node 20.0.0` to .tool-versions
 """#
     flag --remove help="Remove the tool(s) from .tool-versions" var=#true {
         arg <TOOL>
     }
     arg "[TOOL@VERSION]…" help=#"""
-Tool(s) to add to .tool-versions/mise.toml
+Tool(s) to add to .tool-versions/nise.toml
 e.g.: node@20
 if this is a single tool with no version,
-the current value of .tool-versions/mise.toml will be displayed
+the current value of .tool-versions/nise.toml will be displayed
 """# required=#false var=#true
 }
 cmd lock help="Update lockfile checksums and URLs for all specified platforms" {
@@ -1872,13 +1872,13 @@ Operates on the lockfile in the current config root. Use TOOL arguments to targe
     after_long_help #"""
 Examples:
 
-    $ mise lock                       # update lockfile for all common platforms
-    $ mise lock node python           # update only node and python
-    $ mise lock --platform linux-x64  # update only linux-x64 platform
-    $ mise lock --dry-run             # show what would be updated
-    $ mise lock --minimum-release-age 2024-01-01   # lock latest/fuzzy versions released before 2024-01-01
-    $ mise lock --local               # update mise.local.lock for local configs
-    $ mise lock --global              # update only global config lockfiles
+    $ nise lock                       # update lockfile for all common platforms
+    $ nise lock node python           # update only node and python
+    $ nise lock --platform linux-x64  # update only linux-x64 platform
+    $ nise lock --dry-run             # show what would be updated
+    $ nise lock --minimum-release-age 2024-01-01   # lock latest/fuzzy versions released before 2024-01-01
+    $ nise lock --local               # update nise.local.lock for local configs
+    $ nise lock --global              # update only global config lockfiles
 
 """#
     flag "-g --global" help=#"""
@@ -1896,8 +1896,10 @@ If not specified, all platforms already in lockfile will be updated
 """# var=#true {
         arg <PLATFORM>
     }
+    flag --check help="Check nise.lock instead of updating nise.lock"
+    flag --frozen help="Require nise.lock to contain only strict derivations"
     flag --local help=#"""
-Update mise.local.lock instead of mise.lock
+Update nise.local.lock instead of nise.lock
 Use for tools defined in .local.toml configs
 """#
     flag --minimum-release-age help="Only lock versions released before this age or date" {
@@ -1922,7 +1924,7 @@ cmd ls help="List installed and active tool versions" {
     long_help #"""
 List installed and active tool versions
 
-This command lists tools that mise "knows about".
+This command lists tools that nise "knows about".
 These may be tools that are currently installed, or those
 that are in a config file (active) but may or may not be installed.
 
@@ -1931,40 +1933,40 @@ It's a useful command to get the current state of your tools.
     after_long_help #"""
 Examples:
 
-    $ mise ls
+    $ nise ls
     node    20.0.0 ~/src/myapp/.tool-versions latest
     python  3.11.0 ~/.tool-versions           3.10
     python  3.10.0
 
-    $ mise ls --current
+    $ nise ls --current
     node    20.0.0 ~/src/myapp/.tool-versions 20
     python  3.11.0 ~/.tool-versions           3.11.0
 
-    $ mise ls --json
+    $ nise ls --json
     {
       "node": [
         {
           "version": "20.0.0",
           "install_path": "/Users/jdx/.mise/installs/node/20.0.0",
           "source": {
-            "type": "mise.toml",
-            "path": "/Users/jdx/mise.toml"
+            "type": "nise.toml",
+            "path": "/Users/jdx/nise.toml"
           }
         }
       ],
       "python": [...]
     }
 
-    $ mise ls --all-sources
-    node    20.0.0  ~/src/myapp/mise.toml  20
+    $ nise ls --all-sources
+    node    20.0.0  ~/src/myapp/nise.toml  20
                     ~/.config/mise/config.toml  latest
 
 """#
-    flag "-c --current" help="Only show tool versions currently specified in a mise.toml"
-    flag "-g --global" help="Only show tool versions currently specified in the global mise.toml"
-    flag "-i --installed" help="Only show tool versions that are installed (Hides tools defined in mise.toml but not installed)"
+    flag "-c --current" help="Only show tool versions currently specified in a nise.toml"
+    flag "-g --global" help="Only show tool versions currently specified in the global nise.toml"
+    flag "-i --installed" help="Only show tool versions that are installed (Hides tools defined in nise.toml but not installed)"
     flag "-J --json" help="Output in JSON format"
-    flag "-l --local" help="Only show tool versions currently specified in the local mise.toml"
+    flag "-l --local" help="Only show tool versions currently specified in the local nise.toml"
     flag "-m --missing" help="Display missing tool versions"
     flag "-o --offline" help="Don't fetch information such as outdated versions" hide=#true
     flag "-p --plugin" hide=#true {
@@ -1984,7 +1986,7 @@ Uses the active MISE_ENV and requires monorepo_root = true plus explicit
     flag --prefix help="Display versions matching this prefix" {
         arg <PREFIX>
     }
-    flag --prunable help="List only tools that can be pruned with `mise prune`"
+    flag --prunable help="List only tools that can be pruned with `nise prune`"
     arg "[INSTALLED_TOOL]…" help="Only show tool versions from [TOOL]" required=#false var=#true
 }
 cmd ls-remote help="List runtime versions available for install." {
@@ -1992,27 +1994,27 @@ cmd ls-remote help="List runtime versions available for install." {
     long_help #"""
 List runtime versions available for install.
 
-Note that the results may be cached, run `mise cache clean` to clear the cache and get fresh results.
+Note that the results may be cached, run `nise cache clean` to clear the cache and get fresh results.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise ls-remote node
+    $ nise ls-remote node
     18.0.0
     20.0.0
 
-    $ mise ls-remote node@20
+    $ nise ls-remote node@20
     20.0.0
     20.1.0
 
-    $ mise ls-remote node 20
+    $ nise ls-remote node 20
     20.0.0
     20.1.0
 
-    $ mise ls-remote node --minimum-release-age 2024-01-01
+    $ nise ls-remote node --minimum-release-age 2024-01-01
     20.0.0
 
-    $ mise ls-remote github:cli/cli --json
+    $ nise ls-remote github:cli/cli --json
     [{"version":"2.62.0","created_at":"2024-11-14T15:40:35Z","prerelease":false},{"version":"2.61.0","created_at":"2024-10-23T19:22:15Z","prerelease":false}]
 
 """#
@@ -2053,7 +2055,7 @@ cmd mcp help="Run Model Context Protocol (MCP) server" {
     long_help #"""
 Run Model Context Protocol (MCP) server
 
-This command starts an MCP server that exposes mise functionality
+This command starts an MCP server that exposes nise functionality
 to AI assistants over stdin/stdout using JSON-RPC protocol.
 
 The MCP server provides access to:
@@ -2064,14 +2066,14 @@ The MCP server provides access to:
 - Task execution via the run_task tool
 
 Resources available:
-- mise://tools - List all tools (use ?include_inactive=true to include inactive tools)
-- mise://tasks - List all tasks with their configurations
-- mise://env - List all environment variables
-- mise://config - Show configuration files and project root
+- nise://tools - List all tools (use ?include_inactive=true to include inactive tools)
+- nise://tasks - List all tasks with their configurations
+- nise://env - List all environment variables
+- nise://config - Show configuration files and project root
 
 Tools available:
 - install_tool - Install a tool with an optional version (not yet implemented)
-- run_task - Execute a mise task with optional arguments
+- run_task - Execute a nise task with optional arguments
 
 Note: This is primarily intended for integration with AI assistants like Claude,
 Cursor, or other tools that support the Model Context Protocol.
@@ -2080,13 +2082,13 @@ Cursor, or other tools that support the Model Context Protocol.
 Examples:
 
     # Start the MCP server (typically used by AI assistant tools)
-    $ mise mcp
+    $ nise mcp
 
     # Example integration with Claude Desktop (add to claude_desktop_config.json):
     {
       "mcpServers": {
-        "mise": {
-          "command": "mise",
+        "nise": {
+          "command": "nise",
           "args": ["mcp"],
           "env": {}
         }
@@ -2094,37 +2096,37 @@ Examples:
     }
 
     # Interactive testing with JSON-RPC commands:
-    $ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' | mise mcp
+    $ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' | nise mcp
 
     # Resources you can query:
-    - mise://tools - List active tools
-    - mise://tools?include_inactive=true - List all installed tools
-    - mise://tasks - List all tasks
-    - mise://env - List environment variables
-    - mise://config - Show configuration info
+    - nise://tools - List active tools
+    - nise://tools?include_inactive=true - List all installed tools
+    - nise://tasks - List all tasks
+    - nise://env - List environment variables
+    - nise://config - Show configuration info
 
     # Tools available:
     - install_tool - Install a tool (not yet implemented)
-    - run_task - Execute a mise task with optional arguments
+    - run_task - Execute a nise task with optional arguments
       Example: {"task": "build", "args": ["--verbose"]}
 
 """#
 }
-cmd oci subcommand_required=#true help="[experimental] Build OCI container images from a mise.toml" {
+cmd oci subcommand_required=#true help="[experimental] Build OCI container images from a nise.toml" {
     long_help #"""
-[experimental] Build OCI container images from a mise.toml
+[experimental] Build OCI container images from a nise.toml
 
 Each tool becomes its own OCI layer, so bumping any single tool version
 only invalidates one content-addressable blob — unlike a Dockerfile where
 changing an early `RUN` invalidates every layer above it.
 
-This command is experimental and requires `mise settings experimental=true`
+This command is experimental and requires `nise settings experimental=true`
 (or `MISE_EXPERIMENTAL=1`). Behavior, flags, and output layout may change
 in future releases.
 """#
-    cmd build help="[experimental] Build an OCI image from the current mise.toml" {
+    cmd build help="[experimental] Build an OCI image from the current nise.toml" {
         long_help #"""
-[experimental] Build an OCI image from the current mise.toml
+[experimental] Build an OCI image from the current nise.toml
 
 Each tool version becomes its own content-addressable OCI layer. Bumping a
 tool version only invalidates that tool's layer — other tools, the base
@@ -2132,36 +2134,36 @@ image, and config are reused unchanged. The output directory conforms to
 the OCI image-layout spec and can be consumed by `skopeo`, `crane`, or
 `podman load`.
 
-Requires `mise settings experimental=true` (or `MISE_EXPERIMENTAL=1`).
+Requires `nise settings experimental=true` (or `MISE_EXPERIMENTAL=1`).
 """#
         after_long_help #"""
 Examples:
 
     Build with defaults (debian:bookworm-slim base):
-    $ mise oci build
+    $ nise oci build
 
     Build with a specific base image and tag:
-    $ mise oci build --from ubuntu:24.04 --tag myorg/dev:latest -o ./img
+    $ nise oci build --from ubuntu:24.04 --tag myorg/dev:latest -o ./img
 
     Inspect the result with skopeo:
-    $ skopeo inspect oci:./mise-oci
+    $ skopeo inspect oci:./nise-oci
 
     Push to a registry:
-    $ skopeo copy oci:./mise-oci docker://ghcr.io/me/dev:latest
+    $ skopeo copy oci:./nise-oci docker://ghcr.io/me/dev:latest
 
 Notes:
 
-    - The image only contains tools from the project's mise config (and
+    - The image only contains tools from the project's nise config (and
       any configs at-or-below the project root). Tools from
       `~/.config/mise/config.toml` are not included; pass --include-global
       to package them too.
     - asdf and vfox plugins are not supported in v1; use a different backend
       (core, aqua, ubi, github, cargo, npm, go, pipx, spm, http) for each tool.
-    - The host mise binary is embedded at /usr/local/bin/mise by default;
-      build on the same OS/arch as your target image (or pass --no-mise).
+    - The host nise binary is embedded at /usr/local/bin/nise by default;
+      build on the same OS/arch as your target image (or pass --no-nise).
 
 """#
-        flag "-o --output" help="Output directory for the OCI image layout" default="./mise-oci" {
+        flag "-o --output" help="Output directory for the OCI image layout" default="./nise-oci" {
             arg <OUTPUT>
         }
         flag --from help="Base image reference (overrides [oci].from and the oci.default_from setting)" {
@@ -2171,7 +2173,7 @@ Notes:
             long_help #"""
 Also include tools from the global / system config (default: project-only)
 
-By default `mise oci build` only packages tools declared in the project's mise config (and any parent configs at-or-below the project root, e.g. a monorepo root config). Personal dev tools in `~/.config/mise/config.toml` are excluded so they don't bake into a project image. Pass `--include-global` to revert to the old "merge all loaded configs" behavior.
+By default `nise oci build` only packages tools declared in the project's nise config (and any parent configs at-or-below the project root, e.g. a monorepo root config). Personal dev tools in `~/.config/mise/config.toml` are excluded so they don't bake into a project image. Pass `--include-global` to revert to the old "merge all loaded configs" behavior.
 """#
         }
         flag "-t --tag" help="Tag to record in the image index (the org.opencontainers.image.ref.name annotation)" {
@@ -2180,7 +2182,7 @@ By default `mise oci build` only packages tools declared in the project's mise c
         flag --mount-point help="Where to place tool installs inside the image (default: /mise)" {
             arg <MOUNT_POINT>
         }
-        flag --no-mise help="Do not embed the currently-running mise binary at /usr/local/bin/mise"
+        flag --no-nise help="Do not embed the currently-running nise binary at /usr/local/bin/nise"
         flag --owner help="UID[:GID] to assign to every tar entry in generated layers" {
             long_help #"""
 UID[:GID] to assign to every tar entry in generated layers
@@ -2195,30 +2197,30 @@ Overrides [oci].user_id / [oci].group_id. Defaults to 0:0. If GID is omitted, it
 [experimental] Build an OCI image and push it to a registry
 
 Requires `skopeo` (or `crane`) on PATH. If `--image-dir` is not passed,
-builds fresh from the current mise.toml first, then shells out to
+builds fresh from the current nise.toml first, then shells out to
 `skopeo copy oci:<dir> docker://<ref>` (or `crane push <dir> <ref>`).
 Authentication is handled by the underlying tool — configure it the same
 way you would for a plain `skopeo` / `crane` push (e.g. `docker login`,
 `REGISTRY_AUTH_FILE`, `~/.config/containers/auth.json`).
 
-Requires `mise settings experimental=true` (or `MISE_EXPERIMENTAL=1`).
+Requires `nise settings experimental=true` (or `MISE_EXPERIMENTAL=1`).
 """#
         after_long_help #"""
 Examples:
 
     Build and push to GHCR:
-    $ mise oci push ghcr.io/me/devenv:latest
+    $ nise oci push ghcr.io/me/devenv:latest
 
     Push an image built earlier:
-    $ mise oci build -o ./img
-    $ mise oci push --image-dir ./img ghcr.io/me/devenv:v1
+    $ nise oci build -o ./img
+    $ nise oci push --image-dir ./img ghcr.io/me/devenv:v1
 
     Force a specific push tool:
-    $ mise oci push --tool crane ghcr.io/me/devenv:latest
+    $ nise oci push --tool crane ghcr.io/me/devenv:latest
 
 Auth:
 
-    mise shells out to skopeo (preferred) or crane; configure registry
+    nise shells out to skopeo (preferred) or crane; configure registry
     credentials the usual way — `docker login`, `REGISTRY_AUTH_FILE`,
     or `~/.config/containers/auth.json` for skopeo; `crane auth login`
     for crane.
@@ -2234,13 +2236,13 @@ Auth:
             long_help #"""
 Also include tools from the global / system config (default: project-only)
 
-See `mise oci build --help` for details.
+See `nise oci build --help` for details.
 """#
         }
         flag --mount-point help="Override in-image mount point (ignored with --image-dir)" {
             arg <MOUNT_POINT>
         }
-        flag --no-mise help="Don't embed the mise binary (ignored with --image-dir)"
+        flag --no-nise help="Don't embed the nise binary (ignored with --image-dir)"
         flag --owner help="UID[:GID] to assign to every tar entry when building (conflicts with --image-dir)" {
             long_help #"""
 UID[:GID] to assign to every tar entry when building (conflicts with --image-dir)
@@ -2256,30 +2258,30 @@ Overrides [oci].user_id / [oci].group_id. Defaults to 0:0. If GID is omitted, it
         }
         arg <REF> help="Destination registry reference (e.g. `ghcr.io/me/devenv:latest`)"
     }
-    cmd run help="[experimental] Build an OCI image from the current mise.toml and run a command in it" {
+    cmd run help="[experimental] Build an OCI image from the current nise.toml and run a command in it" {
         long_help #"""
-[experimental] Build an OCI image from the current mise.toml and run a command in it
+[experimental] Build an OCI image from the current nise.toml and run a command in it
 
-Equivalent to `mise oci build` followed by `docker run` / `podman run`.
+Equivalent to `nise oci build` followed by `docker run` / `podman run`.
 The built image is loaded into the local container engine (podman is
 preferred; docker works via skopeo) and the given command is executed
 inside it with stdin/stdout/stderr inherited.
 
-Requires `mise settings experimental=true` (or `MISE_EXPERIMENTAL=1`) and
+Requires `nise settings experimental=true` (or `MISE_EXPERIMENTAL=1`) and
 one of: `podman`, `docker+skopeo`.
 """#
         after_long_help #"""
 Examples:
 
-    Build the current mise.toml and drop into bash:
-    $ mise oci run -it -- bash
+    Build the current nise.toml and drop into bash:
+    $ nise oci run -it -- bash
 
     Run a one-shot command with env + volume (note: `-v` is reserved
     for --verbose, so use `--volume`):
-    $ mise oci run -e DEBUG=1 --volume $PWD:/work -w /work -- npm test
+    $ nise oci run -e DEBUG=1 --volume $PWD:/work -w /work -- npm test
 
     Re-use a previously built layout (skip the build step):
-    $ mise oci build -o ./img && mise oci run --image-dir ./img -- node -e 'console.log(process.version)'
+    $ nise oci build -o ./img && nise oci run --image-dir ./img -- node -e 'console.log(process.version)'
 
 Engines:
 
@@ -2302,20 +2304,20 @@ Engines:
             long_help #"""
 Also include tools from the global / system config (default: project-only)
 
-See `mise oci build --help` for details.
+See `nise oci build --help` for details.
 """#
         }
         flag --keep help="Keep the loaded image in the engine's storage after the run" {
             long_help #"""
 Keep the loaded image in the engine's storage after the run
 
-By default, both the container (`--rm`) and the loaded image are removed when the command exits, so repeated `mise oci run` calls don't accumulate images in podman / docker storage. Pass `--keep` to retain the image under the tag mise used (`mise-oci:run-*` for docker; the pulled image ID for podman).
+By default, both the container (`--rm`) and the loaded image are removed when the command exits, so repeated `nise oci run` calls don't accumulate images in podman / docker storage. Pass `--keep` to retain the image under the tag nise used (`nise-oci:run-*` for docker; the pulled image ID for podman).
 """#
         }
         flag --mount-point help="Override in-image mount point (ignored with --image-dir)" {
             arg <MOUNT_POINT>
         }
-        flag --no-mise help="Don't embed the mise binary (ignored with --image-dir)"
+        flag --no-nise help="Don't embed the nise binary (ignored with --image-dir)"
         flag --owner help="UID[:GID] to assign to every tar entry when building (conflicts with --image-dir)" {
             long_help #"""
 UID[:GID] to assign to every tar entry when building (conflicts with --image-dir)
@@ -2328,7 +2330,7 @@ Overrides [oci].user_id / [oci].group_id. Defaults to 0:0. If GID is omitted, it
             long_help #"""
 Bind-mount a host path (repeatable, `HOST:CONTAINER[:MODE]`)
 
-Note: unlike `docker run -v`, there's no `-v` short flag here because mise reserves `-v` for --verbose. Use `--volume` or `--mount`.
+Note: unlike `docker run -v`, there's no `-v` short flag here because nise reserves `-v` for --verbose. Use `--volume` or `--mount`.
 """#
             arg <HOST:CONTAINER>
         }
@@ -2347,24 +2349,24 @@ cmd outdated help="Shows outdated tool versions" {
     long_help #"""
 Shows outdated tool versions
 
-See `mise upgrade` to upgrade these versions.
+See `nise upgrade` to upgrade these versions.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise outdated
+    $ nise outdated
     Plugin  Requested  Current  Latest
     python  3.11       3.11.0   3.11.1
     node    20         20.0.0   20.1.0
 
-    $ mise outdated node
+    $ nise outdated node
     Plugin  Requested  Current  Latest
     node    20         20.0.0   20.1.0
 
-    $ mise outdated --json
+    $ nise outdated --json
     {"python": {"requested": "3.11", "current": "3.11.0", "latest": "3.11.1"}, ...}
 
-    $ mise outdated --local
+    $ nise outdated --local
     Plugin  Requested  Current  Latest
     node    20         20.0.0   20.1.0
 
@@ -2374,7 +2376,7 @@ Examples:
         long_help #"""
 Compares against the latest versions available, not what matches the current config
 
-For example, if you have `node = "20"` in your config by default `mise outdated` will only
+For example, if you have `node = "20"` in your config by default `nise outdated` will only
 show other 20.x versions, not 21.x or 22.x versions.
 
 Using this flag, if there are 21.x or newer versions it will display those instead of 20.x.
@@ -2384,18 +2386,18 @@ Using this flag, if there are 21.x or newer versions it will display those inste
         long_help #"""
 Show outdated tools including installed-but-inactive tools not present in the current config
 
-By default, `mise outdated` only shows tools that come from the current config.
+By default, `nise outdated` only shows tools that come from the current config.
 """#
     }
     flag --local help="Only show outdated tools defined in local config files" {
         long_help #"""
 Only show outdated tools defined in local config files
 
-This will only show tools that are defined in project-local mise.toml and
+This will only show tools that are defined in project-local nise.toml and
 will skip tools defined in the global config (~/.config/mise/config.toml).
 """#
     }
-    flag --monorepo help="Placeholder for future monorepo outdated checks; `mise outdated --monorepo` is not implemented yet."
+    flag --monorepo help="Placeholder for future monorepo outdated checks; `nise outdated --monorepo` is not implemented yet."
     flag --no-header help="Don't show table header"
     arg "[TOOL@VERSION]…" help=#"""
 Tool(s) to show outdated versions for
@@ -2403,9 +2405,9 @@ e.g.: node@20 python@3.10
 If not specified, all tools in global and local configs will be shown
 """# required=#false var=#true
 }
-cmd patrons help="Show the individuals supporting mise as Patron-tier members" {
+cmd patrons help="Show the individuals supporting nise as Patron-tier members" {
     long_help #"""
-Show the individuals supporting mise as Patron-tier members
+Show the individuals supporting nise as Patron-tier members
 
 Lists the individuals on the Patron tier from <https://jdx.dev/patrons.json>.
 The list refreshes daily; supporting terminals will render each patron's
@@ -2416,9 +2418,9 @@ To appear here, become a patron at <https://jdx.dev/sponsors.html>.
     after_long_help #"""
 Examples:
 
-    $ mise patrons
-    $ mise patrons -J
-    $ mise patrons --refresh
+    $ nise patrons
+    $ nise patrons -J
+    $ nise patrons --refresh
 """#
     flag "-J --json" help="Output in JSON format"
     flag --refresh help="Bypass the local cache and re-fetch"
@@ -2430,7 +2432,7 @@ cmd plugins help="Manage plugins" {
         long_help #"""
 list all available remote plugins
 
-same as `mise plugins ls-remote`
+same as `nise plugins ls-remote`
 """#
     }
     flag "-c --core" help=#"""
@@ -2458,8 +2460,8 @@ to show core and user plugins
         long_help #"""
 Install a plugin
 
-note that mise can automatically install plugins when you install a tool
-e.g.: `mise install cmake@3.30` will autoinstall the cmake plugin
+note that nise can automatically install plugins when you install a tool
+e.g.: `nise install cmake@3.30` will autoinstall the cmake plugin
 
 This behavior can be modified in ~/.config/mise/config.toml
 """#
@@ -2467,17 +2469,17 @@ This behavior can be modified in ~/.config/mise/config.toml
 Examples:
 
     # install the poetry via shorthand
-    $ mise plugins install poetry
+    $ nise plugins install poetry
 
     # install the poetry plugin using a specific git url
-    $ mise plugins install poetry https://github.com/mise-plugins/mise-poetry.git
+    $ nise plugins install poetry https://github.com/mise-plugins/mise-poetry.git
 
     # install the poetry plugin using the git url only
     # (poetry is inferred from the url)
-    $ mise plugins install https://github.com/mise-plugins/mise-poetry.git
+    $ nise plugins install https://github.com/mise-plugins/mise-poetry.git
 
     # install the poetry plugin using a specific ref
-    $ mise plugins install poetry https://github.com/mise-plugins/mise-poetry.git#11d0c1e
+    $ nise plugins install poetry https://github.com/mise-plugins/mise-poetry.git#11d0c1e
 
 """#
         flag "-a --all" help=#"""
@@ -2493,15 +2495,15 @@ i.e.: they don't need the full git repo url
         arg "[NEW_PLUGIN]" help=#"""
 The name of the plugin to install
 e.g.: cmake, poetry
-Can specify multiple plugins: `mise plugins install cmake poetry`
+Can specify multiple plugins: `nise plugins install cmake poetry`
 """# required=#false
         arg "[GIT_URL]" help="The git url of the plugin" required=#false
         arg "[REST]…" required=#false var=#true hide=#true
     }
-    cmd link help="Symlinks a plugin into mise" {
+    cmd link help="Symlinks a plugin into nise" {
         alias ln
         long_help #"""
-Symlinks a plugin into mise
+Symlinks a plugin into nise
 
 This is used for developing a plugin.
 """#
@@ -2509,10 +2511,10 @@ This is used for developing a plugin.
 Examples:
 
     # essentially just `ln -s ./vfox-cmake ~/.local/share/mise/plugins/cmake`
-    $ mise plugins link cmake ./vfox-cmake
+    $ nise plugins link cmake ./vfox-cmake
 
     # infer plugin name as "cmake"
-    $ mise plugins link ./vfox-cmake
+    $ nise plugins link ./vfox-cmake
 
 """#
         flag "-f --force" help="Overwrite existing plugin"
@@ -2535,18 +2537,18 @@ Can also show remotely available plugins to install.
         after_long_help #"""
 Examples:
 
-    $ mise plugins ls
+    $ nise plugins ls
     cmake
     poetry
 
-    $ mise plugins ls --urls
+    $ nise plugins ls --urls
     cmake     https://github.com/mise-plugins/vfox-cmake.git
     poetry    https://github.com/mise-plugins/vfox-poetry.git
 
 """#
         flag "-a --all" help=#"""
 List all available remote plugins
-Same as `mise plugins ls-remote`
+Same as `nise plugins ls-remote`
 """# hide=#true
         flag "-c --core" help=#"""
 The built-in plugins only
@@ -2576,7 +2578,7 @@ The full list is here: https://github.com/jdx/mise/blob/main/registry/
 
 Examples:
 
-    $ mise plugins ls-remote
+    $ nise plugins ls-remote
 
 """#
         flag "-u --urls" help="Show the git url for each plugin e.g.: https://github.com/mise-plugins/mise-poetry.git"
@@ -2587,7 +2589,7 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise plugins uninstall cmake
+    $ nise plugins uninstall cmake
 
 """#
         flag "-a --all" help="Remove all plugins"
@@ -2604,9 +2606,9 @@ note: this updates the plugin itself, not the runtime versions
         after_long_help #"""
 Examples:
 
-    $ mise plugins update              # update all plugins
-    $ mise plugins update cmake       # update only cmake
-    $ mise plugins update cmake#beta  # specify a ref
+    $ nise plugins update              # update all plugins
+    $ nise plugins update cmake       # update only cmake
+    $ nise plugins update cmake#beta  # specify a ref
 
 """#
         flag "-j --jobs" help=#"""
@@ -2616,6 +2618,28 @@ Default: 4
             arg <JOBS>
         }
         arg "[PLUGIN]…" help="Plugin(s) to update" required=#false var=#true
+    }
+}
+cmd profile help="Inspect and move nise profile generations" {
+    after_long_help #"""
+Examples:
+
+    $ nise profile list
+    $ nise profile show
+    $ nise profile rollback default 1
+
+"""#
+    cmd list help="List nise profile generations" {
+        flag "-J --json" help="Output JSON"
+    }
+    cmd rollback help="Roll back the current project profile" {
+        flag "-J --json" help="Output JSON"
+        arg "[PROFILE]" help="Project profile name" required=#false default=default
+        arg "[GENERATION]" help="Generation to switch to; defaults to the previous generation" required=#false
+    }
+    cmd show help="Show the current project profile generation" {
+        flag "-J --json" help="Output JSON"
+        arg "[PROFILE]" help="Project profile name" required=#false default=default
     }
 }
 cmd deps help="[experimental] Manage project dependencies" {
@@ -2629,26 +2653,26 @@ This checks if dependency lockfiles are newer than installed outputs
 (e.g., package-lock.json vs node_modules/) and runs install commands
 if needed.
 
-Providers with `auto = true` are automatically invoked before `mise x` and `mise run`
+Providers with `auto = true` are automatically invoked before `nise x` and `nise run`
 unless skipped with the --no-deps flag.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise deps                    # Install all project dependencies
-    $ mise deps install            # Same as bare `mise deps`
-    $ mise deps install --force    # Force reinstall even if fresh
-    $ mise deps install --dry-run  # Show what would run
-    $ mise deps add npm:react      # Add a dependency
-    $ mise deps add -D npm:vitest  # Add a dev dependency
-    $ mise deps remove npm:lodash  # Remove a dependency
+    $ nise deps                    # Install all project dependencies
+    $ nise deps install            # Same as bare `nise deps`
+    $ nise deps install --force    # Force reinstall even if fresh
+    $ nise deps install --dry-run  # Show what would run
+    $ nise deps add npm:react      # Add a dependency
+    $ nise deps add -D npm:vitest  # Add a dev dependency
+    $ nise deps remove npm:lodash  # Remove a dependency
 
 Configuration:
 
 ```toml
 # Built-in npm provider (auto-detects lockfile)
 [deps.npm]
-auto = true              # Auto-run before mise x/run
+auto = true              # Auto-run before nise x/run
 
 # Custom provider
 [deps.codegen]
@@ -2712,21 +2736,69 @@ Package specs use the format `ecosystem:package`, e.g., `npm:lodash`.
         arg <PACKAGES>… help="Package(s) to remove (e.g., npm:lodash)" var=#true
     }
 }
+cmd develop help="Enter a nise development environment backed by a profile generation" {
+    after_long_help #"""
+Examples:
+
+    $ nise develop
+    $ nise develop -- env
+    $ nise develop --impure . -- npm test
+
+This is the first nise profile-backed develop mode. It writes a project profile generation
+and a process lease, then runs with the existing nise tool environment. Strict lock and
+offline requests validate nise.lock and fail closed while derivations remain legacy-unverified.
+Strict isolation fails closed until develop sandboxing is implemented.
+
+"""#
+    flag "-s --shell" help="Shell to start when no command is provided" {
+        long_help #"""
+Shell to start when no command is provided
+
+Defaults to $SHELL
+"""#
+        arg <SHELL>
+    }
+    flag --impure help="Keep the inherited process environment and PATH"
+    flag --isolate help="Isolation policy for this development environment" default=off {
+        arg <MODE> {
+            choices strict best-effort off
+        }
+    }
+    flag --no-realize help="Do not install missing configured tools before entering the environment"
+    flag --offline help="Offline policy for this development environment" {
+        arg <MODE> {
+            choices artifact derivation full
+        }
+    }
+    flag --profile help="Project profile name" default=default {
+        arg <PROFILE>
+    }
+    flag --pure help="Drop inherited environment variables and PATH entries that nise did not compute" {
+        long_help #"""
+Drop inherited environment variables and PATH entries that nise did not compute
+
+This is the default; the flag is retained for explicitness.
+"""#
+    }
+    flag --realize help="Install missing configured tools before entering the environment"
+    arg "[DIR]" help="Directory to develop in" required=#false default=.
+    arg "[-- COMMAND]…" help="Command to run instead of an interactive shell" required=#false var=#true
+}
 cmd prune help="Delete unused versions of tools" {
     long_help #"""
 Delete unused versions of tools
 
-mise tracks which config files have been used in ~/.local/state/mise/tracked-configs
+nise tracks which config files have been used in ~/.local/state/mise/tracked-configs
 Versions which are no longer the latest specified in any of those configs are deleted.
 Versions installed only with environment variables `MISE_<TOOL>_VERSION` will be deleted,
-as will versions only referenced on the command line `mise exec <TOOL>@<VERSION>`.
+as will versions only referenced on the command line `nise exec <TOOL>@<VERSION>`.
 
-You can list prunable tools with `mise ls --prunable`
+You can list prunable tools with `nise ls --prunable`
 """#
     after_long_help #"""
 Examples:
 
-    $ mise prune --dry-run
+    $ nise prune --dry-run
     rm -rf ~/.local/share/mise/versions/node/20.0.0
     rm -rf ~/.local/share/mise/versions/node/20.0.1
 
@@ -2740,7 +2812,7 @@ Like --dry-run but exits with code 1 if there are tools to prune
 This is useful for scripts to check if tools need to be pruned.
 """#
     }
-    flag --monorepo help="Placeholder for future monorepo pruning; `mise prune --monorepo` is not implemented yet."
+    flag --monorepo help="Placeholder for future monorepo pruning; `nise prune --monorepo` is not implemented yet."
     flag --tools help="Prune only unused versions of tools"
     arg "[INSTALLED_TOOL]…" help="Prune only these tools" required=#false var=#true
 }
@@ -2755,12 +2827,12 @@ For example, `poetry` is shorthand for `asdf:mise-plugins/mise-poetry`.
     after_long_help #"""
 Examples:
 
-    $ mise registry
+    $ nise registry
     node    core:node
     poetry  asdf:mise-plugins/mise-poetry
     ubi     cargo:ubi-cli
 
-    $ mise registry poetry
+    $ nise registry poetry
     asdf:mise-plugins/mise-poetry
 
 """#
@@ -2785,26 +2857,26 @@ cmd reshim help="Creates new shims based on bin paths from currently installed t
 Creates new shims based on bin paths from currently installed tools.
 
 This creates new shims in ~/.local/share/mise/shims for CLIs that have been added.
-mise will try to do this automatically for commands like `npm i -g` but there are
-other ways to install things (like using yarn or pnpm for node) that mise does
+nise will try to do this automatically for commands like `npm i -g` but there are
+other ways to install things (like using yarn or pnpm for node) that nise does
 not know about and so it will be necessary to call this explicitly.
 
-If you think mise should automatically call this for a particular command, please
-open an issue on the mise repo. You can also set up a shell function to reshim
+If you think nise should automatically call this for a particular command, please
+open an issue on the nise repo. You can also set up a shell function to reshim
 automatically (it's really fast so you don't need to worry about overhead):
 
     npm() {
       command npm "$@"
-      mise reshim
+      nise reshim
     }
 
 Note that this creates shims for _all_ installed tools, not just the ones that are
-currently active in mise.toml.
+currently active in nise.toml.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise reshim
+    $ nise reshim
     $ ~/.local/share/mise/shims/node -v
     v20.0.0
 
@@ -2823,8 +2895,8 @@ Tasks may have dependencies on other tasks or on source files.
 If source is configured on a task, it will only run if the source
 files have changed.
 
-Tasks can be defined in mise.toml or as standalone scripts.
-In mise.toml, tasks take this form:
+Tasks can be defined in nise.toml or as standalone scripts.
+In nise.toml, tasks take this form:
 
     [tasks.build]
     run = "npm run build"
@@ -2832,7 +2904,7 @@ In mise.toml, tasks take this form:
     outputs = ["dist/**/*.js"]
 
 Alternatively, tasks can be defined as standalone scripts.
-These must be located in `mise-tasks`, `.mise-tasks`, `.mise/tasks`, `mise/tasks` or
+These must be located in `mise-tasks`, `.mise-tasks`, `.mise/tasks`, `nise/tasks` or
 `.config/mise/tasks`.
 The name of the script will be the name of the tasks.
 
@@ -2840,27 +2912,27 @@ The name of the script will be the name of the tasks.
     #!/usr/bin/env bash
     npm run build
     EOF
-    $ mise run build
+    $ nise run build
 """#
     after_long_help #"""
 Examples:
 
-    # Runs the "lint" tasks. This needs to either be defined in mise.toml
+    # Runs the "lint" tasks. This needs to either be defined in nise.toml
     # or as a standalone script. See the project README for more information.
-    $ mise run lint
+    $ nise run lint
 
     # Forces the "build" tasks to run even if its sources are up-to-date.
-    $ mise run --force build
+    $ nise run --force build
 
     # Run "test" with stdin/stdout/stderr all connected to the current terminal.
     # This forces `--jobs=1` to prevent interleaving of output.
-    $ mise run --raw test
+    $ nise run --raw test
 
     # Runs the "lint", "test", and "check" tasks in parallel.
-    $ mise run lint ::: test ::: check
+    $ nise run lint ::: test ::: check
 
     # Execute multiple tasks each with their own arguments.
-    $ mise run cmd1 arg1 arg2 ::: cmd2 arg1 arg2
+    $ nise run cmd1 arg1 arg2 ::: cmd2 arg1 arg2
 
 """#
     flag "-c --continue-on-error" help="Continue running tasks even if one fails"
@@ -2907,7 +2979,7 @@ Or it can be overridden with the `shell` property on a task.
         arg <SHELL>
     }
     flag "-S --silent" help="Don't show any output except for errors" global=#true
-    flag "-t --tool" help="Tool(s) to run in addition to what is in mise.toml files e.g.: node@20 python@3.10" var=#true {
+    flag "-t --tool" help="Tool(s) to run in addition to what is in nise.toml files e.g.: node@20 python@3.10" var=#true {
         arg <TOOL@VERSION>
     }
     flag --allow-env help=#"""
@@ -2962,7 +3034,7 @@ Shows elapsed time after each task completes
 Default to always show with `MISE_TASK_TIMINGS=1`
 """#
     }
-    mount run="mise tasks --usage"
+    mount run="nise tasks --usage"
 }
 cmd search help="Search for tools in the registry" {
     long_help #"""
@@ -2976,21 +3048,21 @@ non-fuzzy matches, use the `--match-type` flag.
     after_long_help #"""
 Examples:
 
-    $ mise search jq
+    $ nise search jq
     Tool  Description
     jq    Command-line JSON processor. https://github.com/jqlang/jq
     jqp   A TUI playground to experiment with jq. https://github.com/noahgorstein/jqp
     jiq   jid on jq - interactive JSON query tool using jq expressions. https://github.com/fiatjaf/jiq
     gojq  Pure Go implementation of jq. https://github.com/itchyny/gojq
 
-    $ mise search --interactive
+    $ nise search --interactive
     Tool
     Search a tool
     ❯ jq    Command-line JSON processor. https://github.com/jqlang/jq
       jqp   A TUI playground to experiment with jq. https://github.com/noahgorstein/jqp
       jiq   jid on jq - interactive JSON query tool using jq expressions. https://github.com/fiatjaf/jiq
       gojq  Pure Go implementation of jq. https://github.com/itchyny/gojq
-    /jq 
+    /jq
     esc clear filter • enter confirm
 
 """#
@@ -3003,66 +3075,66 @@ Examples:
     flag --no-header help="Don't display headers"
     arg "[NAME]" help="The tool to search for" required=#false
 }
-cmd self-update help="Updates mise itself." {
+cmd self-update help="Updates nise itself." {
     long_help #"""
-Updates mise itself.
+Updates nise itself.
 
 Uses the GitHub Releases API to find the latest release and binary.
 By default, this will also update any installed plugins.
-Uses mise's GitHub token resolution chain for authenticated requests.
+Uses nise's GitHub token resolution chain for authenticated requests.
 
-This command is not available if mise is installed via a package manager.
+This command is not available if nise is installed via a package manager.
 """#
     flag "-f --force" help="Update even if already up to date"
     flag "-y --yes" help="Skip confirmation prompt"
     flag --no-plugins help="Disable auto-updating plugins"
     arg "[VERSION]" help="Update to a specific version" required=#false
 }
-cmd set help="Set environment variables in mise.toml" {
+cmd set help="Set environment variables in nise.toml" {
     alias ev env-vars hide=#true
     long_help #"""
-Set environment variables in mise.toml
+Set environment variables in nise.toml
 
-By default, this command modifies `mise.toml` in the current directory.
-If multiple config files exist (e.g., both `mise.toml` and `mise.local.toml`),
-the lowest precedence file (`mise.toml`) will be used.
+By default, this command modifies `nise.toml` in the current directory.
+If multiple config files exist (e.g., both `nise.toml` and `nise.local.toml`),
+the lowest precedence file (`nise.toml`) will be used.
 See https://mise.en.dev/configuration.html#target-file-for-write-operations
 
-Use `-E <env>` to create/modify environment-specific config files like `mise.<env>.toml`.
+Use `-E <env>` to create/modify environment-specific config files like `nise.<env>.toml`.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise set NODE_ENV=production
+    $ nise set NODE_ENV=production
 
-    $ mise set NODE_ENV
+    $ nise set NODE_ENV
     production
 
-    $ mise set -E staging NODE_ENV=staging
-    # creates or modifies mise.staging.toml
+    $ nise set -E staging NODE_ENV=staging
+    # creates or modifies nise.staging.toml
 
-    $ mise set
+    $ nise set
     key       value       source
     NODE_ENV  production  ~/.config/mise/config.toml
 
-    $ mise set --prompt PASSWORD
+    $ nise set --prompt PASSWORD
     Enter value for PASSWORD: [hidden input]
 
     Multiline Values (--stdin):
 
-    $ cat private.key | mise set --stdin MY_KEY
+    $ cat private.key | nise set --stdin MY_KEY
 
-    $ printf "line1\nline2" | mise set --stdin MY_KEY
+    $ printf "line1\nline2" | nise set --stdin MY_KEY
 
     [experimental] Age Encryption:
 
-    $ mise set --age-encrypt API_KEY=secret
+    $ nise set --age-encrypt API_KEY=secret
 
-    $ mise set --age-encrypt --prompt API_KEY
+    $ nise set --age-encrypt --prompt API_KEY
     Enter value for API_KEY: [hidden input]
 
 """#
-    flag "-E --env" help="Create/modify an environment-specific config file like .mise.<env>.toml" {
+    flag "-E --env" help="Create/modify an environment-specific config file like .nise.<env>.toml" {
         arg <ENV>
     }
     flag "-g --global" help="Set the environment variable in the global config file"
@@ -3096,8 +3168,8 @@ Can be used multiple times. Requires --age-encrypt.
         long_help #"""
 The TOML file to update
 
-Can be a file path or directory. If a directory is provided, will create/use mise.toml in that directory.
-Defaults to [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) environment variable, or `mise.toml`.
+Can be a file path or directory. If a directory is provided, will create/use nise.toml in that directory.
+Defaults to [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) environment variable, or `nise.toml`.
 Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
 """#
         arg <FILE>
@@ -3131,21 +3203,21 @@ Show current settings
 This is the contents of ~/.config/mise/config.toml
 
 Note that aliases are also stored in this file
-but managed separately with `mise tool-alias`
+but managed separately with `nise tool-alias`
 """#
     after_long_help #"""
 Examples:
     # list all settings
-    $ mise settings
+    $ nise settings
 
     # get the value of the setting "always_keep_download"
-    $ mise settings always_keep_download
+    $ nise settings always_keep_download
 
     # set the value of the setting "always_keep_download" to "true"
-    $ mise settings always_keep_download=true
+    $ nise settings always_keep_download=true
 
     # set the value of the setting "node.mirror_url" to "https://npm.taobao.org/mirrors/node"
-    $ mise settings node.mirror_url https://npm.taobao.org/mirrors/node
+    $ nise settings node.mirror_url https://npm.taobao.org/mirrors/node
 
 """#
     flag "-a --all" help="List all settings"
@@ -3166,7 +3238,7 @@ This modifies the contents of ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise settings add disable_hints python_multi
+    $ nise settings add disable_hints python_multi
 
 """#
         flag "-l --local" help="Use the local config file instead of the global one"
@@ -3180,12 +3252,12 @@ Show a current setting
 This is the contents of a single entry in ~/.config/mise/config.toml
 
 Note that aliases are also stored in this file
-but managed separately with `mise tool-alias get`
+but managed separately with `nise tool-alias get`
 """#
         after_long_help #"""
 Examples:
 
-    $ mise settings get idiomatic_version_file
+    $ nise settings get idiomatic_version_file
     true
 
 """#
@@ -3200,16 +3272,16 @@ Show current settings
 This is the contents of ~/.config/mise/config.toml
 
 Note that aliases are also stored in this file
-but managed separately with `mise tool-alias`
+but managed separately with `nise tool-alias`
 """#
         after_long_help #"""
 Examples:
 
-    $ mise settings ls
+    $ nise settings ls
     idiomatic_version_file = false
     ...
 
-    $ mise settings ls python
+    $ nise settings ls python
     default_packages_file = "~/.default-python-packages"
     ...
 
@@ -3234,7 +3306,7 @@ See https://mise.en.dev/configuration.html#target-file-for-write-operations
         after_long_help #"""
 Examples:
 
-    $ mise settings idiomatic_version_file=true
+    $ nise settings idiomatic_version_file=true
 
 """#
         flag "-l --local" help="Use the local config file instead of the global one"
@@ -3251,7 +3323,7 @@ This modifies the contents of ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise settings unset idiomatic_version_file
+    $ nise settings unset idiomatic_version_file
 
 """#
         flag "-l --local" help="Use the local config file instead of the global one"
@@ -3263,15 +3335,15 @@ cmd shell help="Sets a tool version for the current session." {
     long_help #"""
 Sets a tool version for the current session.
 
-Only works in a session where mise is already activated.
+Only works in a session where nise is already activated.
 
 This works by setting environment variables for the current shell session
-such as `MISE_NODE_VERSION=20` which is "eval"ed as a shell function created by `mise activate`.
+such as `MISE_NODE_VERSION=20` which is "eval"ed as a shell function created by `nise activate`.
 """#
     after_long_help #"""
 Examples:
 
-    $ mise shell node@20
+    $ nise shell node@20
     $ node -v
     v20.0.0
 
@@ -3292,7 +3364,7 @@ cmd shell-alias help="Manage shell aliases." {
         after_long_help #"""
 Examples:
 
-    $ mise shell-alias get ll
+    $ nise shell-alias get ll
     ls -la
 
 """#
@@ -3304,12 +3376,12 @@ Examples:
 List shell aliases
 
 Shows the shell aliases that are set in the current directory.
-These are defined in `mise.toml` under the `[shell_alias]` section.
+These are defined in `nise.toml` under the `[shell_alias]` section.
 """#
         after_long_help #"""
 Examples:
 
-    $ mise shell-alias ls
+    $ nise shell-alias ls
     alias    command
     ll       ls -la
     gs       git status
@@ -3327,8 +3399,8 @@ This modifies the contents of ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise shell-alias set ll "ls -la"
-    $ mise shell-alias set gs "git status"
+    $ nise shell-alias set ll "ls -la"
+    $ nise shell-alias set gs "git status"
 
 """#
         arg <shell_alias> help="The alias name"
@@ -3344,19 +3416,49 @@ This modifies the contents of ~/.config/mise/config.toml
         after_long_help #"""
 Examples:
 
-    $ mise shell-alias unset ll
+    $ nise shell-alias unset ll
 
 """#
         arg <shell_alias> help="The alias to remove"
     }
 }
-cmd sponsors help="Show the companies sponsoring mise and the jdx.dev open source tools"
-cmd sync subcommand_required=#true help="Synchronize tools from other version managers with mise" {
-    cmd node help="Symlinks all tool versions from an external tool into mise" {
-        long_help #"""
-Symlinks all tool versions from an external tool into mise
+cmd sponsors help="Show the companies sponsoring nise and the jdx.dev open source tools"
+cmd store help="Manage the nise store" {
+    after_long_help #"""
+Examples:
 
-For example, use this to import all Homebrew node installs into mise
+    $ nise store doctor
+    Store: ~/.local/share/mise/nise/store
+    Status: not initialized
+
+    $ NISE_STORE_DIR=/nise/store nise store doctor --json
+
+    $ nise store gc --dry-run
+
+    $ nise store repair --remove-broken-refs
+
+"""#
+    cmd doctor help="Check the nise store for manifest and root problems" {
+        flag --deep help="Recompute object tree hashes"
+        flag "-J --json" help="Output JSON"
+    }
+    cmd gc help="Dry-run nise store garbage collection" {
+        flag --delete help="Delete unreachable objects"
+        flag --dry-run help="Show what would be collected"
+        flag "-J --json" help="Output JSON"
+    }
+    cmd repair help="Repair explicit nise store problems" {
+        flag "-J --json" help="Output JSON"
+        flag "-n --dry-run" help="Do not actually change anything"
+        flag --remove-broken-refs help="Remove broken compatibility install-ref manifests"
+    }
+}
+cmd sync subcommand_required=#true help="Synchronize tools from other version managers with nise" {
+    cmd node help="Symlinks all tool versions from an external tool into nise" {
+        long_help #"""
+Symlinks all tool versions from an external tool into nise
+
+For example, use this to import all Homebrew node installs into nise
 
 This won't overwrite any existing installs but will overwrite any existing symlinks
 """#
@@ -3364,19 +3466,19 @@ This won't overwrite any existing installs but will overwrite any existing symli
 Examples:
 
     $ brew install node@18 node@20
-    $ mise sync node --brew
-    $ mise use -g node@18 - uses Homebrew-provided node
+    $ nise sync node --brew
+    $ nise use -g node@18 - uses Homebrew-provided node
 
 """#
         flag --brew help="Get tool versions from Homebrew"
         flag --nodenv help="Get tool versions from nodenv"
         flag --nvm help="Get tool versions from nvm"
     }
-    cmd python help="Symlinks all tool versions from an external tool into mise" {
+    cmd python help="Symlinks all tool versions from an external tool into nise" {
         long_help #"""
-Symlinks all tool versions from an external tool into mise
+Symlinks all tool versions from an external tool into nise
 
-For example, use this to import all pyenv installs into mise
+For example, use this to import all pyenv installs into nise
 
 This won't overwrite any existing installs but will overwrite any existing symlinks
 """#
@@ -3384,26 +3486,26 @@ This won't overwrite any existing installs but will overwrite any existing symli
 Examples:
 
     $ pyenv install 3.11.0
-    $ mise sync python --pyenv
-    $ mise use -g python@3.11.0 - uses pyenv-provided python
-    
+    $ nise sync python --pyenv
+    $ nise use -g python@3.11.0 - uses pyenv-provided python
+
     $ uv python install 3.11.0
-    $ mise install python@3.10.0
-    $ mise sync python --uv
-    $ mise x python@3.11.0 -- python -V - uses uv-provided python
-    $ uv run -p 3.10.0 -- python -V - uses mise-provided python
+    $ nise install python@3.10.0
+    $ nise sync python --uv
+    $ nise x python@3.11.0 -- python -V - uses uv-provided python
+    $ uv run -p 3.10.0 -- python -V - uses nise-provided python
 
 """#
         flag --pyenv help="Get tool versions from pyenv"
         flag --uv help="Sync tool versions with uv (2-way sync)"
     }
-    cmd ruby help="Symlinks all ruby tool versions from an external tool into mise" {
+    cmd ruby help="Symlinks all ruby tool versions from an external tool into nise" {
         after_long_help #"""
 Examples:
 
     $ brew install ruby
-    $ mise sync ruby --brew
-    $ mise use -g ruby - Use the latest version of Ruby installed by Homebrew
+    $ nise sync ruby --brew
+    $ nise use -g ruby - Use the latest version of Ruby installed by Homebrew
 
 """#
         flag --brew help="Get tool versions from Homebrew"
@@ -3415,7 +3517,7 @@ cmd tasks help="Manage tasks" {
     after_long_help #"""
 Examples:
 
-    $ mise tasks ls
+    $ nise tasks ls
 
 """#
     flag "-g --global" help="Only show global tasks" global=#true
@@ -3446,13 +3548,13 @@ By default, only tasks from the current directory hierarchy are loaded.
         long_help #"""
 Create a new task
 
-Adds a task to the local mise.toml file.
+Adds a task to the local nise.toml file.
 See https://mise.en.dev/configuration.html#target-file-for-write-operations
 """#
         after_long_help #"""
 Examples:
 
-    $ mise tasks add pre-commit --depends "test" --depends "render" -- echo pre-commit
+    $ nise tasks add pre-commit --depends "test" --depends "render" -- echo pre-commit
 
 """#
         flag "-a --alias" help="Other names for the task" var=#true {
@@ -3465,7 +3567,7 @@ Examples:
             arg <DIR>
         }
         flag "-f --file" help="Create a file task instead of a toml task"
-        flag "-H --hide" help="Hide the task from `mise tasks` and completions"
+        flag "-H --hide" help="Hide the task from `nise tasks` and completions"
         flag "-q --quiet" help="Do not print the command before running"
         flag "-r --raw" help="Directly connect stdin/stdout/stderr"
         flag "-s --sources" help="Glob patterns of files this task uses as input" var=#true {
@@ -3498,13 +3600,13 @@ Examples:
 Examples:
 
     # Show dependencies for all tasks
-    $ mise tasks deps
+    $ nise tasks deps
 
     # Show dependencies for the "lint", "test" and "check" tasks
-    $ mise tasks deps lint test check
+    $ nise tasks deps lint test check
 
     # Show dependencies in DOT format
-    $ mise tasks deps --dot
+    $ nise tasks deps --dot
 
 """#
         flag --dot help="Display dependencies in DOT format"
@@ -3512,7 +3614,7 @@ Examples:
         arg "[TASKS]…" help=#"""
 Tasks to show dependencies for
 Can specify multiple tasks by separating with spaces
-e.g.: mise tasks deps lint test check
+e.g.: nise tasks deps lint test check
 """# required=#false var=#true
     }
     cmd edit help="Edit a task with $EDITOR" {
@@ -3524,8 +3626,8 @@ The task will be created as a standalone script if it does not already exist.
         after_long_help #"""
 Examples:
 
-    $ mise tasks edit build
-    $ mise tasks edit test
+    $ nise tasks edit build
+    $ nise tasks edit test
 
 """#
         flag "-p --path" help="Display the path to the task instead of editing it"
@@ -3535,18 +3637,18 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise tasks info
+    $ nise tasks info
     Name: test
     Aliases: t
     Description: Test the application
-    Source: ~/src/myproj/mise.toml
+    Source: ~/src/myproj/nise.toml
 
-    $ mise tasks info test --json
+    $ nise tasks info test --json
     {
       "name": "test",
       "aliases": "t",
       "description": "Test the application",
-      "source": "~/src/myproj/mise.toml",
+      "source": "~/src/myproj/nise.toml",
       "depends": [],
       "env": {},
       "dir": null,
@@ -3568,12 +3670,12 @@ Examples:
     cmd ls help=#"""
 List available tasks to execute
 These may be included from the config file or from the project's .mise/tasks directory
-mise will merge all tasks from all parent directories into this list.
+nise will merge all tasks from all parent directories into this list.
 """# {
         long_help #"""
 List available tasks to execute
 These may be included from the config file or from the project's .mise/tasks directory
-mise will merge all tasks from all parent directories into this list.
+nise will merge all tasks from all parent directories into this list.
 
 So if you have global tasks in `~/.config/mise/tasks/*` and project-specific tasks in
 ~/myproject/.mise/tasks/*, then they'll both be available but the project-specific
@@ -3582,7 +3684,7 @@ tasks will override the global ones if they have the same name.
         after_long_help #"""
 Examples:
 
-    $ mise tasks ls
+    $ nise tasks ls
 
 """#
         flag "-g --global" help="Only show global tasks" global=#true
@@ -3619,8 +3721,8 @@ Tasks may have dependencies on other tasks or on source files.
 If source is configured on a task, it will only run if the source
 files have changed.
 
-Tasks can be defined in mise.toml or as standalone scripts.
-In mise.toml, tasks take this form:
+Tasks can be defined in nise.toml or as standalone scripts.
+In nise.toml, tasks take this form:
 
     [tasks.build]
     run = "npm run build"
@@ -3628,7 +3730,7 @@ In mise.toml, tasks take this form:
     outputs = ["dist/**/*.js"]
 
 Alternatively, tasks can be defined as standalone scripts.
-These must be located in `mise-tasks`, `.mise-tasks`, `.mise/tasks`, `mise/tasks` or
+These must be located in `mise-tasks`, `.mise-tasks`, `.mise/tasks`, `nise/tasks` or
 `.config/mise/tasks`.
 The name of the script will be the name of the tasks.
 
@@ -3636,27 +3738,27 @@ The name of the script will be the name of the tasks.
     #!/usr/bin/env bash
     npm run build
     EOF
-    $ mise run build
+    $ nise run build
 """#
         after_long_help #"""
 Examples:
 
-    # Runs the "lint" tasks. This needs to either be defined in mise.toml
+    # Runs the "lint" tasks. This needs to either be defined in nise.toml
     # or as a standalone script. See the project README for more information.
-    $ mise run lint
+    $ nise run lint
 
     # Forces the "build" tasks to run even if its sources are up-to-date.
-    $ mise run --force build
+    $ nise run --force build
 
     # Run "test" with stdin/stdout/stderr all connected to the current terminal.
     # This forces `--jobs=1` to prevent interleaving of output.
-    $ mise run --raw test
+    $ nise run --raw test
 
     # Runs the "lint", "test", and "check" tasks in parallel.
-    $ mise run lint ::: test ::: check
+    $ nise run lint ::: test ::: check
 
     # Execute multiple tasks each with their own arguments.
-    $ mise run cmd1 arg1 arg2 ::: cmd2 arg1 arg2
+    $ nise run cmd1 arg1 arg2 ::: cmd2 arg1 arg2
 
 """#
         flag "-c --continue-on-error" help="Continue running tasks even if one fails"
@@ -3703,7 +3805,7 @@ Or it can be overridden with the `shell` property on a task.
             arg <SHELL>
         }
         flag "-S --silent" help="Don't show any output except for errors" global=#true
-        flag "-t --tool" help="Tool(s) to run in addition to what is in mise.toml files e.g.: node@20 python@3.10" var=#true {
+        flag "-t --tool" help="Tool(s) to run in addition to what is in nise.toml files e.g.: node@20 python@3.10" var=#true {
             arg <TOOL@VERSION>
         }
         flag --allow-env help=#"""
@@ -3761,27 +3863,27 @@ Default to always show with `MISE_TASK_TIMINGS=1`
         arg "[TASK]" help=#"""
 Tasks to run
 Can specify multiple tasks by separating with `:::`
-e.g.: mise run task1 arg1 arg2 ::: task2 arg1 arg2
+e.g.: nise run task1 arg1 arg2 ::: task2 arg1 arg2
 """# required=#false default=default
         arg "[ARGS]…" help="Arguments to pass to the tasks. Use \":::\" to separate tasks" required=#false var=#true
         arg "[-- ARGS_LAST]…" help="Arguments to pass to the tasks. Use \":::\" to separate tasks" required=#false var=#true hide=#true
-        mount run="mise tasks --usage"
+        mount run="nise tasks --usage"
     }
     cmd validate help="Validate tasks for common errors and issues" {
         after_long_help #"""
 Examples:
 
     # Validate all tasks
-    $ mise tasks validate
+    $ nise tasks validate
 
     # Validate specific tasks
-    $ mise tasks validate build test
+    $ nise tasks validate build test
 
     # Output results as JSON
-    $ mise tasks validate --json
+    $ nise tasks validate --json
 
     # Only show errors (skip warnings)
-    $ mise tasks validate --errors-only
+    $ nise tasks validate --errors-only
 
 Validation Checks:
 
@@ -3811,7 +3913,7 @@ cmd test-tool help="Test a tool installs and executes" {
     after_long_help #"""
 Examples:
 
-    $ mise test-tool ripgrep
+    $ nise test-tool ripgrep
 
 """#
     flag "-a --all" help="Test every tool specified in registry/"
@@ -3826,18 +3928,18 @@ Number of tool tests to run in parallel
     flag --raw help="Connect backend install command stdin/stdout/stderr directly to the terminal Implies --jobs=1"
     arg "[TOOLS]…" help="Tool(s) to test" required=#false var=#true
 }
-cmd token subcommand_required=#true help="Display git provider tokens mise will use" {
+cmd token subcommand_required=#true help="Display git provider tokens nise will use" {
     cmd forgejo help="Forgejo token" {
         after_long_help #"""
 Examples:
 
-    $ mise token forgejo
+    $ nise token forgejo
     codeberg.org: a180…61f6 (source: FORGEJO_TOKEN)
 
-    $ mise token forgejo --unmask
+    $ nise token forgejo --unmask
     codeberg.org: a18099ca69064be387fbe37b8ad1d333758361f6 (source: FORGEJO_TOKEN)
 
-    $ mise token forgejo forgejo.mycompany.com
+    $ nise token forgejo forgejo.mycompany.com
     forgejo.mycompany.com: (none)
 
 """#
@@ -3848,16 +3950,16 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise token github
+    $ nise token github
     github.com: ghp_…xxxx (source: GITHUB_TOKEN)
 
-    $ mise token github --unmask
+    $ nise token github --unmask
     github.com: ghp_xxxxxxxxxxxx (source: GITHUB_TOKEN)
 
-    $ mise token github github.mycompany.com
+    $ nise token github github.mycompany.com
     github.mycompany.com: (none)
 
-    $ mise token github --oauth --refresh
+    $ nise token github --oauth --refresh
     github.com: gho_…xxxx (source: GitHub OAuth)
 
 """#
@@ -3871,13 +3973,13 @@ Examples:
         after_long_help #"""
 Examples:
 
-    $ mise token gitlab
+    $ nise token gitlab
     gitlab.com: glpa…xxxx (source: GITLAB_TOKEN)
 
-    $ mise token gitlab --unmask
+    $ nise token gitlab --unmask
     gitlab.com: glpat-xxxxxxxxxxxx (source: GITLAB_TOKEN)
 
-    $ mise token gitlab gitlab.mycompany.com
+    $ nise token gitlab gitlab.mycompany.com
     gitlab.mycompany.com: (none)
 
 """#
@@ -3889,12 +3991,12 @@ cmd tool help="Gets information about a tool" {
     after_long_help #"""
 Examples:
 
-    $ mise tool node
+    $ nise tool node
     Backend:            core
     Installed Versions: 20.0.0 22.0.0
     Active Version:     20.0.0
     Requested Version:  20
-    Config Source:      ~/.config/mise/mise.toml
+    Config Source:      ~/.config/mise/nise.toml
     Tool Options:       [none]
 
 """#
@@ -3914,9 +4016,9 @@ Execute a tool stub
 
 Tool stubs are executable files containing TOML configuration that specify which tool to run and how to run it. They provide a convenient way to create portable, self-contained executables that automatically manage tool installation and execution.
 
-A tool stub consists of: - A shebang line: #!/usr/bin/env -S mise tool-stub - TOML configuration specifying the tool, version, and options - Optional comments describing the tool's purpose
+A tool stub consists of: - A shebang line: #!/usr/bin/env -S nise tool-stub - TOML configuration specifying the tool, version, and options - Optional comments describing the tool's purpose
 
-Example stub file: #!/usr/bin/env -S mise tool-stub # Node.js v20 development environment
+Example stub file: #!/usr/bin/env -S nise tool-stub # Node.js v20 development environment
 
 tool = "node" version = "20.0.0" bin = "node"
 
@@ -3932,16 +4034,16 @@ The stub file must contain TOML configuration specifying the tool and version to
     arg "[ARGS]…" help="Arguments to pass to the tool" help_long=#"""
 Arguments to pass to the tool
 
-All arguments after the stub file path will be forwarded to the underlying tool. Use '--' to separate mise arguments from tool arguments if needed.
+All arguments after the stub file path will be forwarded to the underlying tool. Use '--' to separate nise arguments from tool arguments if needed.
 """# required=#false double_dash=automatic var=#true
 }
 cmd trust help="Marks a config file as trusted" {
     long_help #"""
 Marks a config file as trusted
 
-This means mise is allowed to parse the file when it needs to read config
-that may execute code or affect the environment. mise checks trust before
-parsing `mise.toml`. Without trust, mise may prompt, skip the config in some
+This means nise is allowed to parse the file when it needs to read config
+that may execute code or affect the environment. nise checks trust before
+parsing `nise.toml`. Without trust, nise may prompt, skip the config in some
 discovery paths, fail with an untrusted-config error when it cannot prompt,
 or assume trust in detected CI unless paranoid mode is enabled.
 
@@ -3949,17 +4051,17 @@ Safe config files do not require trust: files that only contain
 `min_version`, `[tools]` entries with plain version strings (or arrays
 of them), and `[tasks]` (no templates and no tool options) are loaded
 without prompting, since nothing in them executes code at load time —
-tools install and tasks run only on explicit commands like `mise install`
-or `mise run`.
+tools install and tasks run only on explicit commands like `nise install`
+or `nise run`.
 """#
     after_long_help #"""
 Examples:
 
-    # trusts ~/some_dir/mise.toml
-    $ mise trust ~/some_dir/mise.toml
+    # trusts ~/some_dir/nise.toml
+    $ nise trust ~/some_dir/nise.toml
 
-    # trusts mise.toml in the current or parent directory
-    $ mise trust
+    # trusts nise.toml in the current or parent directory
+    $ nise trust
 
 """#
     flag "-a --all" help="Trust all config files in the current directory and its parents"
@@ -3975,19 +4077,19 @@ cmd uninstall help="Removes installed tool versions" {
     long_help #"""
 Removes installed tool versions
 
-This only removes the installed version, it does not modify mise.toml.
+This only removes the installed version, it does not modify nise.toml.
 """#
     after_long_help #"""
 Examples:
 
     # will uninstall specific version
-    $ mise uninstall node@18.0.0
+    $ nise uninstall node@18.0.0
 
     # will uninstall the current node version (if only one version is installed)
-    $ mise uninstall node
+    $ nise uninstall node
 
     # will uninstall all installed versions of node
-    $ mise uninstall --all node@18.0.0 # will uninstall all node versions
+    $ nise uninstall --all node@18.0.0 # will uninstall all node versions
 
 """#
     flag "-a --all" help="Delete all installed versions"
@@ -4005,23 +4107,23 @@ cmd unset help="Remove environment variable(s) from the config file." {
     long_help #"""
 Remove environment variable(s) from the config file.
 
-By default, this command modifies `mise.toml` in the current directory.
+By default, this command modifies `nise.toml` in the current directory.
 """#
     after_long_help #"""
 Examples:
 
     # Remove NODE_ENV from the current directory's config
-    $ mise unset NODE_ENV
+    $ nise unset NODE_ENV
 
     # Remove NODE_ENV from the global config
-    $ mise unset NODE_ENV -g
+    $ nise unset NODE_ENV -g
 
 """#
-    flag "-f --file" help="Specify a file to use instead of `mise.toml`" {
+    flag "-f --file" help="Specify a file to use instead of `nise.toml`" {
         long_help #"""
-Specify a file to use instead of `mise.toml`
+Specify a file to use instead of `nise.toml`
 
-Defaults to [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) environment variable, or `mise.toml`. Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
+Defaults to [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) environment variable, or `nise.toml`. Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
 """#
         arg <FILE>
     }
@@ -4034,23 +4136,23 @@ e.g.: NODE_ENV
 cmd untrust help="No longer trust a config, will prompt in the future" {
     arg "[CONFIG_FILE]" help="The config file to untrust" required=#false
 }
-cmd unuse help="Removes installed tool versions from mise.toml" {
+cmd unuse help="Removes installed tool versions from nise.toml" {
     alias rm remove
     long_help #"""
-Removes installed tool versions from mise.toml
+Removes installed tool versions from nise.toml
 
-By default, this will use the `mise.toml` file that has the tool defined.
-If multiple config files exist (e.g., both `mise.toml` and `mise.local.toml`),
-the lowest precedence file (`mise.toml`) will be used.
+By default, this will use the `nise.toml` file that has the tool defined.
+If multiple config files exist (e.g., both `nise.toml` and `nise.local.toml`),
+the lowest precedence file (`nise.toml`) will be used.
 See https://mise.en.dev/configuration.html#target-file-for-write-operations
 
 In the following order:
   - If `--global` is set, it will use the global config file.
   - If `--path` is set, it will use the config file at the given path.
-  - If `--env` is set, it will use `mise.<env>.toml`.
+  - If `--env` is set, it will use `nise.<env>.toml`.
   - If [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) is set, it will use that instead.
   - If `MISE_OVERRIDE_CONFIG_FILENAMES` is set, it will the first from that list.
-  - Otherwise just "mise.toml" or global config if cwd is home directory.
+  - Otherwise just "nise.toml" or global config if cwd is home directory.
 
 Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
 
@@ -4060,19 +4162,19 @@ Will also prune the installed version if no other configurations are using it.
 Examples:
 
     # will uninstall specific version
-    $ mise unuse node@18.0.0
+    $ nise unuse node@18.0.0
 
     # will uninstall specific version from global config
-    $ mise unuse -g node@18.0.0
+    $ nise unuse -g node@18.0.0
 
-    # will uninstall specific version from .mise.local.toml
-    $ mise unuse --env local node@20
+    # will uninstall specific version from .nise.local.toml
+    $ nise unuse --env local node@20
 
-    # will uninstall specific version from .mise.staging.toml
-    $ mise unuse --env staging node@20
+    # will uninstall specific version from .nise.staging.toml
+    $ nise unuse --env staging node@20
 
 """#
-    flag "-e --env" help="Create/modify an environment-specific config file like .mise.<env>.toml" {
+    flag "-e --env" help="Create/modify an environment-specific config file like .nise.<env>.toml" {
         arg <ENV>
     }
     flag "-g --global" help="Use the global config file (`~/.config/mise/config.toml`) instead of the local one"
@@ -4092,41 +4194,41 @@ cmd upgrade help="Upgrades outdated tools" {
     long_help #"""
 Upgrades outdated tools
 
-By default, this keeps the range specified in mise.toml. So if you have node@20 set, it will
+By default, this keeps the range specified in nise.toml. So if you have node@20 set, it will
 upgrade to the latest 20.x.x version available. See the `--bump` flag to use the latest version
-and bump the version in mise.toml.
+and bump the version in nise.toml.
 
-This will update mise.lock if it is enabled, see https://mise.en.dev/configuration/settings.html#lockfile
+This will update nise.lock if it is enabled, see https://mise.en.dev/configuration/settings.html#lockfile
 """#
     after_long_help #"""
 Examples:
 
-    # Upgrades node to the latest version matching the range in mise.toml
-    $ mise upgrade node
+    # Upgrades node to the latest version matching the range in nise.toml
+    $ nise upgrade node
 
-    # Upgrades node to the latest version and bumps the version in mise.toml
-    $ mise upgrade node --bump
+    # Upgrades node to the latest version and bumps the version in nise.toml
+    $ nise upgrade node --bump
 
     # Upgrades all tools to the latest versions
-    $ mise upgrade
+    $ nise upgrade
 
-    # Upgrades all tools to the latest versions and bumps the version in mise.toml
-    $ mise upgrade --bump
+    # Upgrades all tools to the latest versions and bumps the version in nise.toml
+    $ nise upgrade --bump
 
     # Just print what would be done, don't actually do it
-    $ mise upgrade --dry-run
+    $ nise upgrade --dry-run
 
     # Upgrades node and python to the latest versions
-    $ mise upgrade node python
+    $ nise upgrade node python
 
     # Upgrade all tools except go
-    $ mise upgrade --exclude go
+    $ nise upgrade --exclude go
 
     # Show a multiselect menu to choose which tools to upgrade
-    $ mise upgrade --interactive
+    $ nise upgrade --interactive
 
-    # Only upgrade tools defined in local mise.toml, not global ones
-    $ mise upgrade --local
+    # Only upgrade tools defined in local nise.toml, not global ones
+    $ nise upgrade --local
 
 """#
     flag "-i --interactive" help="Display multiselect menu to choose which tools to upgrade"
@@ -4136,11 +4238,11 @@ Number of jobs to run in parallel
 """# {
         arg <JOBS>
     }
-    flag "-l --bump" help="Upgrades to the latest version available, bumping the version in mise.toml" {
+    flag "-l --bump" help="Upgrades to the latest version available, bumping the version in nise.toml" {
         long_help #"""
-Upgrades to the latest version available, bumping the version in mise.toml
+Upgrades to the latest version available, bumping the version in nise.toml
 
-For example, if you have `node = "20.0.0"` in your mise.toml but 22.1.0 is the latest available,
+For example, if you have `node = "20.0.0"` in your nise.toml but 22.1.0 is the latest available,
 this will install 22.1.0 and set `node = "22.1.0"` in your config.
 
 It keeps the same precision as what was there before, so if you instead had `node = "20"`, it
@@ -4166,7 +4268,7 @@ This is useful for scripts to check if tools need to be upgraded.
         long_help #"""
 Only upgrade tools defined in local config files
 
-This will only upgrade tools that are defined in project-local mise.toml and
+This will only upgrade tools that are defined in project-local nise.toml and
 will skip tools defined in the global config (~/.config/mise/config.toml).
 """#
     }
@@ -4182,7 +4284,7 @@ Explicitly pinned versions like "22.5.0" are not filtered.
 """#
         arg <MINIMUM_RELEASE_AGE>
     }
-    flag --monorepo help="Placeholder for future monorepo upgrades; `mise upgrade --monorepo` is not implemented yet."
+    flag --monorepo help="Placeholder for future monorepo upgrades; `nise upgrade --monorepo` is not implemented yet."
     flag --raw help="Connect backend install command stdin/stdout/stderr directly to the terminal Implies --jobs=1"
     arg "[INSTALLED_TOOL@VERSION]…" help=#"""
 Tool(s) to upgrade
@@ -4197,24 +4299,24 @@ Generate a usage CLI spec
 See https://usage.jdx.dev for more information on this specification.
 """#
 }
-cmd use help="Installs a tool and adds the version to mise.toml." {
+cmd use help="Installs a tool and adds the version to nise.toml." {
     alias u
     long_help #"""
-Installs a tool and adds the version to mise.toml.
+Installs a tool and adds the version to nise.toml.
 
 This will install the tool version if it is not already installed.
-By default, this will use a `mise.toml` file in the current directory.
-If multiple config files exist (e.g., both `mise.toml` and `mise.local.toml`),
-the lowest precedence file (`mise.toml`) will be used.
+By default, this will use a `nise.toml` file in the current directory.
+If multiple config files exist (e.g., both `nise.toml` and `nise.local.toml`),
+the lowest precedence file (`nise.toml`) will be used.
 See https://mise.en.dev/configuration.html#target-file-for-write-operations
 
 In the following order:
   - If `--global` is set, it will use the global config file.
   - If `--path` is set, it will use the config file at the given path.
-  - If `--env` is set, it will use `mise.<env>.toml`.
+  - If `--env` is set, it will use `nise.<env>.toml`.
   - If [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) is set, it will use that instead.
   - If `MISE_OVERRIDE_CONFIG_FILENAMES` is set, it will the first from that list.
-  - Otherwise just "mise.toml" or global config if cwd is home directory.
+  - Otherwise just "nise.toml" or global config if cwd is home directory.
 
 Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
 
@@ -4224,24 +4326,24 @@ Use the `--global` flag to use the global config file instead.
 Examples:
 
     # run with no arguments to use the interactive selector
-    $ mise use
+    $ nise use
 
-    # set the current version of node to 20.x in mise.toml of current directory
+    # set the current version of node to 20.x in nise.toml of current directory
     # will write the fuzzy version (e.g.: 20)
-    $ mise use node@20
+    $ nise use node@20
 
     # set the current version of node to 20.x in ~/.config/mise/config.toml
     # will write the precise version (e.g.: 20.0.0)
-    $ mise use -g --pin node@20
+    $ nise use -g --pin node@20
 
-    # sets .mise.local.toml (which is intended not to be committed to a project)
-    $ mise use --env local node@20
+    # sets .nise.local.toml (which is intended not to be committed to a project)
+    $ nise use --env local node@20
 
-    # sets .mise.staging.toml (which is used if MISE_ENV=staging)
-    $ mise use --env staging node@20
+    # sets .nise.staging.toml (which is used if MISE_ENV=staging)
+    $ nise use --env staging node@20
 
 """#
-    flag "-e --env" help="Create/modify an environment-specific config file like .mise.<env>.toml" {
+    flag "-e --env" help="Create/modify an environment-specific config file like .nise.<env>.toml" {
         arg <ENV>
     }
     flag "-f --force" help="Force reinstall even if already installed"
@@ -4272,7 +4374,7 @@ This is useful for scripts to check if tools need to be added or removed.
         long_help #"""
 Save fuzzy version to config file
 
-e.g.: `mise use --fuzzy node@20` will save 20 as the version
+e.g.: `nise use --fuzzy node@20` will save 20 as the version
 this is the default behavior unless `MISE_PIN=1`
 """#
     }
@@ -4286,15 +4388,15 @@ Supports absolute dates like "2024-06-01" and relative durations like "90d" or "
     }
     flag --pin help=#"""
 Save exact version to config file
-e.g.: `mise use --pin node@20` will save 20.0.0 as the version
+e.g.: `nise use --pin node@20` will save 20.0.0 as the version
 Set `MISE_PIN=1` to make this the default behavior
 """# {
         long_help #"""
 Save exact version to config file
-e.g.: `mise use --pin node@20` will save 20.0.0 as the version
+e.g.: `nise use --pin node@20` will save 20.0.0 as the version
 Set `MISE_PIN=1` to make this the default behavior
 
-Consider using mise.lock as a better alternative to pinning in mise.toml:
+Consider using nise.lock as a better alternative to pinning in nise.toml:
 https://mise.en.dev/configuration/settings.html#lockfile
 """#
     }
@@ -4310,13 +4412,13 @@ If no version is specified, it will default to @latest
 
 Tool options can be set with this syntax:
 
-    mise use ubi:BurntSushi/ripgrep[exe=rg]
+    nise use ubi:BurntSushi/ripgrep[exe=rg]
 """# required=#false var=#true
 }
-cmd version help="Display the version of mise" {
+cmd version help="Display the version of nise" {
     alias v
     long_help #"""
-Display the version of mise
+Display the version of nise
 
 Displays the version, os, architecture, and the date of the build.
 
@@ -4325,10 +4427,10 @@ If the version is out of date, it will display a warning.
     after_long_help #"""
 Examples:
 
-    $ mise version
-    $ mise --version
-    $ mise -v
-    $ mise -V
+    $ nise version
+    $ nise --version
+    $ nise -v
+    $ nise -V
 
 """#
     flag "-J --json" help="Print the version information in JSON format"
@@ -4339,26 +4441,26 @@ cmd watch help="Run task(s) and watch for changes to rerun it" {
 Run task(s) and watch for changes to rerun it
 
 This command uses the `watchexec` tool to watch for changes to files and rerun the specified task(s).
-It must be installed for this command to work, but you can install it with `mise use -g watchexec@latest`.
+It must be installed for this command to work, but you can install it with `nise use -g watchexec@latest`.
 
 For more advanced process management (daemon management, auto-restart, readiness checks,
-cron scheduling), see mise's sister project: https://pitchfork.jdx.dev
+cron scheduling), see nise's sister project: https://pitchfork.jdx.dev
 """#
     after_long_help #"""
 Examples:
 
-    $ mise watch build
+    $ nise watch build
     Runs the "build" tasks. Will re-run the tasks when any of its sources change.
     Uses "sources" from the tasks definition to determine which files to watch.
 
-    $ mise watch build --glob src/**/*.rs
+    $ nise watch build --glob src/**/*.rs
     Runs the "build" tasks but specify the files to watch with a glob pattern.
     This overrides the "sources" from the tasks definition.
 
-    $ mise watch build --clear
+    $ nise watch build --clear
     Extra arguments are passed to watchexec. See `watchexec --help` for details.
 
-    $ mise watch serve --watch src --exts rs --restart
+    $ nise watch serve --watch src --exts rs --restart
     Starts an api server, watching for changes to "*.rs" files in "./src" and kills/restarts the server when they change.
 
 """#
@@ -4984,7 +5086,7 @@ This shows the manual page for Watchexec, if the output is a terminal and the 'm
     arg "[TASK]" help=#"""
 Tasks to run
 Can specify multiple tasks by separating with `:::`
-e.g.: `mise run task1 arg1 arg2 ::: task2 arg1 arg2`
+e.g.: `nise run task1 arg1 arg2 ::: task2 arg1 arg2`
 """# required=#false
     arg "[ARGS]…" help="Task and arguments to run" required=#false double_dash=automatic var=#true
 }
@@ -4999,12 +5101,12 @@ Examples:
 
     # Show the latest installed version of node
     # If it is is not installed, errors
-    $ mise where node@20
+    $ nise where node@20
     /home/jdx/.local/share/mise/installs/node/20.0.0
 
     # Show the current, active install directory of node
     # Errors if node is not referenced in any .tool-version file
-    $ mise where node
+    $ nise where node
     /home/jdx/.local/share/mise/installs/node/20.0.0
 
 """#
@@ -5030,19 +5132,19 @@ Use this to figure out what version of a tool is currently active.
     after_long_help #"""
 Examples:
 
-    $ mise which node
+    $ nise which node
     /home/username/.local/share/mise/installs/node/20.0.0/bin/node
 
-    $ mise which node --plugin
+    $ nise which node --plugin
     node
 
-    $ mise which node --version
+    $ nise which node --version
     20.0.0
 
 """#
     flag "-t --tool" help=#"""
 Use a specific tool@version
-e.g.: `mise which npm --tool=node@20`
+e.g.: `nise which npm --tool=node@20`
 """# {
         arg <TOOL@VERSION>
     }
@@ -5067,19 +5169,19 @@ source_code_link_template #"""
 https://github.com/jdx/mise/blob/main/src/cli/{{path}}
 """#
 
-complete "alias" run="mise alias ls {{words[PREV]}} | awk '{print $2}'"
+complete "alias" run="nise alias ls {{words[PREV]}} | awk '{print $2}'"
 complete "config_file" type="file"
-complete "new_plugin" run="mise plugins --all"
-complete "installed_tool" run="mise ls -i | awk '{print $1}' | uniq"
-complete "plugin" run="mise plugins --core --user"
-complete "prefix" run="mise ls-remote {{words[PREV]}}"
-complete "setting" run="mise settings --complete" descriptions=#true
-complete "task" run="mise tasks ls --complete" descriptions=#true
-complete "tool" run="mise registry --complete" descriptions=#true
-complete "env_var" run=#"mise set --complete | awk '{print $1"="}'"#
-complete "env_key" run="mise set --complete"
-complete "backend" run="mise backends"
-complete "bin_name" run="mise which --complete"
+complete "new_plugin" run="nise plugins --all"
+complete "installed_tool" run="nise ls -i | awk '{print $1}' | uniq"
+complete "plugin" run="nise plugins --core --user"
+complete "prefix" run="nise ls-remote {{words[PREV]}}"
+complete "setting" run="nise settings --complete" descriptions=#true
+complete "task" run="nise tasks ls --complete" descriptions=#true
+complete "tool" run="nise registry --complete" descriptions=#true
+complete "env_var" run=#"nise set --complete | awk '{print $1"="}'"#
+complete "env_key" run="nise set --complete"
+complete "backend" run="nise backends"
+complete "bin_name" run="nise which --complete"
 
 complete "tool@version" run=#"""
 cur="{{words[CURRENT]}}"
@@ -5088,14 +5190,14 @@ case $cur in
     tool="$(echo "$cur" | cut -d'@' -f1)"
     prefix="$(echo "$cur" | cut -d'@' -f2)"
 
-    versions=$(mise ls-remote $tool $prefix | sed '1!G;h;$!d')
+    versions=$(nise ls-remote $tool $prefix | sed '1!G;h;$!d')
 
     for version in $versions; do
       echo "$tool@$version"
     done
     ;;
   *)
-    plugins=$(mise registry | awk '{print $1}')
+    plugins=$(nise registry | awk '{print $1}')
     for plugin in $plugins; do
       echo "$plugin@"
     done
@@ -5113,14 +5215,14 @@ case $cur in
     if [ ! -z "$prefix" ]; then
       prefix="--prefix $prefix"
     fi
-    versions=$(mise ls --installed $tool $prefix | awk '{print $2}' | sed '1!G;h;$!d')
+    versions=$(nise ls --installed $tool $prefix | awk '{print $2}' | sed '1!G;h;$!d')
 
     for version in $versions; do
       echo "$tool@$version"
     done
     ;;
   *)
-    plugins=$(mise ls --installed | awk '{print $1}' | uniq | sed '1!G;h;$!d')
+    plugins=$(nise ls --installed | awk '{print $1}' | uniq | sed '1!G;h;$!d')
     for plugin in $plugins; do
       echo "$plugin@"
     done

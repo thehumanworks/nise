@@ -1,4 +1,3 @@
-use crate::backend::Backend;
 use crate::backend::VersionInfo;
 use crate::backend::backend_type::BackendType;
 use crate::backend::options::BackendOptions;
@@ -10,6 +9,7 @@ use crate::backend::static_helpers::{
     template_string_for_target, verify_artifact,
 };
 use crate::backend::version_list;
+use crate::backend::{Backend, BackendInstallPlan, InstallPhase, StoreInstallMode};
 use crate::cli::args::BackendArg;
 use crate::config::Config;
 use crate::config::Settings;
@@ -17,19 +17,27 @@ use crate::http::HTTP;
 use crate::install_context::InstallContext;
 use crate::lockfile::PlatformInfo;
 use crate::runtime_symlinks::is_runtime_symlink;
+use crate::store::{
+    ProvenanceRecord, StagedStoreInstallPublishInput, StoreObjectPublishInput,
+    StoreRealisationMetadata, StoreRoot, StoreTxn, StoreTxnInput, StoreTxnState,
+    publish_staged_store_install,
+};
 use crate::toolset::ToolRequest;
 use crate::toolset::ToolVersion;
 use crate::toolset::ToolVersionOptions;
+use crate::toolset::install_state;
 use crate::ui::progress_report::SingleReport;
 use crate::{dirs, file, hash};
 use async_trait::async_trait;
-use eyre::Result;
+use eyre::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fmt::Debug;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
+use walkdir::WalkDir;
 
 // Constants
 const HTTP_TARBALLS_DIR: &str = "http-tarballs";
@@ -70,6 +78,17 @@ struct CachePlan {
     key: String,
     file_info: FileInfo,
     strip_components: usize,
+}
+
+struct PreparedHttpArtifact {
+    url: String,
+    filename: String,
+    file_path: PathBuf,
+    cache_plan: CachePlan,
+    extraction_type: ExtractionType,
+    lockfile_enabled: bool,
+    has_lockfile_checksum: bool,
+    artifact_file_available: bool,
 }
 
 impl FileInfo {
@@ -257,6 +276,63 @@ impl HttpBackend {
     /// Check if a cache entry exists and is valid
     fn is_cached(&self, cache_key: &str) -> bool {
         self.cache_path(cache_key).exists() && self.metadata_path(cache_key).exists()
+    }
+
+    fn read_cache_metadata(&self, cache_key: &str) -> Result<CacheMetadata> {
+        Ok(serde_json::from_str(&file::read_to_string(
+            self.metadata_path(cache_key),
+        )?)?)
+    }
+
+    fn find_offline_cache_plan(
+        &self,
+        url: &str,
+        file_path: &Path,
+        opts: &HttpOptions<'_>,
+    ) -> Result<Option<(CachePlan, ExtractionType)>> {
+        let Some(expected_checksum) = opts.checksum() else {
+            return Ok(None);
+        };
+        let tarballs_dir = Self::tarballs_dir();
+        if !tarballs_dir.is_dir() {
+            return Ok(None);
+        }
+
+        let mut entries =
+            fs::read_dir(tarballs_dir)?.collect::<std::result::Result<Vec<_>, _>>()?;
+        entries.sort_by_key(|entry| entry.file_name());
+        for entry in entries {
+            if !entry.file_type()?.is_dir() {
+                continue;
+            }
+            let cache_key = entry.file_name().to_string_lossy().to_string();
+            let Ok(metadata) = self.read_cache_metadata(&cache_key) else {
+                continue;
+            };
+            if metadata.url != url
+                || metadata.checksum.as_deref() != Some(expected_checksum.as_str())
+            {
+                continue;
+            }
+            let file_info = FileInfo::new(file_path, opts);
+            let strip_components = opts
+                .strip_components()
+                .map(|s| {
+                    s.parse::<usize>()
+                        .map_err(|_| eyre::eyre!("Invalid strip_components value: {s}"))
+                })
+                .transpose()?
+                .unwrap_or(0);
+            let cache_plan = CachePlan {
+                key: cache_key,
+                file_info,
+                strip_components,
+            };
+            let extraction_type =
+                self.extraction_type_from_cache(&cache_plan.key, &cache_plan.file_info);
+            return Ok(Some((cache_plan, extraction_type)));
+        }
+        Ok(None)
     }
 
     // -------------------------------------------------------------------------
@@ -568,6 +644,337 @@ impl HttpBackend {
         let json = serde_json::to_string_pretty(&metadata)?;
         file::write(self.metadata_path(cache_key), json)?;
         Ok(())
+    }
+
+    async fn prepare_artifact(
+        &self,
+        ctx: &InstallContext,
+        tv: &mut ToolVersion,
+        opts: &HttpOptions<'_>,
+    ) -> Result<PreparedHttpArtifact> {
+        let url_template = opts.url().ok_or_else(|| {
+            let platform_key = self.get_platform_key();
+            let available = opts.url_platforms();
+            if !available.is_empty() {
+                eyre::eyre!(
+                    "No URL for platform {platform_key}. Available: {}. \
+                     Provide 'url' or add 'platforms.{platform_key}.url'",
+                    available.join(", ")
+                )
+            } else {
+                eyre::eyre!("Http backend requires 'url' option")
+            }
+        })?;
+
+        let url = template_string(&url_template, tv);
+        let filename = get_filename_from_url(&url);
+        let file_path = tv.download_path().join(&filename);
+
+        let platform_key = self.get_platform_key();
+        tv.lock_platforms
+            .entry(platform_key.clone())
+            .or_default()
+            .url = Some(url.clone());
+
+        let settings = Settings::get();
+        let lockfile_enabled = settings.lockfile_enabled();
+        let has_lockfile_checksum = tv
+            .lock_platforms
+            .get(&platform_key)
+            .and_then(|p| p.checksum.as_ref())
+            .is_some();
+
+        if settings.offline()
+            && !file_path.exists()
+            && let Some((cache_plan, extraction_type)) =
+                self.find_offline_cache_plan(&url, &file_path, opts)?
+        {
+            ctx.pr.set_message(format!("use cached tarball {filename}"));
+            if let Some(checksum) = opts.checksum() {
+                tv.lock_platforms
+                    .entry(platform_key.clone())
+                    .or_default()
+                    .checksum = Some(checksum);
+            }
+            return Ok(PreparedHttpArtifact {
+                url,
+                filename,
+                file_path,
+                cache_plan,
+                extraction_type,
+                lockfile_enabled,
+                has_lockfile_checksum: true,
+                artifact_file_available: false,
+            });
+        }
+
+        if settings.offline() && file_path.exists() {
+            ctx.pr
+                .set_message(format!("use cached download {filename}"));
+        } else {
+            ctx.pr.set_message(format!("download {filename}"));
+            HTTP.download_file(&url, &file_path, Some(ctx.pr.as_ref()))
+                .await?;
+        }
+
+        if opts.checksum().is_some() {
+            ctx.pr.next_operation();
+        }
+        verify_artifact(tv, &file_path, opts.raw(), Some(ctx.pr.as_ref()))?;
+
+        let cache_plan = self.cache_plan(&file_path, opts)?;
+        let cache_path = self.cache_path(&cache_plan.key);
+        let _lock = crate::lock_file::get(&cache_path, ctx.force)?;
+
+        ctx.pr.next_operation();
+        let extraction_type = if self.is_cached(&cache_plan.key) {
+            ctx.pr.set_message("using cached tarball".into());
+            ctx.pr.set_length(1);
+            ctx.pr.set_position(1);
+            self.extraction_type_from_cache(&cache_plan.key, &cache_plan.file_info)
+        } else {
+            ctx.pr.set_message("extracting to cache".into());
+            self.extract_to_cache(
+                tv,
+                &file_path,
+                &cache_plan,
+                &url,
+                opts,
+                Some(ctx.pr.as_ref()),
+            )?
+        };
+
+        Ok(PreparedHttpArtifact {
+            url,
+            filename,
+            file_path,
+            cache_plan,
+            extraction_type,
+            lockfile_enabled,
+            has_lockfile_checksum,
+            artifact_file_available: true,
+        })
+    }
+
+    fn stage_cached_payload_for_store(
+        &self,
+        tv: &ToolVersion,
+        build_path: &Path,
+        cache_key: &str,
+        extraction_type: &ExtractionType,
+        opts: &HttpOptions<'_>,
+    ) -> Result<()> {
+        let cache_path = self.cache_path(cache_key);
+        self.stage_cached_payload_from_path_for_store(
+            tv,
+            build_path,
+            &cache_path,
+            extraction_type,
+            opts,
+        )
+    }
+
+    fn stage_cached_payload_from_path_for_store(
+        &self,
+        tv: &ToolVersion,
+        build_path: &Path,
+        cache_path: &Path,
+        extraction_type: &ExtractionType,
+        opts: &HttpOptions<'_>,
+    ) -> Result<()> {
+        match extraction_type {
+            ExtractionType::RawFile { filename } => {
+                if let Some(bin_path_template) = opts.bin_path() {
+                    let bin_path = template_string(&bin_path_template, tv);
+                    let dest_dir = build_path.join(bin_path);
+                    file::create_dir_all(&dest_dir)?;
+                    self.copy_cache_file_to_store(
+                        &cache_path.join(filename),
+                        &dest_dir.join(filename),
+                    )?;
+                } else {
+                    self.copy_cache_tree_to_store_build(&cache_path, build_path)?;
+                }
+            }
+            ExtractionType::Archive => {
+                self.copy_cache_tree_to_store_build(&cache_path, build_path)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn copy_cache_tree_to_store_build(&self, cache_path: &Path, build_path: &Path) -> Result<()> {
+        for entry in WalkDir::new(cache_path)
+            .follow_links(false)
+            .sort_by_file_name()
+            .into_iter()
+        {
+            let entry = entry?;
+            let src = entry.path();
+            let rel = src.strip_prefix(cache_path)?;
+            if rel.as_os_str().is_empty() || rel == Path::new(METADATA_FILE) {
+                continue;
+            }
+            let dest = build_path.join(rel);
+            if entry.file_type().is_dir() {
+                file::create_dir_all(&dest)?;
+            } else if entry.file_type().is_file() {
+                self.copy_cache_file_to_store(src, &dest)?;
+            } else if entry.file_type().is_symlink() {
+                self.copy_cache_symlink_to_store(src, &dest)?;
+            } else {
+                bail!(
+                    "http cache contains unsupported file type: {}",
+                    file::display_path(src)
+                );
+            }
+        }
+        Ok(())
+    }
+
+    fn copy_cache_file_to_store(&self, src: &Path, dest: &Path) -> Result<()> {
+        if let Some(parent) = dest.parent() {
+            file::create_dir_all(parent)?;
+        }
+        file::copy(src, dest)?;
+        let permissions = fs::symlink_metadata(src)?.permissions();
+        fs::set_permissions(dest, permissions).wrap_err_with(|| {
+            format!("failed to copy permissions to {}", file::display_path(dest))
+        })?;
+        Ok(())
+    }
+
+    fn copy_cache_symlink_to_store(&self, src: &Path, dest: &Path) -> Result<()> {
+        if let Some(parent) = dest.parent() {
+            file::create_dir_all(parent)?;
+        }
+        let target = fs::read_link(src)?;
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(&target, dest).wrap_err_with(|| {
+                format!(
+                    "failed to copy symlink {} -> {}",
+                    file::display_path(src),
+                    file::display_path(dest)
+                )
+            })?;
+        }
+        #[cfg(not(unix))]
+        {
+            let resolved = src.parent().unwrap_or_else(|| Path::new(".")).join(&target);
+            if resolved.is_dir() {
+                file::copy_dir_all(&resolved, dest)?;
+            } else {
+                self.copy_cache_file_to_store(&resolved, dest)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn store_bin_paths_for_build(
+        &self,
+        build_path: &Path,
+        tv: &ToolVersion,
+        opts: &HttpOptions<'_>,
+    ) -> Result<Vec<PathBuf>> {
+        if let Some(bin_path_template) = opts.bin_path() {
+            return Ok(vec![PathBuf::from(template_string(
+                bin_path_template.as_str(),
+                tv,
+            ))]);
+        }
+
+        if build_path.join("bin").is_dir() {
+            return Ok(vec![PathBuf::from("bin")]);
+        }
+
+        let mut paths = Vec::new();
+        if build_path.is_dir() {
+            for entry in fs::read_dir(build_path)? {
+                let entry = entry?;
+                if entry.file_type()?.is_dir() {
+                    let sub_bin = entry.path().join("bin");
+                    if sub_bin.is_dir() {
+                        paths.push(entry.file_name().to_string_lossy().to_string());
+                    }
+                }
+            }
+        }
+        paths.sort();
+        if paths.is_empty() {
+            Ok(vec![PathBuf::from(".")])
+        } else {
+            Ok(paths
+                .into_iter()
+                .map(|path| PathBuf::from(path).join("bin"))
+                .collect())
+        }
+    }
+
+    fn store_executable_paths_for_build(
+        &self,
+        build_path: &Path,
+        bin_paths: &[PathBuf],
+    ) -> Result<Vec<PathBuf>> {
+        let mut executable_paths = Vec::new();
+        for bin_path in bin_paths {
+            let full_bin_path = build_path.join(bin_path);
+            if !full_bin_path.is_dir() {
+                continue;
+            }
+            for entry in fs::read_dir(&full_bin_path)? {
+                let entry = entry?;
+                let file_type = entry.file_type()?;
+                if file_type.is_file() || file_type.is_symlink() {
+                    executable_paths.push(bin_path.join(entry.file_name()));
+                }
+            }
+        }
+        executable_paths.sort();
+        Ok(executable_paths)
+    }
+
+    fn store_derivation_id(
+        &self,
+        tv: &ToolVersion,
+        prepared: &PreparedHttpArtifact,
+    ) -> Result<String> {
+        let options = toml::to_string(&tv.request.options())?;
+        let key = format!(
+            "schema_version=1\nbackend_type=http\nbackend={}\nshort={}\nversion={}\nplatform={}\nurl={}\ncache_key={}\nstrip_components={}\noptions={options}",
+            self.ba.full_without_opts(),
+            self.ba.short,
+            tv.version,
+            self.get_platform_key(),
+            prepared.url,
+            prepared.cache_plan.key,
+            prepared.cache_plan.strip_components,
+        );
+        Ok(format!("sha256:{}", hash::hash_sha256_to_str(&key)))
+    }
+
+    fn store_options_hash(&self, tv: &ToolVersion) -> Result<String> {
+        let options = toml::to_string(&tv.request.options())?;
+        Ok(format!("sha256:{}", hash::hash_sha256_to_str(&options)))
+    }
+
+    fn store_source_hash(&self, prepared: &PreparedHttpArtifact) -> Result<String> {
+        let artifact_hash = if prepared.file_path.exists() {
+            hash::file_hash_blake3(&prepared.file_path, None)?
+        } else {
+            prepared
+                .cache_plan
+                .key
+                .split('_')
+                .next()
+                .unwrap_or(&prepared.cache_plan.key)
+                .to_string()
+        };
+        let key = format!(
+            "url={}\nfilename={}\nartifact_blake3={artifact_hash}\ncache_key={}",
+            prepared.url, prepared.filename, prepared.cache_plan.key
+        );
+        Ok(format!("sha256:{}", hash::hash_sha256_to_str(&key)))
     }
 
     // -------------------------------------------------------------------------
@@ -882,6 +1289,22 @@ impl Backend for HttpBackend {
         ]
     }
 
+    fn store_install_mode(&self, _tv: &ToolVersion) -> StoreInstallMode {
+        StoreInstallMode::ImmutableRelocatable
+    }
+
+    fn store_install_plan(&self, _tv: &ToolVersion) -> BackendInstallPlan {
+        BackendInstallPlan {
+            phases: vec![
+                InstallPhase::Fetch,
+                InstallPhase::Build,
+                InstallPhase::Smoke,
+            ],
+            monolithic: false,
+            strict_sandbox_supported: false,
+        }
+    }
+
     async fn install_operation_count(&self, tv: &ToolVersion, _ctx: &InstallContext) -> usize {
         let raw_opts = tv.request.options();
         let opts = HttpOptions::new(&raw_opts);
@@ -973,94 +1396,184 @@ impl Backend for HttpBackend {
     ) -> Result<ToolVersion> {
         let raw_opts = tv.request.options();
         let opts = HttpOptions::new(&raw_opts);
-
-        // Get URL template
-        let url_template = opts.url().ok_or_else(|| {
-            let platform_key = self.get_platform_key();
-            let available = opts.url_platforms();
-            if !available.is_empty() {
-                eyre::eyre!(
-                    "No URL for platform {platform_key}. Available: {}. \
-                     Provide 'url' or add 'platforms.{platform_key}.url'",
-                    available.join(", ")
-                )
-            } else {
-                eyre::eyre!("Http backend requires 'url' option")
-            }
-        })?;
-
-        let url = template_string(&url_template, &tv);
-
-        // Download
-        let filename = get_filename_from_url(&url);
-        let file_path = tv.download_path().join(&filename);
-
-        // Record URL in lock platforms
-        let platform_key = self.get_platform_key();
-        tv.lock_platforms
-            .entry(platform_key.clone())
-            .or_default()
-            .url = Some(url.clone());
-
-        // For lockfile checksum verification
-        let settings = Settings::get();
-        let lockfile_enabled = settings.lockfile_enabled();
-        let has_lockfile_checksum = tv
-            .lock_platforms
-            .get(&platform_key)
-            .and_then(|p| p.checksum.as_ref())
-            .is_some();
-
-        ctx.pr.set_message(format!("download {filename}"));
-        HTTP.download_file(&url, &file_path, Some(ctx.pr.as_ref()))
-            .await?;
-
-        // Verify artifact (checksum if provided)
-        if opts.checksum().is_some() {
-            ctx.pr.next_operation();
-        }
-        verify_artifact(&tv, &file_path, opts.raw(), Some(ctx.pr.as_ref()))?;
-
-        // Generate cache key
-        let cache_plan = self.cache_plan(&file_path, &opts)?;
-
-        // Acquire lock and extract or reuse cache
-        let cache_path = self.cache_path(&cache_plan.key);
-        let _lock = crate::lock_file::get(&cache_path, ctx.force)?;
-
-        // Determine extraction type based on whether we're using cache or extracting fresh
-        // On cache hit, we need to detect the actual filename from the cache (which may differ
-        // from current options if a previous extraction used different `bin` name)
-        ctx.pr.next_operation();
-        let extraction_type = if self.is_cached(&cache_plan.key) {
-            ctx.pr.set_message("using cached tarball".into());
-            // Report extraction operation as complete (instant since we're using cache)
-            ctx.pr.set_length(1);
-            ctx.pr.set_position(1);
-            self.extraction_type_from_cache(&cache_plan.key, &cache_plan.file_info)
-        } else {
-            ctx.pr.set_message("extracting to cache".into());
-            self.extract_to_cache(
-                &tv,
-                &file_path,
-                &cache_plan,
-                &url,
-                &opts,
-                Some(ctx.pr.as_ref()),
-            )?
-        };
+        let prepared = self.prepare_artifact(ctx, &mut tv, &opts).await?;
 
         // Create symlinks
-        self.create_install_symlink(&tv, &cache_plan.key, &extraction_type, &opts)?;
-        self.create_version_alias_symlink(&tv, &cache_plan.key)?;
-        tv.install_path = Some(Self::install_path_for(&tv, &cache_plan.key));
+        self.create_install_symlink(
+            &tv,
+            &prepared.cache_plan.key,
+            &prepared.extraction_type,
+            &opts,
+        )?;
+        self.create_version_alias_symlink(&tv, &prepared.cache_plan.key)?;
+        tv.install_path = Some(Self::install_path_for(&tv, &prepared.cache_plan.key));
 
         // Verify checksum for lockfile
-        if lockfile_enabled || has_lockfile_checksum {
+        if prepared.artifact_file_available
+            && (prepared.lockfile_enabled || prepared.has_lockfile_checksum)
+        {
             ctx.pr.next_operation();
+            self.verify_checksum(ctx, &mut tv, &prepared.file_path)?;
         }
-        self.verify_checksum(ctx, &mut tv, &file_path)?;
 
+        Ok(tv)
+    }
+
+    async fn install_version_store(
+        &self,
+        ctx: &InstallContext,
+        mut tv: ToolVersion,
+    ) -> Result<ToolVersion> {
+        self.validate_nise_immutable_store_install(&tv)?;
+        if tv.request.options().contains_key("postinstall") {
+            bail!(
+                "http immutable store installs do not support postinstall hooks yet; use legacy install mode for {}",
+                tv.style()
+            );
+        }
+
+        let raw_opts = tv.request.options();
+        let opts = HttpOptions::new(&raw_opts);
+        let install_ops = self.install_operation_count(&tv, ctx).await + 2;
+        ctx.pr.start_operations(install_ops);
+
+        let prepared = self.prepare_artifact(ctx, &mut tv, &opts).await?;
+        if prepared.artifact_file_available
+            && (prepared.lockfile_enabled || prepared.has_lockfile_checksum)
+        {
+            ctx.pr.next_operation();
+            self.verify_checksum(ctx, &mut tv, &prepared.file_path)?;
+        }
+
+        let compatibility_path = Self::install_path_for(&tv, &prepared.cache_plan.key);
+        tv.install_path = Some(compatibility_path.clone());
+        let _install_lock = crate::lock_file::get(&compatibility_path, ctx.force)?;
+        if !ctx.force && self.is_version_installed(&ctx.config, &tv, true) {
+            return Ok(tv);
+        }
+
+        let store = StoreRoot::default();
+        let derivation_id = self.store_derivation_id(&tv, &prepared)?;
+        let mut txn = StoreTxn::begin(
+            store.clone(),
+            StoreTxnInput {
+                derivation_id,
+                compatibility_path: compatibility_path.clone(),
+            },
+        )?;
+
+        ctx.pr.next_operation();
+        ctx.pr.set_message("stage store object".into());
+        txn.set_state(StoreTxnState::Building)?;
+        if let Err(err) = self.stage_cached_payload_for_store(
+            &tv,
+            txn.build_path(),
+            &prepared.cache_plan.key,
+            &prepared.extraction_type,
+            &opts,
+        ) {
+            let _ = txn.fail();
+            return Err(err);
+        }
+
+        let bin_paths = match self.store_bin_paths_for_build(txn.build_path(), &tv, &opts) {
+            Ok(paths) => paths,
+            Err(err) => {
+                let _ = txn.fail();
+                return Err(err);
+            }
+        };
+        let executable_paths =
+            match self.store_executable_paths_for_build(txn.build_path(), &bin_paths) {
+                Ok(paths) => paths,
+                Err(err) => {
+                    let _ = txn.fail();
+                    return Err(err);
+                }
+            };
+        let cache_path = self.cache_path(&prepared.cache_plan.key);
+        let platform_key = self.get_platform_key();
+        let checksum = tv
+            .lock_platforms
+            .get(&platform_key)
+            .and_then(|platform| platform.checksum.clone());
+        let provenance = vec![ProvenanceRecord {
+            kind: "http-artifact".to_string(),
+            source: Some(prepared.url.clone()),
+            value: checksum.clone(),
+            verified: Some(checksum.is_some() || opts.checksum().is_some()),
+        }];
+        let object_name = format!(
+            "{}-{}",
+            self.ba.short,
+            Self::install_version_name(&tv, &prepared.cache_plan.key)
+        );
+        let relocation_tokens = vec![
+            txn.build_path().to_string_lossy().to_string(),
+            cache_path.to_string_lossy().to_string(),
+        ];
+
+        ctx.pr.next_operation();
+        ctx.pr.set_message("publish store object".into());
+        let publication = match publish_staged_store_install(
+            &store,
+            &mut txn,
+            StagedStoreInstallPublishInput {
+                object: StoreObjectPublishInput {
+                    name: object_name,
+                    platform: platform_key.clone(),
+                    created_by: "nise-http".to_string(),
+                    executable_paths,
+                    bin_paths,
+                    references: vec![],
+                    realisations: vec![],
+                    relocation_tokens,
+                },
+                realisation: StoreRealisationMetadata {
+                    tool: self.ba.short.clone(),
+                    backend: self.ba.full_without_opts(),
+                    version: tv.tv_pathname(),
+                    platform: platform_key,
+                    options_hash: self.store_options_hash(&tv)?,
+                    source_hash: self.store_source_hash(&prepared)?,
+                    lock_policy: if ctx.locked {
+                        "locked".to_string()
+                    } else {
+                        "artifact".to_string()
+                    },
+                    provenance,
+                    closure: vec![],
+                },
+            },
+        ) {
+            Ok(publication) => publication,
+            Err(err) => {
+                let _ = txn.fail();
+                return Err(err);
+            }
+        };
+        txn.complete()?;
+
+        self.create_version_alias_symlink(&tv, &prepared.cache_plan.key)?;
+
+        if compatibility_path.starts_with(*dirs::INSTALLS) {
+            install_state::write_backend_meta(self.ba())?;
+            install_state::add_tool_version(self.ba(), &compatibility_path, &tv.tv_pathname());
+        }
+
+        let mut touch_dirs = vec![dirs::DATA.to_path_buf()];
+        touch_dirs.extend(ctx.config.config_files.keys().cloned());
+        for path in touch_dirs {
+            if let Err(err) = file::touch_dir(&path) {
+                trace!("error touching config file: {:?} {:?}", path, err);
+            }
+        }
+
+        debug!(
+            "published http store install {} -> {}",
+            tv.style(),
+            file::display_path(publication.object.path)
+        );
         Ok(tv)
     }
 
@@ -1141,6 +1654,16 @@ mod tests {
     use crate::cli::args::BackendResolution;
     use crate::toolset::{ToolRequest, ToolSource};
 
+    fn http_test_backend() -> HttpBackend {
+        HttpBackend::from_arg(BackendArg::new_raw(
+            "http-absolute-version".to_string(),
+            Some("http:absolute-version".to_string()),
+            "absolute-version".to_string(),
+            None,
+            BackendResolution::new(true),
+        ))
+    }
+
     fn http_test_tv(version: &str) -> ToolVersion {
         let backend = Arc::new(BackendArg::new_raw(
             "http-absolute-version".to_string(),
@@ -1153,6 +1676,23 @@ mod tests {
             backend,
             version: version.to_string(),
             options: ToolVersionOptions::default(),
+            source: ToolSource::Argument,
+        };
+        ToolVersion::new(request, version.to_string())
+    }
+
+    fn http_test_tv_with_options(version: &str, options: ToolVersionOptions) -> ToolVersion {
+        let backend = Arc::new(BackendArg::new_raw(
+            "http-absolute-version".to_string(),
+            Some("http:absolute-version".to_string()),
+            "absolute-version".to_string(),
+            None,
+            BackendResolution::new(true),
+        ));
+        let request = ToolRequest::Version {
+            backend,
+            version: version.to_string(),
+            options,
             source: ToolSource::Argument,
         };
         ToolVersion::new(request, version.to_string())
@@ -1287,5 +1827,87 @@ mod tests {
         let lookup_path = HttpBackend::lookup_install_path(&tv);
 
         assert_eq!(lookup_path, install_path);
+    }
+
+    #[test]
+    fn store_cache_copy_excludes_metadata_and_discovers_bin_paths() -> Result<()> {
+        let backend = http_test_backend();
+        let tmp = tempfile::tempdir()?;
+        let cache = tmp.path().join("cache");
+        let build = tmp.path().join("build");
+        crate::file::create_dir_all(cache.join("bin"))?;
+        crate::file::create_dir_all(&build)?;
+        crate::file::write(cache.join(METADATA_FILE), "cache metadata")?;
+        crate::file::write(cache.join("bin").join("demo"), "demo")?;
+        crate::file::write(cache.join("README.md"), "readme")?;
+
+        backend.copy_cache_tree_to_store_build(&cache, &build)?;
+
+        assert!(!build.join(METADATA_FILE).exists());
+        assert_eq!(
+            crate::file::read_to_string(build.join("bin").join("demo"))?,
+            "demo"
+        );
+        assert_eq!(
+            crate::file::read_to_string(build.join("README.md"))?,
+            "readme"
+        );
+
+        let tv = http_test_tv("1.0.0");
+        let raw_opts = tv.request.options();
+        let opts = HttpOptions::new(&raw_opts);
+        let bin_paths = backend.store_bin_paths_for_build(&build, &tv, &opts)?;
+        let executable_paths = backend.store_executable_paths_for_build(&build, &bin_paths)?;
+
+        assert_eq!(bin_paths, vec![PathBuf::from("bin")]);
+        assert_eq!(executable_paths, vec![PathBuf::from("bin/demo")]);
+        Ok(())
+    }
+
+    #[test]
+    fn raw_file_store_stage_honors_bin_path_layout() -> Result<()> {
+        let backend = http_test_backend();
+        let tmp = tempfile::tempdir()?;
+        let cache = tmp.path().join("cache");
+        let build = tmp.path().join("build");
+        crate::file::create_dir_all(&cache)?;
+        crate::file::create_dir_all(&build)?;
+        crate::file::write(cache.join("demo"), "demo")?;
+        crate::file::write(cache.join(METADATA_FILE), "cache metadata")?;
+
+        let mut options = ToolVersionOptions::default();
+        options
+            .insert_option(
+                "bin_path".to_string(),
+                toml::Value::String("tools/bin".to_string()),
+            )
+            .unwrap();
+        let tv = http_test_tv_with_options("1.0.0", options);
+        let raw_opts = tv.request.options();
+        let opts = HttpOptions::new(&raw_opts);
+
+        backend.stage_cached_payload_from_path_for_store(
+            &tv,
+            &build,
+            &cache,
+            &ExtractionType::RawFile {
+                filename: "demo".to_string(),
+            },
+            &opts,
+        )?;
+
+        assert_eq!(
+            crate::file::read_to_string(build.join("tools/bin/demo"))?,
+            "demo"
+        );
+        assert!(!build.join("demo").exists());
+        assert!(!build.join(METADATA_FILE).exists());
+
+        let bin_paths = backend.store_bin_paths_for_build(&build, &tv, &opts)?;
+        let executable_paths = backend.store_executable_paths_for_build(&build, &bin_paths)?;
+
+        assert_eq!(bin_paths, vec![PathBuf::from("tools/bin")]);
+        assert_eq!(executable_paths, vec![PathBuf::from("tools/bin/demo")]);
+        Ok(())
     }
 }

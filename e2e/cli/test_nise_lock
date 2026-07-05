@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+export CLICOLOR=0
+
+cat >mise.lock <<'EOF'
+[tools]
+dummy = [
+  { version = "1.0.0", backend = "asdf:dummy", platforms = { "macos-arm64" = { url = "https://example.test/dummy.tar.gz", checksum = "sha256:dummy" } } },
+]
+EOF
+
+assert_contains "mise lock import mise.lock" "legacy-unverified derivation(s)"
+assert_contains "mise lock --check" "Legacy-unverified: 1"
+assert_fail "mise lock --check --frozen" "legacy-unverified"
+assert_contains "cat nise.lock" 'schema = "nise.lock"'
+assert_contains "cat nise.lock" 'status = "legacy-unverified"'

@@ -66,7 +66,7 @@ struct Row {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tool-alias ls</bold>
+    $ <bold>nise tool-alias ls</bold>
     node  lts-jod      22
 "#
 );

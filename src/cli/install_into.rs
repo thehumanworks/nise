@@ -1,7 +1,7 @@
 use crate::cli::args::ToolArg;
 use crate::config::{Config, Settings};
 use crate::file::display_path;
-use crate::install_context::InstallContext;
+use crate::install_context::{InstallContext, NiseStoreInstallMode};
 use crate::toolset::ToolsetBuilder;
 use crate::ui::multi_progress_report::MultiProgressReport;
 use crate::ui::prompt;
@@ -56,6 +56,7 @@ impl InstallInto {
             force: true,
             dry_run: false,
             locked: false, // install-into doesn't support locked mode
+            nise_store_install_mode: NiseStoreInstallMode::Legacy,
             before_date,
         };
         tv.install_path = Some(self.path.clone());
@@ -105,7 +106,7 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # install node@20.0.0 into ./mynode
-    $ <bold>mise install-into node@20.0.0 ./mynode && ./mynode/bin/node -v</bold>
+    $ <bold>nise install-into node@20.0.0 ./mynode && ./mynode/bin/node -v</bold>
     20.0.0
 "#
 );

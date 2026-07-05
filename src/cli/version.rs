@@ -11,7 +11,7 @@ use crate::file::modified_duration;
 use crate::ui::style;
 use crate::{dirs, duration, env, file};
 
-/// Display the version of mise
+/// Display the version of nise
 ///
 /// Displays the version, os, architecture, and the date of the build.
 ///
@@ -75,10 +75,10 @@ pub static VERSION: Lazy<String> = Lazy::new(|| {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise version</bold>
-    $ <bold>mise --version</bold>
-    $ <bold>mise -v</bold>
-    $ <bold>mise -V</bold>
+    $ <bold>nise version</bold>
+    $ <bold>nise --version</bold>
+    $ <bold>nise -v</bold>
+    $ <bold>nise -V</bold>
 "#
 );
 

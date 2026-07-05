@@ -10,7 +10,7 @@ use crate::{dirs, env};
 use eyre::Result;
 use itertools::Itertools;
 
-/// Initializes mise in the current shell session
+/// Initializes nise in the current shell session
 ///
 /// This should go into your shell's rc file or login shell.
 /// Otherwise, it will only take effect in the current session.
@@ -18,12 +18,12 @@ use itertools::Itertools;
 ///
 /// Typically, this can be added with something like the following:
 ///
-///     echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
+///     echo 'eval "$(nise activate zsh)"' >> ~/.zshrc
 ///
-/// However, this requires that "mise" is in your PATH. If it is not, you need to
+/// However, this requires that "nise" is in your PATH. If it is not, you need to
 /// specify the full path like this:
 ///
-///     echo 'eval "$(/path/to/mise activate zsh)"' >> ~/.zshrc
+///     echo 'eval "$(/path/to/nise activate zsh)"' >> ~/.zshrc
 ///
 /// Customize status output with `status` settings.
 #[derive(Debug, clap::Args)]
@@ -44,8 +44,8 @@ pub struct Activate {
     /// Do not automatically call hook-env
     ///
     /// This can be helpful for debugging mise. If you run `eval "$(mise activate --no-hook-env)"`, then
-    /// you can call `mise hook-env` manually which will output the env vars to stdout without actually
-    /// modifying the environment. That way you can do things like `mise hook-env --trace` to get more
+    /// you can call `nise hook-env` manually which will output the env vars to stdout without actually
+    /// modifying the environment. That way you can do things like `nise hook-env --trace` to get more
     /// information or just see the values that hook-env is outputting.
     #[clap(long)]
     no_hook_env: bool,
@@ -55,7 +55,7 @@ pub struct Activate {
     ///
     ///     PATH="$HOME/.local/share/mise/shims:$PATH"
     ///
-    /// `mise activate --shims` does not support all the features of `mise activate`.
+    /// `nise activate --shims` does not support all the features of `nise activate`.
     /// See https://mise.en.dev/dev-tools/shims.html#shims-vs-path for more information
     #[clap(long, verbatim_doc_comment)]
     shims: bool,
@@ -68,7 +68,7 @@ pub struct Activate {
 impl Activate {
     pub fn run(self) -> Result<()> {
         let shell = get_shell(self.shell_type.or(self.shell))
-            .expect("no shell provided. Run `mise activate zsh` or similar");
+            .expect("no shell provided. Run `nise activate zsh` or similar");
 
         // touch ROOT to allow hook-env to run
         let _ = touch_dir(&dirs::DATA);
@@ -230,7 +230,7 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
 
     $ <bold>eval "$(mise activate bash)"</bold>
     $ <bold>eval "$(mise activate zsh)"</bold>
-    $ <bold>mise activate fish | source</bold>
+    $ <bold>nise activate fish | source</bold>
     $ <bold>execx($(mise activate xonsh))</bold>
     $ <bold>(&mise activate pwsh) | Out-String | Invoke-Expression</bold>
 "#

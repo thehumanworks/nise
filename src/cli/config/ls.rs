@@ -123,9 +123,9 @@ impl ConfigLs {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise config ls</bold>
+    $ <bold>nise config ls</bold>
     Path                        Tools
     ~/.config/mise/config.toml  pitchfork
-    ~/src/mise/mise.toml        actionlint, bun, cargo-binstall, cargo:cargo-edit, cargo:cargo-insta
+    ~/src/mise/nise.toml        actionlint, bun, cargo-binstall, cargo:cargo-edit, cargo:cargo-insta
 "#
 );

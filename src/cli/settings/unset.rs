@@ -57,6 +57,6 @@ pub fn unset(mut key: &str, local: bool) -> Result<()> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise settings unset idiomatic_version_file</bold>
+    $ <bold>nise settings unset idiomatic_version_file</bold>
 "#
 );

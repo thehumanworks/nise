@@ -22,7 +22,7 @@ use crate::file::{
     canonicalize_cached, display_path, remove_all_with_progress, remove_all_with_warning,
 };
 use crate::install_before::resolve_before_date_for_tool;
-use crate::install_context::InstallContext;
+use crate::install_context::{InstallContext, NiseStoreInstallMode};
 use crate::lockfile::{PlatformInfo, ProvenanceType};
 use crate::path_env::PathEnv;
 use crate::platform::Platform;
@@ -31,11 +31,15 @@ use crate::plugins::{PEP440_PRERELEASE_REGEX, PluginType, VERSION_REGEX};
 use crate::registry::{REGISTRY, full_to_url, normalize_remote, tool_enabled};
 use crate::runtime_symlinks::is_runtime_symlink;
 use crate::semver::semver_triplet;
+use crate::store::{
+    LegacyInstallManifestInput, StoreRoot, remove_install_ref_manifest,
+    write_legacy_install_manifests,
+};
 use crate::tera::{contains_template_syntax, get_tera, render_str};
 use crate::toolset::outdated_info::OutdatedInfo;
 use crate::toolset::{
     ResolveOptions, ToolOptionSource, ToolRequest, ToolVersion, ToolVersionOptions, Toolset,
-    install_state, is_outdated_version,
+    install_state, installed_versions, is_outdated_version,
 };
 use crate::ui::progress_report::SingleReport;
 use crate::{
@@ -51,7 +55,6 @@ use itertools::Itertools;
 use platform_target::PlatformTarget;
 use regex::Regex;
 use std::sync::LazyLock as Lazy;
-use versions::Versioning;
 
 pub mod aqua;
 pub mod asdf;
@@ -86,6 +89,88 @@ pub type IdiomaticVersion = (String, Option<ToolVersionOptions>);
 pub type VersionCacheManager = CacheManager<Vec<VersionInfo>>;
 
 pub(crate) const MISE_BINS_DIR: &str = ".mise-bins";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
+pub enum StoreInstallMode {
+    /// Existing mise behavior: install into and run from the mutable compatibility path.
+    LegacyMutable,
+    /// Backend can install into a staging prefix, then run correctly after publish elsewhere.
+    ImmutableRelocatable,
+    /// Backend needs its final store prefix during install, but can be sealed read-only after.
+    ImmutableFinalPrefix,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
+pub enum NetworkPolicy {
+    /// Keep the current process/network behavior.
+    Inherit,
+    /// Deny all network access for the phase.
+    Deny,
+    /// Allow only declared hosts for the phase.
+    DeclaredHostsOnly,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[allow(dead_code)]
+pub struct InstallSandboxPolicy {
+    pub fetch_network: NetworkPolicy,
+    pub build_network: NetworkPolicy,
+    pub postinstall_network: NetworkPolicy,
+    pub write_roots: Vec<PathBuf>,
+    pub allow_env: Vec<String>,
+}
+
+#[allow(dead_code)]
+impl InstallSandboxPolicy {
+    pub fn legacy() -> Self {
+        Self {
+            fetch_network: NetworkPolicy::Inherit,
+            build_network: NetworkPolicy::Inherit,
+            postinstall_network: NetworkPolicy::Inherit,
+            write_roots: vec![],
+            allow_env: vec![],
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
+pub enum InstallPhase {
+    Fetch,
+    Build,
+    PostInstall,
+    Smoke,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[allow(dead_code)]
+pub struct BackendInstallPlan {
+    pub phases: Vec<InstallPhase>,
+    pub monolithic: bool,
+    pub strict_sandbox_supported: bool,
+}
+
+#[allow(dead_code)]
+impl BackendInstallPlan {
+    pub fn legacy_monolithic() -> Self {
+        Self {
+            phases: vec![
+                InstallPhase::Fetch,
+                InstallPhase::Build,
+                InstallPhase::PostInstall,
+                InstallPhase::Smoke,
+            ],
+            monolithic: true,
+            strict_sandbox_supported: false,
+        }
+    }
+
+    pub fn supports_strict_immutable(&self) -> bool {
+        !self.monolithic || self.strict_sandbox_supported
+    }
+}
 
 pub(crate) fn backend_arg_matches_registry_backend(ba: &BackendArg) -> bool {
     let full = ba.full_without_opts();
@@ -592,6 +677,11 @@ mod tests {
         }
     }
 
+    fn create_test_tool_version(tool: &str, version: &str) -> ToolVersion {
+        let ba = create_test_backend_arg(tool);
+        ToolVersion::new(create_test_tool_request(ba, version), version.to_string())
+    }
+
     #[test]
     fn test_normalize_idiomatic_contents() {
         assert_eq!(normalize_idiomatic_contents("tool # and a comment"), "tool");
@@ -759,6 +849,105 @@ mod tests {
             &resolved,
             &["api_url", "version_prefix"],
         ));
+    }
+
+    #[test]
+    fn test_backend_store_capability_defaults_are_legacy() {
+        let backend = TestBackend::default();
+        let tv = create_test_tool_version("test", "1.0.0");
+
+        assert_eq!(
+            backend.store_install_mode(&tv),
+            StoreInstallMode::LegacyMutable
+        );
+        assert_eq!(
+            backend.store_sandbox_policy(&tv),
+            InstallSandboxPolicy::legacy()
+        );
+        assert_eq!(
+            backend.store_install_plan(&tv),
+            BackendInstallPlan {
+                phases: vec![
+                    InstallPhase::Fetch,
+                    InstallPhase::Build,
+                    InstallPhase::PostInstall,
+                    InstallPhase::Smoke,
+                ],
+                monolithic: true,
+                strict_sandbox_supported: false,
+            }
+        );
+        assert!(!backend.store_install_plan(&tv).supports_strict_immutable());
+    }
+
+    #[test]
+    fn test_non_monolithic_store_install_plan_supports_strict_immutable() {
+        let plan = BackendInstallPlan {
+            phases: vec![
+                InstallPhase::Fetch,
+                InstallPhase::Build,
+                InstallPhase::PostInstall,
+                InstallPhase::Smoke,
+            ],
+            monolithic: false,
+            strict_sandbox_supported: false,
+        };
+
+        assert!(plan.supports_strict_immutable());
+    }
+
+    #[test]
+    fn test_nise_immutable_store_install_rejects_legacy_backend() {
+        let backend = TestBackend::default();
+        let tv = create_test_tool_version("test", "1.0.0");
+
+        let err = backend
+            .validate_nise_immutable_store_install(&tv)
+            .unwrap_err();
+
+        assert!(
+            err.to_string()
+                .contains("does not support nise immutable store installs")
+        );
+    }
+
+    #[test]
+    fn test_nise_immutable_store_install_rejects_unsafe_monolithic_plan() {
+        let backend = TestBackend::with_store_capability(
+            StoreInstallMode::ImmutableRelocatable,
+            BackendInstallPlan::legacy_monolithic(),
+        );
+        let tv = create_test_tool_version("test", "1.0.0");
+
+        let err = backend
+            .validate_nise_immutable_store_install(&tv)
+            .unwrap_err();
+
+        assert!(err.to_string().contains("cannot run under strict"));
+    }
+
+    #[test]
+    fn test_nise_immutable_store_install_accepts_strict_capable_plan() -> Result<()> {
+        let backend = TestBackend::with_store_capability(
+            StoreInstallMode::ImmutableRelocatable,
+            BackendInstallPlan {
+                phases: vec![
+                    InstallPhase::Fetch,
+                    InstallPhase::Build,
+                    InstallPhase::PostInstall,
+                    InstallPhase::Smoke,
+                ],
+                monolithic: false,
+                strict_sandbox_supported: false,
+            },
+        );
+        let tv = create_test_tool_version("test", "1.0.0");
+
+        assert_eq!(
+            backend.validate_nise_immutable_store_install(&tv)?,
+            StoreInstallMode::ImmutableRelocatable
+        );
+        Ok(())
     }
 
     #[test]
@@ -1085,12 +1274,29 @@ mod tests {
     #[derive(Debug)]
     struct TestBackend {
         ba: Arc<BackendArg>,
+        store_install_mode: StoreInstallMode,
+        store_install_plan: BackendInstallPlan,
     }
 
     impl Default for TestBackend {
         fn default() -> Self {
             Self {
                 ba: Arc::new("test".into()),
+                store_install_mode: StoreInstallMode::LegacyMutable,
+                store_install_plan: BackendInstallPlan::legacy_monolithic(),
+            }
+        }
+    }
+
+    impl TestBackend {
+        fn with_store_capability(
+            store_install_mode: StoreInstallMode,
+            store_install_plan: BackendInstallPlan,
+        ) -> Self {
+            Self {
+                ba: Arc::new("test".into()),
+                store_install_mode,
+                store_install_plan,
             }
         }
     }
@@ -1099,6 +1305,14 @@ mod tests {
     impl Backend for TestBackend {
         fn ba(&self) -> &Arc<BackendArg> {
             &self.ba
+        }
+
+        fn store_install_mode(&self, _tv: &ToolVersion) -> StoreInstallMode {
+            self.store_install_mode
+        }
+
+        fn store_install_plan(&self, _tv: &ToolVersion) -> BackendInstallPlan {
+            self.store_install_plan.clone()
         }
 
         async fn _list_remote_versions(
@@ -1169,6 +1383,77 @@ pub trait Backend: Debug + Send + Sync {
     /// - linux-x64-musl-baseline (musl + no AVX2)
     fn platform_variants(&self, platform: &Platform) -> Vec<Platform> {
         vec![platform.clone()] // Default: just the base platform
+    }
+
+    /// Declares whether this backend can publish installs into the nise immutable store.
+    ///
+    /// The default is deliberately legacy-only. A backend must opt in after relocation
+    /// and read-only smoke tests prove the stronger guarantees.
+    #[allow(dead_code)]
+    fn store_install_mode(&self, _tv: &ToolVersion) -> StoreInstallMode {
+        StoreInstallMode::LegacyMutable
+    }
+
+    /// Declares install-time sandbox requirements for nise store installs.
+    ///
+    /// Legacy backends inherit current behavior and are not eligible for strict
+    /// immutable install mode until they opt into a stricter policy and install plan.
+    #[allow(dead_code)]
+    fn store_sandbox_policy(&self, _tv: &ToolVersion) -> InstallSandboxPolicy {
+        InstallSandboxPolicy::legacy()
+    }
+
+    /// Declares whether the backend install can be split into strict phases.
+    ///
+    /// Existing backends expose one monolithic install hook, so the default cannot
+    /// satisfy strict immutable store mode.
+    #[allow(dead_code)]
+    fn store_install_plan(&self, _tv: &ToolVersion) -> BackendInstallPlan {
+        BackendInstallPlan::legacy_monolithic()
+    }
+
+    fn validate_nise_immutable_store_install(&self, tv: &ToolVersion) -> Result<StoreInstallMode> {
+        let mode = self.store_install_mode(tv);
+        if mode == StoreInstallMode::LegacyMutable {
+            bail!(
+                "{} does not support nise immutable store installs yet",
+                self.ba().short
+            );
+        }
+        let plan = self.store_install_plan(tv);
+        if !plan.supports_strict_immutable() {
+            bail!(
+                "{} cannot run under strict nise immutable store install mode with its current install plan",
+                self.ba().short
+            );
+        }
+        Ok(mode)
+    }
+
+    async fn install_version_store(
+        &self,
+        _ctx: &InstallContext,
+        tv: ToolVersion,
+    ) -> Result<ToolVersion> {
+        self.validate_nise_immutable_store_install(&tv)?;
+        bail!(
+            "{} declares nise immutable store capability but has not implemented store publishing yet",
+            self.ba().short
+        )
+    }
+
+    /// Validates a staged install after publishing to a different store location.
+    ///
+    /// Backends that opt into `ImmutableRelocatable` should scan for embedded staging
+    /// paths and run backend-specific smoke checks here.
+    #[allow(dead_code)]
+    fn validate_relocated_store(
+        &self,
+        _ctx: &InstallContext,
+        _build_path: &Path,
+        _published: &ToolVersion,
+    ) -> Result<()> {
+        Ok(())
     }
 
     /// Whether this backend supports URL-based locking in locked mode.
@@ -1886,15 +2171,13 @@ pub trait Backend: Debug + Send + Sync {
                         .to_string();
                     return Ok(Some(version));
                 }
-                Ok(file::dir_subdirs(&self.ba().installs_path)
-                    .unwrap_or_default()
-                    .into_iter()
-                    .filter(|v| !v.starts_with('.'))
-                    .filter(|v| !is_runtime_symlink(&self.ba().installs_path.join(v)))
-                    .filter(|v| !self.ba().installs_path.join(v).join("incomplete").exists())
-                    .filter(|v| v != "latest")
-                    .sorted_by_cached_key(|v| (Versioning::new(v), v.to_string()))
-                    .last())
+                Ok(installed_versions::list_concrete_versions(
+                    &self.ba().installs_path,
+                    &self.ba().short,
+                )
+                .into_iter()
+                .filter(|v| v != "latest")
+                .last())
             }
         }
     }
@@ -2094,6 +2377,11 @@ pub trait Backend: Debug + Send + Sync {
                 );
             }
         }
+        let nise_immutable_store_requested =
+            ctx.nise_store_install_mode == NiseStoreInstallMode::Immutable;
+        if nise_immutable_store_requested {
+            self.validate_nise_immutable_store_install(&tv)?;
+        }
 
         // Handle dry-run mode early to avoid plugin installation
         if ctx.dry_run {
@@ -2110,6 +2398,10 @@ pub trait Backend: Debug + Send + Sync {
 
         if let Some(plugin) = self.plugin() {
             plugin.is_installed_err()?;
+        }
+
+        if nise_immutable_store_requested {
+            return self.install_version_store(&ctx, tv).await;
         }
 
         // If --force and the install path resolved to a shared dir (but wasn't explicitly
@@ -2207,6 +2499,7 @@ pub trait Backend: Debug + Send + Sync {
                 .finish_with_message("running custom postinstall hook".to_string());
             self.run_postinstall_hook(&ctx, &tv, script).await?;
         }
+        self.write_legacy_install_manifests(&tv);
         ctx.pr.finish_with_message("installed".to_string());
         Ok(tv)
     }
@@ -2370,6 +2663,16 @@ pub trait Backend: Debug + Send + Sync {
             rmdir(&tv.download_path())?;
         }
         rmdir(&tv.cache_path())?;
+        if !dryrun
+            && let Err(err) = remove_install_ref_manifest(
+                &StoreRoot::default(),
+                &self.ba().short,
+                &tv.tv_pathname(),
+                false,
+            )
+        {
+            warn!("failed to remove nise install ref for {tv}: {err:#}");
+        }
         if !dryrun {
             self.cleanup_empty_installs_dir();
         }
@@ -2468,6 +2771,27 @@ pub trait Backend: Debug + Send + Sync {
     fn cleanup_install_dirs(&self, tv: &ToolVersion) {
         if !Settings::get().always_keep_download {
             let _ = remove_all_with_warning(tv.download_path());
+        }
+    }
+    fn write_legacy_install_manifests(&self, tv: &ToolVersion) {
+        let install_path = tv.install_path();
+        if !install_path.exists()
+            || env::install_path_category(&install_path) != env::InstallPathCategory::Local
+        {
+            return;
+        }
+        let backend = self.ba().full_without_opts();
+        let version = tv.tv_pathname();
+        let platform = self.get_platform_key();
+        let input = LegacyInstallManifestInput {
+            tool: &self.ba().short,
+            backend: &backend,
+            version: &version,
+            platform: &platform,
+            compatibility_path: &install_path,
+        };
+        if let Err(err) = write_legacy_install_manifests(&StoreRoot::default(), input) {
+            warn!("failed to write nise legacy install manifests for {tv}: {err:#}");
         }
     }
     fn cleanup_empty_installs_dir(&self) {

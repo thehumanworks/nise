@@ -6,7 +6,7 @@ use clap::ValueEnum;
 use eyre::bail;
 use std::path::PathBuf;
 
-/// Set the value of a setting in a mise.toml file
+/// Set the value of a setting in a nise.toml file
 #[derive(Debug, clap::Args)]
 #[clap(after_long_help = AFTER_LONG_HELP, verbatim_doc_comment)]
 pub struct ConfigSet {
@@ -16,9 +16,9 @@ pub struct ConfigSet {
     /// The value to set the key to (optional if provided as KEY=VALUE)
     pub value: Option<String>,
 
-    /// The path to the mise.toml file to edit
+    /// The path to the nise.toml file to edit
     ///
-    /// If not provided, the nearest mise.toml file will be used
+    /// If not provided, the nearest nise.toml file will be used
     #[clap(short, long)]
     pub file: Option<PathBuf>,
 
@@ -62,7 +62,7 @@ impl ConfigSet {
             file = top_toml_config();
         }
         let Some(file) = file else {
-            bail!("No mise.toml file found");
+            bail!("No nise.toml file found");
         };
         let mut config: toml_edit::DocumentMut = std::fs::read_to_string(&file)?.parse()?;
         let mut container = config.as_item_mut();
@@ -161,12 +161,12 @@ impl ConfigSet {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise config set tools.python 3.12</bold>
-    $ <bold>mise config set settings.always_keep_download true</bold>
-    $ <bold>mise config set env.TEST_ENV_VAR ABC</bold>
-    $ <bold>mise config set settings.disable_tools node,rust</bold>
+    $ <bold>nise config set tools.python 3.12</bold>
+    $ <bold>nise config set settings.always_keep_download true</bold>
+    $ <bold>nise config set env.TEST_ENV_VAR ABC</bold>
+    $ <bold>nise config set settings.disable_tools node,rust</bold>
 
     # Type for `settings` is inferred
-    $ <bold>mise config set settings.jobs 4</bold>
+    $ <bold>nise config set settings.jobs 4</bold>
 "#
 );

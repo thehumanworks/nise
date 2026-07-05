@@ -12,7 +12,7 @@ use tabled::{Table, Tabled};
 /// This is the contents of ~/.config/mise/config.toml
 ///
 /// Note that aliases are also stored in this file
-/// but managed separately with `mise tool-alias`
+/// but managed separately with `nise tool-alias`
 #[derive(Debug, clap::Args)]
 #[clap(after_long_help = AFTER_LONG_HELP, verbatim_doc_comment)]
 pub struct SettingsLs {
@@ -188,11 +188,11 @@ impl SettingsLs {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise settings ls</bold>
+    $ <bold>nise settings ls</bold>
     idiomatic_version_file = false
     ...
 
-    $ <bold>mise settings ls python</bold>
+    $ <bold>nise settings ls python</bold>
     default_packages_file = "~/.default-python-packages"
     ...
 "#

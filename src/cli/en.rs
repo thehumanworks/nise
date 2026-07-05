@@ -3,11 +3,11 @@ use std::path::PathBuf;
 
 use crate::env;
 
-/// Starts a new shell with the mise environment built from the current configuration
+/// Starts a new shell with the nise environment built from the current configuration
 ///
-/// This is an alternative to `mise activate` that allows you to explicitly start a mise session.
+/// This is an alternative to `nise activate` that allows you to explicitly start a nise session.
 /// It will have the tools and environment variables in the configs loaded.
-/// Note that changing directories will not update the mise environment.
+/// Note that changing directories will not update the nise environment.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct En {
@@ -54,14 +54,14 @@ impl En {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise en .</bold>
+    $ <bold>nise en .</bold>
     $ <bold>node -v</bold>
     v20.0.0
 
     Skip loading bashrc:
-    $ <bold>mise en -s "bash --norc"</bold>
+    $ <bold>nise en -s "bash --norc"</bold>
 
     Skip loading zshrc:
-    $ <bold>mise en -s "zsh -f"</bold>
+    $ <bold>nise en -s "zsh -f"</bold>
 "#
 );

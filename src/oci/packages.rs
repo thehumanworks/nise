@@ -51,25 +51,25 @@ pub fn build_system_packages_layer(
     }
     if base_layers.is_empty() {
         bail!(
-            "mise oci requires an apt-based base image when [bootstrap.packages] is configured; \
+            "nise oci requires an apt-based base image when [bootstrap.packages] is configured; \
              `scratch` has no apt metadata"
         );
     }
     if file::which("apt-get").is_none() {
-        bail!("mise oci needs `apt-get` on PATH to install apt system packages into the image");
+        bail!("nise oci needs `apt-get` on PATH to install apt system packages into the image");
     }
     if file::which("dpkg").is_none() {
-        bail!("mise oci needs `dpkg` on PATH to install apt system packages into the image");
+        bail!("nise oci needs `dpkg` on PATH to install apt system packages into the image");
     }
 
-    let td = TempDir::with_prefix("mise-oci-apt-rootfs-")
+    let td = TempDir::with_prefix("nise-oci-apt-rootfs-")
         .wrap_err("creating temp rootfs for apt system packages")?;
     let rootfs = td.path().join("rootfs");
     file::create_dir_all(&rootfs)?;
     unpack_base_layers(layout, base_layers, &rootfs)?;
     if !rootfs.join("etc/apt").is_dir() {
         bail!(
-            "mise oci found apt packages in [bootstrap.packages], but the base image does not \
+            "nise oci found apt packages in [bootstrap.packages], but the base image does not \
              contain /etc/apt. Use a Debian/Ubuntu base image or remove the apt entries."
         );
     }
@@ -111,7 +111,7 @@ fn collect_apt_requests(managers: &[ManagerPackages]) -> Result<Vec<PackageReque
         unsupported.sort();
         unsupported.dedup();
         bail!(
-            "mise oci currently supports only apt entries in [bootstrap.packages]; unsupported \
+            "nise oci currently supports only apt entries in [bootstrap.packages]; unsupported \
              manager(s): {}",
             unsupported.join(", ")
         );

@@ -30,28 +30,28 @@ use clap::{Subcommand, ValueEnum};
 /// Runs the bootstrap steps for the current config in order:
 ///
 /// 0. `[bootstrap.hooks.pre-packages]` — optional setup hook
-/// 1. `mise bootstrap packages apply` — install missing
+/// 1. `nise bootstrap packages apply` — install missing
 ///    `[bootstrap.packages]`
 ///    then `[bootstrap.hooks.post-packages]`
-/// 2. `mise bootstrap repos apply` — clone/update `[bootstrap.repos]`
+/// 2. `nise bootstrap repos apply` — clone/update `[bootstrap.repos]`
 ///    surrounded by `pre-repos`/`post-repos` hooks
-/// 3. `mise bootstrap dotfiles apply` — apply dotfiles from `[dotfiles]`
+/// 3. `nise bootstrap dotfiles apply` — apply dotfiles from `[dotfiles]`
 ///    surrounded by `pre-dotfiles`/`post-dotfiles` hooks
-/// 4. `mise bootstrap mise-shell-activate apply` — configure shell activation
+/// 4. `nise bootstrap mise-shell-activate apply` — configure shell activation
 ///    from `[bootstrap.mise_shell_activate]`
-/// 5. `mise bootstrap macos defaults apply` — write
+/// 5. `nise bootstrap macos defaults apply` — write
 ///    `[bootstrap.macos.defaults]` entries (macOS)
 ///    surrounded by `pre-defaults`/`post-defaults` hooks
-/// 6. `mise bootstrap macos launchd-agents apply` — install/load
+/// 6. `nise bootstrap macos launchd-agents apply` — install/load
 ///    `[bootstrap.macos.launchd.agents]`
-/// 7. `mise bootstrap linux systemd-units apply` — install/start
+/// 7. `nise bootstrap linux systemd-units apply` — install/start
 ///    `[bootstrap.linux.systemd.units]`
-/// 8. `mise bootstrap user apply` — set `[bootstrap.user].login_shell`
+/// 8. `nise bootstrap user apply` — set `[bootstrap.user].login_shell`
 ///    (Unix)
 ///    surrounded by `pre-user`/`post-user` hooks
-/// 9. `mise install` — install missing tools from `[tools]`
+/// 9. `nise install` — install missing tools from `[tools]`
 ///    surrounded by `pre-tools`/`post-tools` hooks
-/// 10. `mise run bootstrap` — if a task named `bootstrap` is defined
+/// 10. `nise run bootstrap` — if a task named `bootstrap` is defined
 /// 11. `[bootstrap.hooks.final]` — optional final hook
 ///
 /// The declarative steps converge — anything already in its desired state
@@ -212,19 +212,19 @@ struct BootstrapDotfilesStatus {
 static BOOTSTRAP_DOTFILES_APPLY_AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap dotfiles apply</bold>
-    $ <bold>mise bootstrap dotfiles apply --dry-run</bold>
-    $ <bold>mise bootstrap dotfiles apply --force --yes</bold>
+    $ <bold>nise bootstrap dotfiles apply</bold>
+    $ <bold>nise bootstrap dotfiles apply --dry-run</bold>
+    $ <bold>nise bootstrap dotfiles apply --force --yes</bold>
 "#
 );
 
 static BOOTSTRAP_DOTFILES_STATUS_AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap dotfiles status</bold>
-    $ <bold>mise bootstrap dotfiles status ~/.zshrc</bold>
-    $ <bold>mise bootstrap dotfiles status --json</bold>
-    $ <bold>mise bootstrap dotfiles status --missing</bold> # exit 1 if anything is out of sync
+    $ <bold>nise bootstrap dotfiles status</bold>
+    $ <bold>nise bootstrap dotfiles status ~/.zshrc</bold>
+    $ <bold>nise bootstrap dotfiles status --json</bold>
+    $ <bold>nise bootstrap dotfiles status --missing</bold> # exit 1 if anything is out of sync
 "#
 );
 
@@ -563,7 +563,7 @@ impl Bootstrap {
                     dry_run: self.dry_run,
                     verbose: false,
                     force: self.force_dotfiles,
-                    force_hint: "use --force-dotfiles or run `mise dotfiles apply --force`",
+                    force_hint: "use --force-dotfiles or run `nise dotfiles apply --force`",
                     yes: self.yes,
                 };
                 system::files::apply(&config, &files, &opts)?;
@@ -2295,20 +2295,20 @@ impl BootstrapUserStatus {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap</bold>                    # packages + repos + dotfiles + tools + bootstrap task
-    $ <bold>mise bootstrap --force-dotfiles</bold>   # replace conflicting dotfile targets
-    $ <bold>mise bootstrap --skip tools,task</bold>  # skip tool installation and the bootstrap task
-    $ <bold>mise bootstrap --only tools</bold>       # run just tool installation
-    $ <bold>mise bootstrap status --missing</bold>
-    $ <bold>mise bootstrap packages apply --yes</bold>
-    $ <bold>mise bootstrap repos status</bold>
-    $ <bold>mise bootstrap repos apply --dry-run</bold>
-    $ <bold>mise bootstrap dotfiles status</bold>
-    $ <bold>mise bootstrap mise-shell-activate apply --dry-run</bold>
-    $ <bold>mise bootstrap macos defaults status</bold>
-    $ <bold>mise bootstrap macos launchd-agents apply --dry-run</bold>
-    $ <bold>mise bootstrap linux systemd-units apply --dry-run</bold>
-    $ <bold>mise bootstrap user apply --dry-run</bold>
+    $ <bold>nise bootstrap</bold>                    # packages + repos + dotfiles + tools + bootstrap task
+    $ <bold>nise bootstrap --force-dotfiles</bold>   # replace conflicting dotfile targets
+    $ <bold>nise bootstrap --skip tools,task</bold>  # skip tool installation and the bootstrap task
+    $ <bold>nise bootstrap --only tools</bold>       # run just tool installation
+    $ <bold>nise bootstrap status --missing</bold>
+    $ <bold>nise bootstrap packages apply --yes</bold>
+    $ <bold>nise bootstrap repos status</bold>
+    $ <bold>nise bootstrap repos apply --dry-run</bold>
+    $ <bold>nise bootstrap dotfiles status</bold>
+    $ <bold>nise bootstrap mise-shell-activate apply --dry-run</bold>
+    $ <bold>nise bootstrap macos defaults status</bold>
+    $ <bold>nise bootstrap macos launchd-agents apply --dry-run</bold>
+    $ <bold>nise bootstrap linux systemd-units apply --dry-run</bold>
+    $ <bold>nise bootstrap user apply --dry-run</bold>
 "#
 );
 

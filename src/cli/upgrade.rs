@@ -27,9 +27,9 @@ use jiff::{Span, Timestamp, civil::date};
 
 /// Upgrades outdated tools
 ///
-/// By default, this keeps the range specified in mise.toml. So if you have node@20 set, it will
+/// By default, this keeps the range specified in nise.toml. So if you have node@20 set, it will
 /// upgrade to the latest 20.x.x version available. See the `--bump` flag to use the latest version
-/// and bump the version in mise.toml.
+/// and bump the version in nise.toml.
 ///
 /// This will update mise.lock if it is enabled, see https://mise.en.dev/configuration/settings.html#lockfile
 #[derive(Debug, clap::Args)]
@@ -50,9 +50,9 @@ pub struct Upgrade {
     #[clap(long, short, env = "MISE_JOBS", verbatim_doc_comment)]
     jobs: Option<usize>,
 
-    /// Upgrades to the latest version available, bumping the version in mise.toml
+    /// Upgrades to the latest version available, bumping the version in nise.toml
     ///
-    /// For example, if you have `node = "20.0.0"` in your mise.toml but 22.1.0 is the latest available,
+    /// For example, if you have `node = "20.0.0"` in your nise.toml but 22.1.0 is the latest available,
     /// this will install 22.1.0 and set `node = "22.1.0"` in your config.
     ///
     /// It keeps the same precision as what was there before, so if you instead had `node = "20"`, it
@@ -81,7 +81,7 @@ pub struct Upgrade {
 
     /// Only upgrade tools defined in local config files
     ///
-    /// This will only upgrade tools that are defined in project-local mise.toml and
+    /// This will only upgrade tools that are defined in project-local nise.toml and
     /// will skip tools defined in the global config (~/.config/mise/config.toml).
     #[clap(long, verbatim_doc_comment)]
     local: bool,
@@ -96,7 +96,7 @@ pub struct Upgrade {
     #[clap(long, alias = "before", verbatim_doc_comment)]
     minimum_release_age: Option<String>,
 
-    /// Placeholder for future monorepo upgrades; `mise upgrade --monorepo` is not implemented yet.
+    /// Placeholder for future monorepo upgrades; `nise upgrade --monorepo` is not implemented yet.
     #[clap(long, verbatim_doc_comment)]
     monorepo: bool,
 
@@ -173,7 +173,7 @@ impl Upgrade {
             if !self.bump {
                 hint!(
                     "outdated_bump",
-                    r#"By default, `mise upgrade` only upgrades versions that match your config. Use `mise upgrade --bump` to upgrade all new versions."#,
+                    r#"By default, `nise upgrade` only upgrades versions that match your config. Use `nise upgrade --bump` to upgrade all new versions."#,
                     ""
                 );
             }
@@ -327,7 +327,7 @@ impl Upgrade {
             }
         }
 
-        // When a specific version is provided via CLI (e.g., `mise upgrade tiny@3.0.1`),
+        // When a specific version is provided via CLI (e.g., `nise upgrade tiny@3.0.1`),
         // update the config file prefix if the new version doesn't match the current specifier.
         // Skip if --bump was used since it already handles config updates.
         if !self.bump {
@@ -802,32 +802,32 @@ fn release_is_eligible_at(created_at: Timestamp, now: Timestamp, age: &Span) -> 
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    # Upgrades node to the latest version matching the range in mise.toml
-    $ <bold>mise upgrade node</bold>
+    # Upgrades node to the latest version matching the range in nise.toml
+    $ <bold>nise upgrade node</bold>
 
-    # Upgrades node to the latest version and bumps the version in mise.toml
-    $ <bold>mise upgrade node --bump</bold>
+    # Upgrades node to the latest version and bumps the version in nise.toml
+    $ <bold>nise upgrade node --bump</bold>
 
     # Upgrades all tools to the latest versions
-    $ <bold>mise upgrade</bold>
+    $ <bold>nise upgrade</bold>
 
-    # Upgrades all tools to the latest versions and bumps the version in mise.toml
-    $ <bold>mise upgrade --bump</bold>
+    # Upgrades all tools to the latest versions and bumps the version in nise.toml
+    $ <bold>nise upgrade --bump</bold>
 
     # Just print what would be done, don't actually do it
-    $ <bold>mise upgrade --dry-run</bold>
+    $ <bold>nise upgrade --dry-run</bold>
 
     # Upgrades node and python to the latest versions
-    $ <bold>mise upgrade node python</bold>
+    $ <bold>nise upgrade node python</bold>
 
     # Upgrade all tools except go
-    $ <bold>mise upgrade --exclude go</bold>
+    $ <bold>nise upgrade --exclude go</bold>
 
     # Show a multiselect menu to choose which tools to upgrade
-    $ <bold>mise upgrade --interactive</bold>
+    $ <bold>nise upgrade --interactive</bold>
 
-    # Only upgrade tools defined in local mise.toml, not global ones
-    $ <bold>mise upgrade --local</bold>
+    # Only upgrade tools defined in local nise.toml, not global ones
+    $ <bold>nise upgrade --local</bold>
 "#
 );
 

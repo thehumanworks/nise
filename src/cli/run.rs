@@ -33,8 +33,8 @@ use tokio::sync::Mutex;
 /// If source is configured on a task, it will only run if the source
 /// files have changed.
 ///
-/// Tasks can be defined in mise.toml or as standalone scripts.
-/// In mise.toml, tasks take this form:
+/// Tasks can be defined in nise.toml or as standalone scripts.
+/// In nise.toml, tasks take this form:
 ///
 ///     [tasks.build]
 ///     run = "npm run build"
@@ -50,7 +50,7 @@ use tokio::sync::Mutex;
 ///     #!/usr/bin/env bash
 ///     npm run build
 ///     EOF
-///     $ mise run build
+///     $ nise run build
 #[derive(clap::Args)]
 #[clap(visible_alias = "r", verbatim_doc_comment, disable_help_flag = true, after_long_help = AFTER_LONG_HELP)]
 pub struct Run {
@@ -128,7 +128,7 @@ pub struct Run {
     #[clap(long, short = 'S', verbatim_doc_comment, env = "MISE_SILENT")]
     pub silent: bool,
 
-    /// Tool(s) to run in addition to what is in mise.toml files
+    /// Tool(s) to run in addition to what is in nise.toml files
     /// e.g.: node@20 python@3.10
     #[clap(short, long, value_name = "TOOL@VERSION")]
     pub tool: Vec<ToolArg>,
@@ -350,7 +350,7 @@ impl Run {
         let resolved_tasks = resolve_depends(&config, task_list).await?;
 
         // Collect subdirectory config files from all resolved tasks. In
-        // monorepos these come from sub mise.toml files referenced via the
+        // monorepos these come from sub nise.toml files referenced via the
         // `//sub:taskname` syntax — they aren't in `config.config_files`.
         let subdir_configs: Vec<_> = resolved_tasks
             .iter()
@@ -882,22 +882,22 @@ fn display_task_help(task: &Task) -> Result<()> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    # Runs the "lint" tasks. This needs to either be defined in mise.toml
+    # Runs the "lint" tasks. This needs to either be defined in nise.toml
     # or as a standalone script. See the project README for more information.
-    $ <bold>mise run lint</bold>
+    $ <bold>nise run lint</bold>
 
     # Forces the "build" tasks to run even if its sources are up-to-date.
-    $ <bold>mise run --force build</bold>
+    $ <bold>nise run --force build</bold>
 
     # Run "test" with stdin/stdout/stderr all connected to the current terminal.
     # This forces `--jobs=1` to prevent interleaving of output.
-    $ <bold>mise run --raw test</bold>
+    $ <bold>nise run --raw test</bold>
 
     # Runs the "lint", "test", and "check" tasks in parallel.
-    $ <bold>mise run lint ::: test ::: check</bold>
+    $ <bold>nise run lint ::: test ::: check</bold>
 
     # Execute multiple tasks each with their own arguments.
-    $ <bold>mise run cmd1 arg1 arg2 ::: cmd2 arg1 arg2</bold>
+    $ <bold>nise run cmd1 arg1 arg2 ::: cmd2 arg1 arg2</bold>
 "#
 );
 

@@ -15,14 +15,14 @@ use demand::Input;
 use eyre::{Result, bail, eyre};
 use tabled::Tabled;
 
-/// Set environment variables in mise.toml
+/// Set environment variables in nise.toml
 ///
-/// By default, this command modifies `mise.toml` in the current directory.
-/// If multiple config files exist (e.g., both `mise.toml` and `mise.local.toml`),
-/// the lowest precedence file (`mise.toml`) will be used.
+/// By default, this command modifies `nise.toml` in the current directory.
+/// If multiple config files exist (e.g., both `nise.toml` and `nise.local.toml`),
+/// the lowest precedence file (`nise.toml`) will be used.
 /// See https://mise.en.dev/configuration.html#target-file-for-write-operations
 ///
-/// Use `-E <env>` to create/modify environment-specific config files like `mise.<env>.toml`.
+/// Use `-E <env>` to create/modify environment-specific config files like `nise.<env>.toml`.
 #[derive(Debug, clap::Args)]
 #[clap(aliases = ["ev", "env-vars"], verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Set {
@@ -31,7 +31,7 @@ pub struct Set {
     #[clap(value_name = "ENV_VAR", verbatim_doc_comment)]
     env_vars: Option<Vec<EnvVarArg>>,
 
-    /// Create/modify an environment-specific config file like .mise.<env>.toml
+    /// Create/modify an environment-specific config file like .nise.<env>.toml
     #[clap(short = 'E', long, overrides_with_all = &["global", "file"])]
     env: Option<String>,
 
@@ -67,8 +67,8 @@ pub struct Set {
 
     /// The TOML file to update
     ///
-    /// Can be a file path or directory. If a directory is provided, will create/use mise.toml in that directory.
-    /// Defaults to [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) environment variable, or `mise.toml`.
+    /// Can be a file path or directory. If a directory is provided, will create/use nise.toml in that directory.
+    /// Defaults to [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) environment variable, or `nise.toml`.
     /// Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
     #[clap(long, verbatim_doc_comment, required = false, value_hint = clap::ValueHint::AnyPath)]
     file: Option<PathBuf>,
@@ -264,21 +264,8 @@ impl Set {
         } else if self.env.is_some() {
             Some(self.filename()?)
         } else if !self.global {
-            // Check for local config file when no specific file or environment is specified
-            // Check for mise.toml in current directory first
-            let cwd = env::current_dir()?;
-            let mise_toml = cwd.join("mise.toml");
-            if mise_toml.exists() {
-                Some(mise_toml)
-            } else {
-                // Fall back to .mise.toml if mise.toml doesn't exist
-                let dot_mise_toml = cwd.join(".mise.toml");
-                if dot_mise_toml.exists() {
-                    Some(dot_mise_toml)
-                } else {
-                    None // Fall back to global config if no local config exists
-                }
-            }
+            let local_config = crate::config::local_toml_config_path();
+            local_config.exists().then_some(local_config)
         } else {
             None
         };
@@ -471,19 +458,19 @@ struct Row {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise set NODE_ENV=production</bold>
+    $ <bold>nise set NODE_ENV=production</bold>
 
-    $ <bold>mise set NODE_ENV</bold>
+    $ <bold>nise set NODE_ENV</bold>
     production
 
-    $ <bold>mise set -E staging NODE_ENV=staging</bold>
-    # creates or modifies mise.staging.toml
+    $ <bold>nise set -E staging NODE_ENV=staging</bold>
+    # creates or modifies nise.staging.toml
 
-    $ <bold>mise set</bold>
+    $ <bold>nise set</bold>
     key       value       source
     NODE_ENV  production  ~/.config/mise/config.toml
 
-    $ <bold>mise set --prompt PASSWORD</bold>
+    $ <bold>nise set --prompt PASSWORD</bold>
     Enter value for PASSWORD: [hidden input]
 
     <bold><underline>Multiline Values (--stdin):</underline></bold>
@@ -494,9 +481,9 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
 
     <bold><underline>[experimental] Age Encryption:</underline></bold>
 
-    $ <bold>mise set --age-encrypt API_KEY=secret</bold>
+    $ <bold>nise set --age-encrypt API_KEY=secret</bold>
 
-    $ <bold>mise set --age-encrypt --prompt API_KEY</bold>
+    $ <bold>nise set --age-encrypt --prompt API_KEY</bold>
     Enter value for API_KEY: [hidden input]
 "#
 );

@@ -57,7 +57,7 @@ impl TasksInfo {
             }
         } else {
             bail!(
-                "Task not found: {}, use `mise tasks ls --all --hidden` to list all tasks",
+                "Task not found: {}, use `nise tasks ls --all --hidden` to list all tasks",
                 self.task
             );
         }
@@ -170,18 +170,18 @@ impl TasksInfo {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tasks info</bold>
+    $ <bold>nise tasks info</bold>
     Name: test
     Aliases: t
     Description: Test the application
-    Source: ~/src/myproj/mise.toml
+    Source: ~/src/myproj/nise.toml
 
-    $ <bold>mise tasks info test --json</bold>
+    $ <bold>nise tasks info test --json</bold>
     {
       "name": "test",
       "aliases": "t",
       "description": "Test the application",
-      "source": "~/src/myproj/mise.toml",
+      "source": "~/src/myproj/nise.toml",
       "depends": [],
       "env": {},
       "dir": null,

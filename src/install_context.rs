@@ -5,6 +5,12 @@ use jiff::Timestamp;
 use crate::ui::progress_report::SingleReport;
 use crate::{config::Config, toolset::Toolset};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NiseStoreInstallMode {
+    Legacy,
+    Immutable,
+}
+
 pub struct InstallContext {
     pub config: Arc<Config>,
     pub ts: Arc<Toolset>,
@@ -13,5 +19,6 @@ pub struct InstallContext {
     pub dry_run: bool,
     /// require lockfile URLs to be present; fail if not
     pub locked: bool,
+    pub nise_store_install_mode: NiseStoreInstallMode,
     pub before_date: Option<Timestamp>,
 }

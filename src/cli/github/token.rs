@@ -50,13 +50,13 @@ impl From<Token> for Github {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise github token</bold>
+    $ <bold>nise github token</bold>
     github.com: ghp_…xxxx (source: GITHUB_TOKEN)
 
-    $ <bold>mise github token --unmask</bold>
+    $ <bold>nise github token --unmask</bold>
     github.com: ghp_xxxxxxxxxxxx (source: GITHUB_TOKEN)
 
-    $ <bold>mise github token github.mycompany.com</bold>
+    $ <bold>nise github token github.mycompany.com</bold>
     github.mycompany.com: (none)
 "#
 );

@@ -119,7 +119,7 @@ impl BackendProvider for MiseBackendProvider {
     }
 }
 
-/// Edit mise.toml interactively
+/// Edit nise.toml interactively
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Edit {
@@ -287,8 +287,8 @@ impl Edit {
             # in all parent directories and merge them together.
             # You might have a structure like:
             #
-            # * ~/work/project/mise.toml   # a config file for a specific work project
-            # * ~/work/mise.toml           # a config file for projects related to work
+            # * ~/work/project/nise.toml   # a config file for a specific work project
+            # * ~/work/nise.toml           # a config file for projects related to work
             # * ~/.config/mise/config.toml # the global config file
             # * /etc/mise/config.toml      # the system config file
             #
@@ -387,10 +387,10 @@ fn extract_version(tool: &str, path: &Path) -> Option<String> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise edit</bold>             <dim># edit mise.toml interactively</dim>
-    $ <bold>mise edit .mise.toml</bold>  <dim># edit a specific file</dim>
-    $ <bold>mise edit -g</bold>          <dim># edit the global config file</dim>
-    $ <bold>mise edit -y</bold>          <dim># skip interactive editor</dim>
-    $ <bold>mise edit -n</bold>          <dim># preview without writing</dim>
+    $ <bold>nise edit</bold>             <dim># edit nise.toml interactively</dim>
+    $ <bold>nise edit .nise.toml</bold>  <dim># edit a specific file</dim>
+    $ <bold>nise edit -g</bold>          <dim># edit the global config file</dim>
+    $ <bold>nise edit -y</bold>          <dim># skip interactive editor</dim>
+    $ <bold>nise edit -n</bold>          <dim># preview without writing</dim>
 "#
 );

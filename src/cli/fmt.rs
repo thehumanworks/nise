@@ -5,9 +5,9 @@ use eyre::bail;
 use std::io::{self, Read, Write};
 use taplo::formatter::Options;
 
-/// Formats mise.toml
+/// Formats nise.toml
 ///
-/// Sorts keys and cleans up whitespace in mise.toml
+/// Sorts keys and cleans up whitespace in nise.toml
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Fmt {
@@ -137,6 +137,6 @@ fn format(toml: String) -> Result<String> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise fmt</bold>
+    $ <bold>nise fmt</bold>
 "#
 );

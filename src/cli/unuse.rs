@@ -10,20 +10,20 @@ use eyre::Result;
 use itertools::Itertools;
 use path_absolutize::Absolutize;
 
-/// Removes installed tool versions from mise.toml
+/// Removes installed tool versions from nise.toml
 ///
-/// By default, this will use the `mise.toml` file that has the tool defined.
-/// If multiple config files exist (e.g., both `mise.toml` and `mise.local.toml`),
-/// the lowest precedence file (`mise.toml`) will be used.
+/// By default, this will use the `nise.toml` file that has the tool defined.
+/// If multiple config files exist (e.g., both `nise.toml` and `nise.local.toml`),
+/// the lowest precedence file (`nise.toml`) will be used.
 /// See https://mise.en.dev/configuration.html#target-file-for-write-operations
 ///
 /// In the following order:
 ///   - If `--global` is set, it will use the global config file.
 ///   - If `--path` is set, it will use the config file at the given path.
-///   - If `--env` is set, it will use `mise.<env>.toml`.
+///   - If `--env` is set, it will use `nise.<env>.toml`.
 ///   - If [`MISE_DEFAULT_CONFIG_FILENAME`](https://mise.en.dev/configuration.html#mise_default_config_filename) is set, it will use that instead.
 ///   - If `MISE_OVERRIDE_CONFIG_FILENAMES` is set, it will the first from that list.
-///   - Otherwise just "mise.toml" or global config if cwd is home directory.
+///   - Otherwise just "nise.toml" or global config if cwd is home directory.
 ///
 /// Use [`MISE_GLOBAL_CONFIG_FILE`](https://mise.en.dev/configuration.html#mise_global_config_file) to choose a different global config path.
 ///
@@ -35,7 +35,7 @@ pub struct Unuse {
     #[clap(value_name = "INSTALLED_TOOL@VERSION", required = true)]
     installed_tool: Vec<ToolArg>,
 
-    /// Create/modify an environment-specific config file like .mise.<env>.toml
+    /// Create/modify an environment-specific config file like .nise.<env>.toml
     #[clap(long, short, overrides_with_all = & ["global", "path"])]
     env: Option<String>,
 
@@ -119,11 +119,11 @@ impl Unuse {
                 p.clone()
             }
         } else if let Some(env) = &self.env {
-            let p = cwd.join(format!(".mise.{env}.toml"));
+            let p = cwd.join(format!(".nise.{env}.toml"));
             if p.exists() {
                 p
             } else {
-                cwd.join(format!("mise.{env}.toml"))
+                cwd.join(format!("nise.{env}.toml"))
             }
         } else if env::in_home_dir() {
             config::global_config_path()
@@ -148,15 +148,15 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # will uninstall specific version
-    $ <bold>mise unuse node@18.0.0</bold>
+    $ <bold>nise unuse node@18.0.0</bold>
 
     # will uninstall specific version from global config
-    $ <bold>mise unuse -g node@18.0.0</bold>
+    $ <bold>nise unuse -g node@18.0.0</bold>
 
-    # will uninstall specific version from .mise.local.toml
-    $ <bold>mise unuse --env local node@20</bold>
+    # will uninstall specific version from .nise.local.toml
+    $ <bold>nise unuse --env local node@20</bold>
 
-    # will uninstall specific version from .mise.staging.toml
-    $ <bold>mise unuse --env staging node@20</bold>
+    # will uninstall specific version from .nise.staging.toml
+    $ <bold>nise unuse --env staging node@20</bold>
 "#
 );

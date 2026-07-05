@@ -16,19 +16,19 @@ use crate::{
 };
 use crate::{env, file};
 
-/// Sets/gets tool version in local .tool-versions or mise.toml
+/// Sets/gets tool version in local .tool-versions or nise.toml
 ///
 /// Use this to set a tool's version when within a directory
-/// Use `mise global` to set a tool version globally
-/// This uses `.tool-version` by default unless there is a `mise.toml` file or if `MISE_USE_TOML`
-/// is set. A future v2 release of mise will default to using `mise.toml`.
+/// Use `nise global` to set a tool version globally
+/// This uses `.tool-version` by default unless there is a `nise.toml` file or if `MISE_USE_TOML`
+/// is set. A future v2 release of mise will default to using `nise.toml`.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, hide = true, alias = "l", after_long_help = AFTER_LONG_HELP)]
 pub struct Local {
-    /// Tool(s) to add to .tool-versions/mise.toml
+    /// Tool(s) to add to .tool-versions/nise.toml
     /// e.g.: node@20
     /// if this is a single tool with no version,
-    /// the current value of .tool-versions/mise.toml will be displayed
+    /// the current value of .tool-versions/nise.toml will be displayed
     #[clap(value_name = "TOOL@VERSION", verbatim_doc_comment)]
     tool: Vec<ToolArg>,
 
@@ -38,7 +38,7 @@ pub struct Local {
     parent: bool,
 
     /// Save fuzzy version to `.tool-versions`
-    /// e.g.: `mise local --fuzzy node@20` will save `node 20` to .tool-versions
+    /// e.g.: `nise local --fuzzy node@20` will save `node 20` to .tool-versions
     /// This is the default behavior unless MISE_ASDF_COMPAT=1
     #[clap(long, overrides_with = "pin")]
     fuzzy: bool,
@@ -48,7 +48,7 @@ pub struct Local {
     path: bool,
 
     /// Save exact version to `.tool-versions`
-    /// e.g.: `mise local --pin node@20` will save `node 20.0.0` to .tool-versions
+    /// e.g.: `nise local --pin node@20` will save `node 20.0.0` to .tool-versions
     #[clap(long, verbatim_doc_comment, overrides_with = "fuzzy")]
     pin: bool,
 
@@ -114,7 +114,7 @@ pub async fn local(
 ) -> Result<()> {
     deprecated!(
         "local",
-        "mise local/global are deprecated. Use `mise use` instead."
+        "mise local/global are deprecated. Use `nise use` instead."
     );
     let settings = Settings::try_get()?;
     let cf = config_file::parse_or_init(path).await?;
@@ -159,20 +159,20 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
     # set the current version of node to 20.x for the current directory
     # will use a precise version (e.g.: 20.0.0) in .tool-versions file
-    $ <bold>mise local node@20</bold>
+    $ <bold>nise local node@20</bold>
 
     # set node to 20.x for the current project (recurses up to find .tool-versions)
-    $ <bold>mise local -p node@20</bold>
+    $ <bold>nise local -p node@20</bold>
 
     # set the current version of node to 20.x for the current directory
     # will use a fuzzy version (e.g.: 20) in .tool-versions file
-    $ <bold>mise local --fuzzy node@20</bold>
+    $ <bold>nise local --fuzzy node@20</bold>
 
     # removes node from .tool-versions
-    $ <bold>mise local --remove=node</bold>
+    $ <bold>nise local --remove=node</bold>
 
     # show the current version of node in .tool-versions
-    $ <bold>mise local node</bold>
+    $ <bold>nise local node</bold>
     20.0.0
 "#
 );

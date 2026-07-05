@@ -23,9 +23,9 @@ use crate::toolset::{InstallOptions, ResolveOptions, ToolsetBuilder};
 ///
 /// use this to avoid modifying the shell session or running ad-hoc commands with mise tools set.
 ///
-/// Tools will be loaded from mise.toml, though they can be overridden with <RUNTIME> args
-/// Note that only the plugin specified will be overridden, so if a `mise.toml` file
-/// includes "node 20" but you run `mise exec python@3.11`; it will still load node@20.
+/// Tools will be loaded from nise.toml, though they can be overridden with <RUNTIME> args
+/// Note that only the plugin specified will be overridden, so if a `nise.toml` file
+/// includes "node 20" but you run `nise exec python@3.11`; it will still load node@20.
 ///
 /// The "--" separates runtimes from the commands to pass along to the subprocess.
 #[derive(Debug, clap::Args)]
@@ -193,13 +193,13 @@ impl Exec {
 
         // Embed __MISE_DIFF so a nested mise invocation can recover the pristine
         // env (and pristine PATH) instead of stacking our tool dirs on top of its
-        // own. Without this, `mise -C <new> exec -- ...` invoked from inside our
+        // own. Without this, `nise -C <new> exec -- ...` invoked from inside our
         // child process would inherit our tool dirs as user-pre-PATH and they
         // would outrank the inner toolset's resolved tool. See discussion #9754.
         // Computed after all env modifications so the diff fully describes what
         // mise added (matches task_executor.rs).
         let removed_mise_env = if !env::MISE_ENV.is_empty() {
-            // Keep explicit -E profiles active if the child shell sources `mise activate`.
+            // Keep explicit -E profiles active if the child shell sources `nise activate`.
             env.remove("MISE_ENV")
         } else {
             None
@@ -418,10 +418,10 @@ where
     // the child process deal with it instead.
     win_exec::set_ctrlc_handler()?;
 
-    // `mise exec -c "<cmd>"` spawns the configured shell as `cmd /c <cmd>`. For
+    // `nise exec -c "<cmd>"` spawns the configured shell as `cmd /c <cmd>`. For
     // cmd, pass the command verbatim so inner double quotes survive (#9355).
     // Gated on `shell_body_mode` (the `-c`/`--command` path) so a positional
-    // `mise exec -- cmd /c "echo one" two` is not reinterpreted as a shell body.
+    // `nise exec -- cmd /c "echo one" two` is not reinterpreted as a shell body.
     // cwd is intentionally inherited from the process here, matching the duct
     // fallback below; the resolved `cwd` above governs program lookup only.
     if shell_body_mode {
@@ -523,13 +523,13 @@ fn parse_command(
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise exec node@20 -- node ./app.js</bold>  # launch app.js using node-20.x
-    $ <bold>mise x node@20 -- node ./app.js</bold>     # shorter alias
+    $ <bold>nise exec node@20 -- node ./app.js</bold>  # launch app.js using node-20.x
+    $ <bold>nise x node@20 -- node ./app.js</bold>     # shorter alias
 
     # Specify command as a string:
-    $ <bold>mise exec node@20 python@3.11 --command "node -v && python -V"</bold>
+    $ <bold>nise exec node@20 python@3.11 --command "node -v && python -V"</bold>
 
     # Run a command in a different directory:
-    $ <bold>mise x -C /path/to/project node@20 -- node ./app.js</bold>
+    $ <bold>nise x -C /path/to/project node@20 -- node ./app.js</bold>
 "#
 );

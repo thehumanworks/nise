@@ -3,9 +3,9 @@ use eyre::Result;
 use crate::env;
 use crate::shell::{build_deactivation_script, get_shell};
 
-/// Disable mise for current shell session
+/// Disable nise for current shell session
 ///
-/// This can be used to temporarily disable mise in a shell session.
+/// This can be used to temporarily disable nise in a shell session.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Deactivate {}
@@ -33,6 +33,6 @@ impl Deactivate {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise deactivate</bold>
+    $ <bold>nise deactivate</bold>
 "#
 );

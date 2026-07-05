@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use crate::config::settings::Settings;
+use crate::install_context::NiseStoreInstallMode;
 use crate::toolset::tool_version::ResolveOptions;
 
 #[derive(Debug, Clone)]
@@ -20,6 +21,7 @@ pub struct InstallOptions {
     pub locked: bool,
     /// Override the install directory (e.g. for --system or --shared)
     pub install_dir: Option<PathBuf>,
+    pub nise_store_install_mode: NiseStoreInstallMode,
 }
 
 impl Default for InstallOptions {
@@ -36,6 +38,7 @@ impl Default for InstallOptions {
             dry_run: false,
             locked: Settings::get().locked,
             install_dir: None,
+            nise_store_install_mode: NiseStoreInstallMode::Legacy,
         }
     }
 }

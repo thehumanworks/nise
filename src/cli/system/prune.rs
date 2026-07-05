@@ -101,8 +101,8 @@ impl SystemPrune {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap packages prune --manager brew</bold>
-    $ <bold>mise bootstrap packages prune --manager brew --dry-run</bold>
-    $ <bold>mise bootstrap packages prune --manager brew --yes</bold>
+    $ <bold>nise bootstrap packages prune --manager brew</bold>
+    $ <bold>nise bootstrap packages prune --manager brew --dry-run</bold>
+    $ <bold>nise bootstrap packages prune --manager brew --yes</bold>
 "#
 );

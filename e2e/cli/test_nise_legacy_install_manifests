@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+export CLICOLOR=0
+
+manifest="$MISE_DATA_DIR/nise/store/refs/installs/dummy/1.0.0.toml"
+realisations="$MISE_DATA_DIR/nise/store/realisations"
+
+mise install dummy@1.0.0
+assert_contains "cat '$manifest'" 'mode = "legacy-real-directory"'
+assert_contains "cat '$manifest'" 'object_id = "legacy:'
+assert_contains "cat '$manifest'" "compatibility_path = \"$MISE_DATA_DIR/installs/dummy/1.0.0\""
+assert "find '$realisations' -name '*.toml' -print -quit | grep -q ."
+assert "test -d '$MISE_DATA_DIR/installs/dummy/1.0.0'"
+
+mise install --force dummy@1.0.0
+assert_contains "cat '$manifest'" 'mode = "legacy-real-directory"'
+assert "find '$realisations' -name '*.toml' -print -quit | grep -q ."
+assert "test -d '$MISE_DATA_DIR/installs/dummy/1.0.0'"
+
+mise uninstall dummy@1.0.0
+assert "test ! -f '$manifest'"
+assert "test ! -d '$MISE_DATA_DIR/installs/dummy/1.0.0'"

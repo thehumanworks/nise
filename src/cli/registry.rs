@@ -226,12 +226,12 @@ async fn to_output(tool: RegistryToolOutputArgs, security: bool) -> RegistryTool
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise registry</bold>
+    $ <bold>nise registry</bold>
     node    core:node
     poetry  asdf:mise-plugins/mise-poetry
     ubi     cargo:ubi-cli
 
-    $ <bold>mise registry poetry</bold>
+    $ <bold>nise registry poetry</bold>
     asdf:mise-plugins/mise-poetry
 "#
 );

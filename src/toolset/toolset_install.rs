@@ -488,6 +488,7 @@ impl Toolset {
             force: opts.force,
             dry_run: opts.dry_run,
             locked: opts.locked,
+            nise_store_install_mode: opts.nise_store_install_mode,
             before_date,
         };
 

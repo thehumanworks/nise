@@ -87,12 +87,12 @@ impl Latest {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise latest node@20</bold>  # get the latest version of node 20
+    $ <bold>nise latest node@20</bold>  # get the latest version of node 20
     20.0.0
 
-    $ <bold>mise latest node</bold>     # get the latest stable version of node
+    $ <bold>nise latest node</bold>     # get the latest stable version of node
     20.0.0
 
-    $ <bold>mise latest node --minimum-release-age 2024-01-01</bold>  # latest stable node released before 2024-01-01
+    $ <bold>nise latest node --minimum-release-age 2024-01-01</bold>  # latest stable node released before 2024-01-01
 "#
 );

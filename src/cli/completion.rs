@@ -67,9 +67,9 @@ impl Completion {
             "generate".into(),
             "completion".into(),
             shell.to_string(),
-            "mise".into(),
+            "nise".into(),
             "--usage-cmd".into(),
-            "mise usage".into(),
+            "nise usage".into(),
             "--cache-key".into(),
             env!("CARGO_PKG_VERSION").into(),
         ];
@@ -84,10 +84,10 @@ impl Completion {
 
     fn prerendered(&self, shell: Shell) -> String {
         match shell {
-            Shell::Bash => include_str!("../../completions/mise.bash"),
-            Shell::Fish => include_str!("../../completions/mise.fish"),
-            Shell::PowerShell => include_str!("../../completions/mise.ps1"),
-            Shell::Zsh => include_str!("../../completions/_mise"),
+            Shell::Bash => include_str!("../../completions/nise.bash"),
+            Shell::Fish => include_str!("../../completions/nise.fish"),
+            Shell::PowerShell => include_str!("../../completions/nise.ps1"),
+            Shell::Zsh => include_str!("../../completions/_nise"),
         }
         .to_string()
     }
@@ -96,10 +96,10 @@ impl Completion {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise</bold>
-    $ <bold>mise completion zsh  > /usr/local/share/zsh/site-functions/_mise</bold>
-    $ <bold>mise completion fish > ~/.config/fish/completions/mise.fish</bold>
-    $ <bold>mise completion powershell >> $PROFILE</bold>
+    $ <bold>nise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/nise</bold>
+    $ <bold>nise completion zsh  > /usr/local/share/zsh/site-functions/_nise</bold>
+    $ <bold>nise completion fish > ~/.config/fish/completions/nise.fish</bold>
+    $ <bold>nise completion powershell >> $PROFILE</bold>
 "#
 );
 

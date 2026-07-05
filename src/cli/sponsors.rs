@@ -1,6 +1,6 @@
 use eyre::Result;
 
-/// Show the companies sponsoring mise and the jdx.dev open source tools
+/// Show the companies sponsoring nise and the jdx.dev open source tools
 #[derive(Debug, clap::Args)]
 pub struct Sponsors;
 

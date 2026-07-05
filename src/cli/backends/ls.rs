@@ -22,7 +22,7 @@ impl BackendsLs {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise backends ls</bold>
+    $ <bold>nise backends ls</bold>
     aqua
     asdf
     cargo

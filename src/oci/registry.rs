@@ -1,7 +1,7 @@
 //! Anonymous OCI Distribution Spec v2 client for pulling base images.
 //!
 //! Supports Docker Hub / GHCR / quay.io style references and anonymous token
-//! auth (no login flow). Used by `mise oci build --from <ref>` to stream a
+//! auth (no login flow). Used by `nise oci build --from <ref>` to stream a
 //! base image's layers into the output layout byte-for-byte so digests match.
 
 use eyre::{Context, Result};

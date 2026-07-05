@@ -129,6 +129,6 @@ impl TaskDocs {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise generate task-docs</bold>
+    $ <bold>nise generate task-docs</bold>
 "#
 );

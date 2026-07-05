@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+detect_platform
+
+SRV="$PWD/srv"
+mkdir -p "$SRV"
+
+cat >"$SRV/nise-store-hello" <<'EOF'
+#!/usr/bin/env bash
+echo nise-store-ok
+EOF
+
+SHA="$(shasum -a 256 "$SRV/nise-store-hello" | awk '{print $1}')"
+
+PORT_FILE="$TMPDIR/nise_http_store_port"
+python3 - "$SRV" "$PORT_FILE" <<'PY' &
+import functools
+import http.server
+import socketserver
+import sys
+
+srv, port_file = sys.argv[1], sys.argv[2]
+handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=srv)
+socketserver.TCPServer.allow_reuse_address = True
+with socketserver.TCPServer(("127.0.0.1", 0), handler) as httpd:
+    with open(port_file, "w") as f:
+        f.write(str(httpd.server_address[1]))
+    httpd.serve_forever()
+PY
+SERVER_PID=$!
+cleanup() { kill "$SERVER_PID" 2>/dev/null || true; }
+trap cleanup EXIT
+
+wait_for_file "$PORT_FILE" "nise http store server port file" 30 "$SERVER_PID"
+PORT="$(cat "$PORT_FILE")"
+
+cat >mise.toml <<EOF
+[tools."http:nise-store-hello"]
+version = "1.0.0"
+url = "http://127.0.0.1:${PORT}/nise-store-hello"
+checksum = "sha256:${SHA}"
+bin_path = "bin"
+EOF
+
+# Seed the artifact download/cache through the legacy path, then remove only the
+# compatibility install path so the offline nise store realization must publish
+# a fresh store-backed ref from the cached artifact.
+mise install http:nise-store-hello
+assert "mise x -- nise-store-hello" "nise-store-ok"
+INSTALL_PATH="$(mise where http:nise-store-hello)"
+rm -rf "$INSTALL_PATH"
+
+cat >nise.lock <<EOF
+schema = "nise.lock"
+schema_version = 1
+hash_algorithm = "sha256"
+generator = "nise e2e"
+
+[policy]
+mode = "frozen"
+offline = "full"
+provenance = "lock-or-reverify"
+allow_tofu = false
+
+[sources."src:mise.toml"]
+kind = "mise-toml"
+path = "mise.toml"
+
+[registries."mise-builtin"]
+kind = "mise-registry"
+revision = "e2e"
+
+[[derivations]]
+id = "sha256:e2e"
+status = "strict"
+tool = "nise-store-hello"
+request = "1.0.0"
+request_kind = "exact"
+resolved_version = "1.0.0"
+backend = "http:nise-store-hello"
+backend_type = "http"
+backend_identity = { kind = "e2e", mise_lock_backend = "http:nise-store-hello" }
+source = "src:mise.toml"
+registries = ["mise-builtin"]
+
+[derivations.platforms."${MISE_PLATFORM}"]
+url = "http://127.0.0.1:${PORT}/nise-store-hello"
+checksum = "sha256:${SHA}"
+EOF
+
+kill "$SERVER_PID" 2>/dev/null || true
+
+assert "mise develop --offline=full --isolate=off --realize -- nise-store-hello" "nise-store-ok"
+assert_succeed 'test -d "$MISE_DATA_DIR/nise/store/objects/sha256"'
+assert_contains "mise store doctor" "Store:"
+assert_succeed 'test -L "$(mise where http:nise-store-hello)"'
+
+# Store objects are sealed read-only. Make this test's isolated object writable
+# again so the e2e harness can remove its temp HOME without noisy rm failures.
+chmod -R u+w "$MISE_DATA_DIR/nise/store/objects"

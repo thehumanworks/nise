@@ -33,7 +33,7 @@ impl ToolAliasSet {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tool-alias set maven asdf:mise-plugins/mise-maven</bold>
-    $ <bold>mise tool-alias set node lts-jod 22.0.0</bold>
+    $ <bold>nise tool-alias set maven asdf:mise-plugins/mise-maven</bold>
+    $ <bold>nise tool-alias set node lts-jod 22.0.0</bold>
 "#
 );

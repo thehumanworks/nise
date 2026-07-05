@@ -36,7 +36,7 @@ impl ShellAliasSet {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise shell-alias set ll "ls -la"</bold>
-    $ <bold>mise shell-alias set gs "git status"</bold>
+    $ <bold>nise shell-alias set ll "ls -la"</bold>
+    $ <bold>nise shell-alias set gs "git status"</bold>
 "#
 );

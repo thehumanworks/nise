@@ -36,7 +36,7 @@ Flags, output layout, and defaults may change in future releases.
 
 ```sh
 # Build an image from the current mise.toml using the default base
-# (debian:bookworm-slim). Output goes to ./mise-oci/.
+# (debian:bookworm-slim). Output goes to ./nise-oci/.
 mise oci build
 
 # Run an interactive shell in the image (uses podman if present, else
@@ -47,8 +47,8 @@ mise oci run -it -- bash
 mise oci push ghcr.io/me/devenv:latest
 
 # You can also go through skopeo/crane manually:
-skopeo inspect oci:./mise-oci
-skopeo copy oci:./mise-oci docker://ghcr.io/me/devenv:latest
+skopeo inspect oci:./nise-oci
+skopeo copy oci:./nise-oci docker://ghcr.io/me/devenv:latest
 ```
 
 ## How layering works
@@ -87,7 +87,7 @@ mise oci build [-o PATH] [--from REF] [--tag REF] [--mount-point PATH]
                [--no-mise] [--owner UID[:GID]]
 ```
 
-- `-o, --output PATH` — output directory (default `./mise-oci`)
+- `-o, --output PATH` — output directory (default `./nise-oci`)
 - `--from REF` — base image reference (overrides `[oci].from` and the
   `oci.default_from` setting). Use `scratch` to build without a base.
 - `-t, --tag REF` — tag written to `index.json` as the

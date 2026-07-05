@@ -10,9 +10,9 @@ use crate::file::{make_symlink, remove_all};
 use crate::{cli::args::ToolArg, config::Config};
 use crate::{config, file};
 
-/// Symlinks a tool version into mise
+/// Symlinks a tool version into nise
 ///
-/// Use this for adding installs either custom compiled outside mise or built with a different tool.
+/// Use this for adding installs either custom compiled outside nise or built with a different tool.
 #[derive(Debug, clap::Args)]
 #[clap(visible_alias = "ln", verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Link {
@@ -76,11 +76,11 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
 
     # build node-20.0.0 with node-build and link it into mise
     $ <bold>node-build 20.0.0 ~/.nodes/20.0.0</bold>
-    $ <bold>mise link node@20.0.0 ~/.nodes/20.0.0</bold>
+    $ <bold>nise link node@20.0.0 ~/.nodes/20.0.0</bold>
 
     # have mise use the node version provided by Homebrew
     $ <bold>brew install node</bold>
-    $ <bold>mise link node@brew $(brew --prefix node)</bold>
-    $ <bold>mise use node@brew</bold>
+    $ <bold>nise link node@brew $(brew --prefix node)</bold>
+    $ <bold>nise use node@brew</bold>
 "#
 );

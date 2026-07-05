@@ -5,6 +5,7 @@ use crate::cli::args::{BackendArg, ToolArg};
 use crate::config::tracking::Tracker;
 use crate::config::{Config, Settings};
 use crate::runtime_symlinks;
+use crate::toolset::installed_versions::{self, InstalledVersionEntry};
 use crate::toolset::{ToolVersion, ToolsetBuilder, get_versions_needed_by_tracked_configs};
 use crate::ui::multi_progress_report::MultiProgressReport;
 use crate::ui::prompt;
@@ -19,9 +20,9 @@ use super::trust::Trust;
 /// mise tracks which config files have been used in ~/.local/state/mise/tracked-configs
 /// Versions which are no longer the latest specified in any of those configs are deleted.
 /// Versions installed only with environment variables `MISE_<TOOL>_VERSION` will be deleted,
-/// as will versions only referenced on the command line `mise exec <TOOL>@<VERSION>`.
+/// as will versions only referenced on the command line `nise exec <TOOL>@<VERSION>`.
 ///
-/// You can list prunable tools with `mise ls --prunable`
+/// You can list prunable tools with `nise ls --prunable`
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Prune {
@@ -43,7 +44,7 @@ pub struct Prune {
     #[clap(long, verbatim_doc_comment)]
     pub dry_run_code: bool,
 
-    /// Placeholder for future monorepo pruning; `mise prune --monorepo` is not implemented yet.
+    /// Placeholder for future monorepo pruning; `nise prune --monorepo` is not implemented yet.
     #[clap(long, verbatim_doc_comment)]
     pub monorepo: bool,
 
@@ -153,6 +154,18 @@ async fn delete(
             continue;
         }
         let pr = mpr.add(&prefix);
+        let store_ref =
+            installed_versions::find(&p.ba().installs_path, &p.ba().short, &tv.tv_pathname());
+        if let Some(InstalledVersionEntry::StoreRef { ref_manifest }) = store_ref
+            && installed_versions::remove_store_ref(&ref_manifest, dry_run)?
+        {
+            if dry_run {
+                pr.finish_with_message("uninstalled store ref (dry-run)".into());
+            } else {
+                pr.finish_with_message("uninstalled store ref".into());
+            }
+            continue;
+        }
         p.uninstall_version(config, &tv, pr.as_ref(), dry_run)
             .await?;
         runtime_symlinks::remove_missing_symlinks(p)?;
@@ -164,7 +177,7 @@ async fn delete(
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise prune --dry-run</bold>
+    $ <bold>nise prune --dry-run</bold>
     rm -rf ~/.local/share/mise/versions/node/20.0.0
     rm -rf ~/.local/share/mise/versions/node/20.0.1
 "#

@@ -203,9 +203,9 @@ fn target_bootstrap_packages(path: &Path) -> Result<BTreeMap<String, String>> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap packages import --manager brew</bold>
-    $ <bold>mise bootstrap packages import --manager brew --all</bold>
-    $ <bold>mise bootstrap packages import --manager brew --global</bold>
-    $ <bold>mise bootstrap packages import --manager brew --dry-run</bold>
+    $ <bold>nise bootstrap packages import --manager brew</bold>
+    $ <bold>nise bootstrap packages import --manager brew --all</bold>
+    $ <bold>nise bootstrap packages import --manager brew --global</bold>
+    $ <bold>nise bootstrap packages import --manager brew --dry-run</bold>
 "#
 );

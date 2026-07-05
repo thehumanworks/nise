@@ -19,7 +19,7 @@ use crate::{backend::unalias_backend, config::Settings};
 /// Install a plugin
 ///
 /// note that mise can automatically install plugins when you install a tool
-/// e.g.: `mise install cmake@3.30` will autoinstall the cmake plugin
+/// e.g.: `nise install cmake@3.30` will autoinstall the cmake plugin
 ///
 /// This behavior can be modified in ~/.config/mise/config.toml
 #[derive(Debug, clap::Args)]
@@ -28,7 +28,7 @@ use crate::{backend::unalias_backend, config::Settings};
 pub struct PluginsInstall {
     /// The name of the plugin to install
     /// e.g.: cmake, poetry
-    /// Can specify multiple plugins: `mise plugins install cmake poetry`
+    /// Can specify multiple plugins: `nise plugins install cmake poetry`
     #[clap(required_unless_present = "all", verbatim_doc_comment)]
     new_plugin: Option<String>,
 
@@ -194,17 +194,17 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # install the poetry via shorthand
-    $ <bold>mise plugins install poetry</bold>
+    $ <bold>nise plugins install poetry</bold>
 
     # install the poetry plugin using a specific git url
-    $ <bold>mise plugins install poetry https://github.com/mise-plugins/mise-poetry.git</bold>
+    $ <bold>nise plugins install poetry https://github.com/mise-plugins/mise-poetry.git</bold>
 
     # install the poetry plugin using the git url only
     # (poetry is inferred from the url)
-    $ <bold>mise plugins install https://github.com/mise-plugins/mise-poetry.git</bold>
+    $ <bold>nise plugins install https://github.com/mise-plugins/mise-poetry.git</bold>
 
     # install the poetry plugin using a specific ref
-    $ <bold>mise plugins install poetry https://github.com/mise-plugins/mise-poetry.git#11d0c1e</bold>
+    $ <bold>nise plugins install poetry https://github.com/mise-plugins/mise-poetry.git#11d0c1e</bold>
 "#
 );
 

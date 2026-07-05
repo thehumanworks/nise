@@ -146,7 +146,7 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     $ <bold>brew install node@18 node@20</bold>
-    $ <bold>mise sync node --brew</bold>
-    $ <bold>mise use -g node@18</bold> - uses Homebrew-provided node
+    $ <bold>nise sync node --brew</bold>
+    $ <bold>nise use -g node@18</bold> - uses Homebrew-provided node
 "#
 );

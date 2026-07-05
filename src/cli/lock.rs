@@ -6,12 +6,13 @@ use crate::config::{Config, ConfigMap};
 use crate::file::display_path;
 use crate::install_before::resolve_cli_minimum_release_age;
 use crate::lockfile::{self, LockResolutionResult, Lockfile};
+use crate::nise_lock::{self, NiseLock};
 use crate::platform::Platform;
 use crate::toolset::{ResolveOptions, ToolRequest, ToolSource, Toolset, ToolsetBuilder};
 use crate::ui::multi_progress_report::MultiProgressReport;
 use crate::{cli::args::ToolArg, config::Settings};
 use console::style;
-use eyre::Result;
+use eyre::{Result, bail};
 use jiff::Timestamp;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
@@ -57,6 +58,14 @@ pub struct Lock {
     #[clap(long, short, value_delimiter = ',', verbatim_doc_comment)]
     pub platform: Vec<String>,
 
+    /// Check nise.lock instead of updating mise.lock
+    #[clap(long, verbatim_doc_comment)]
+    pub check: bool,
+
+    /// Require nise.lock to contain only strict derivations
+    #[clap(long, verbatim_doc_comment)]
+    pub frozen: bool,
+
     /// Update mise.local.lock instead of mise.lock
     /// Use for tools defined in .local.toml configs
     #[clap(long, verbatim_doc_comment)]
@@ -79,8 +88,11 @@ pub struct Lock {
 
 impl Lock {
     pub async fn run(self) -> Result<()> {
-        let settings = Settings::get();
         let config = Config::get().await?;
+        if self.is_nise_lock_request() {
+            return self.run_nise_lock(&config);
+        }
+        let settings = Settings::get();
         if !self.dry_run {
             lockfile::migrate_monorepo_lockfiles(&config)?;
         }
@@ -135,7 +147,7 @@ impl Lock {
 
             if tools.is_empty() {
                 // `tools` can be empty either because config has no tools, or because a filter excludes all.
-                // For unfiltered runs (`mise lock`), this means "prune all stale lockfile entries".
+                // For unfiltered runs (`nise lock`), this means "prune all stale lockfile entries".
                 if self.dry_run {
                     let lockfile = Lockfile::read(lockfile_path)?;
                     let stale_tools = self.stale_entries_if_pruned(&lockfile, &tools);
@@ -243,7 +255,7 @@ impl Lock {
         }
 
         // Update config files when a specific version is requested that doesn't match
-        // the current prefix (e.g., `mise lock tiny@3.0.1` when config has `tiny = "2"`)
+        // the current prefix (e.g., `nise lock tiny@3.0.1` when config has `tiny = "2"`)
         {
             use crate::toolset::outdated_info::{
                 apply_config_bumps, compute_config_bumps_for_paths,
@@ -281,6 +293,67 @@ impl Lock {
             return Err(eyre::eyre!("{}", all_provenance_errors.join("\n")));
         }
 
+        Ok(())
+    }
+
+    fn is_nise_lock_request(&self) -> bool {
+        self.check
+            || self.frozen
+            || self
+                .tool
+                .first()
+                .is_some_and(|tool| tool.ba.tool_name == "import")
+    }
+
+    fn run_nise_lock(&self, config: &Config) -> Result<()> {
+        let nise_lock_path = nise_lock::nise_lock_path_for_config(config);
+        if self
+            .tool
+            .first()
+            .is_some_and(|tool| tool.ba.tool_name == "import")
+        {
+            if self.check || self.frozen {
+                bail!("nise lock import cannot be combined with --check or --frozen");
+            }
+            if self.tool.len() > 2 {
+                bail!("usage: mise lock import [mise.lock]");
+            }
+            let mise_lock_path = self
+                .tool
+                .get(1)
+                .map(|tool| PathBuf::from(&tool.ba.tool_name))
+                .unwrap_or_else(|| nise_lock_path.with_file_name("mise.lock"));
+            let nise_lock = NiseLock::import_mise_lock(&mise_lock_path)?;
+            if self.dry_run {
+                miseprintln!(
+                    "Would write {} with {} legacy-unverified derivation(s)",
+                    display_path(&nise_lock_path),
+                    nise_lock.derivations.len()
+                );
+            } else {
+                nise_lock.write(&nise_lock_path)?;
+                miseprintln!(
+                    "Wrote {} with {} legacy-unverified derivation(s)",
+                    display_path(&nise_lock_path),
+                    nise_lock.derivations.len()
+                );
+            }
+            return Ok(());
+        }
+
+        if !self.tool.is_empty() {
+            bail!("nise lock --check does not accept TOOL arguments");
+        }
+        let check = nise_lock::check_nise_lock(&nise_lock_path, self.frozen)?;
+        miseprintln!("nise lock: {}", display_path(&check.path));
+        miseprintln!("Derivations: {}", check.derivations);
+        miseprintln!("Strict: {}", check.strict);
+        miseprintln!("Legacy-unverified: {}", check.legacy_unverified);
+        if self.frozen {
+            miseprintln!("Status: frozen check passed");
+        } else {
+            miseprintln!("Status: check passed");
+        }
         Ok(())
     }
 
@@ -860,13 +933,13 @@ impl Lock {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise lock</bold>                       # update lockfile for all common platforms
-    $ <bold>mise lock node python</bold>           # update only node and python
-    $ <bold>mise lock --platform linux-x64</bold>  # update only linux-x64 platform
-    $ <bold>mise lock --dry-run</bold>             # show what would be updated
-    $ <bold>mise lock --minimum-release-age 2024-01-01</bold>   # lock latest/fuzzy versions released before 2024-01-01
-    $ <bold>mise lock --local</bold>               # update mise.local.lock for local configs
-    $ <bold>mise lock --global</bold>              # update only global config lockfiles
+    $ <bold>nise lock</bold>                       # update lockfile for all common platforms
+    $ <bold>nise lock node python</bold>           # update only node and python
+    $ <bold>nise lock --platform linux-x64</bold>  # update only linux-x64 platform
+    $ <bold>nise lock --dry-run</bold>             # show what would be updated
+    $ <bold>nise lock --minimum-release-age 2024-01-01</bold>   # lock latest/fuzzy versions released before 2024-01-01
+    $ <bold>nise lock --local</bold>               # update mise.local.lock for local configs
+    $ <bold>nise lock --global</bold>              # update only global config lockfiles
 "#
 );
 
@@ -890,6 +963,8 @@ mod tests {
             dry_run: false,
             platform: vec![],
             local: false,
+            check: false,
+            frozen: false,
             global: false,
             minimum_release_age: None,
         }

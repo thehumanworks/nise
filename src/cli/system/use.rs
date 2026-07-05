@@ -13,11 +13,11 @@ use crate::system::packages::PackageRequest;
 
 /// Add bootstrap packages to [bootstrap.packages] and install them
 ///
-/// Like `mise use` for tools: writes `"manager:package" = "version"` entries
-/// to mise.toml (the local config by default, the global one with `-g`) and
+/// Like `nise use` for tools: writes `"manager:package" = "version"` entries
+/// to nise.toml (the local config by default, the global one with `-g`) and
 /// then installs whatever is missing.
 ///
-/// Versions are pinned with `@`: `mise bootstrap packages use apt:curl@8.5.0-2`. Without
+/// Versions are pinned with `@`: `nise bootstrap packages use apt:curl@8.5.0-2`. Without
 /// `@` (or with `@latest`) no pin is written. brew formulae and casks
 /// version through their names instead (for example `brew:postgresql@17`,
 /// `brew-cask:temurin@17`), where `@` is part of the Homebrew name rather than
@@ -83,7 +83,7 @@ impl SystemUse {
             path: self.path.clone(),
             env: self.env.clone(),
             cwd: None,
-            prefer_toml: true,        // [bootstrap] only exists in mise.toml
+            prefer_toml: true,        // [bootstrap] only exists in nise.toml
             prevent_home_local: true, // in $HOME, write the global config
         })?;
         if self.dry_run {
@@ -111,7 +111,7 @@ impl SystemUse {
             );
         }
 
-        // unlike `mise bootstrap packages apply apt:x`, an unavailable manager is not
+        // unlike `nise bootstrap packages apply apt:x`, an unavailable manager is not
         // an error here: writing apt: entries from a mac into a shared repo
         // config is the point of a declarative file. Say so (except in
         // dry-run, where nothing was written), then install best-effort for
@@ -141,8 +141,8 @@ impl SystemUse {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap packages use apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835</bold>
-    $ <bold>mise bootstrap packages use -g brew:postgresql@17</bold>
-    $ <bold>mise bootstrap packages use apt:curl@8.5.0-2</bold>
+    $ <bold>nise bootstrap packages use apk:zlib-dev apt:curl brew:jq brew-cask:firefox mas:497799835</bold>
+    $ <bold>nise bootstrap packages use -g brew:postgresql@17</bold>
+    $ <bold>nise bootstrap packages use apt:curl@8.5.0-2</bold>
 "#
 );

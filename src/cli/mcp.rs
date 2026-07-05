@@ -216,7 +216,7 @@ impl ServerHandler for MiseServer {
         match (url.scheme(), url.host_str()) {
             ("mise", Some("tools")) => {
                 // Return tool information
-                // By default only shows active tools (those in current .mise.toml)
+                // By default only shows active tools (those in current .nise.toml)
                 // With ?include_inactive=true, shows all installed tools
                 let config = Config::get().await.map_err(|e| ErrorData {
                     code: ErrorCode::INTERNAL_ERROR,
@@ -444,7 +444,7 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
     # Start the MCP server (typically used by AI assistant tools)
-    $ <bold>mise mcp</bold>
+    $ <bold>nise mcp</bold>
 
     # Example integration with Claude Desktop (add to claude_desktop_config.json):
     {

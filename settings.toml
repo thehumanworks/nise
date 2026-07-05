@@ -408,8 +408,8 @@ hide = true
 type = "Bool"
 
 [default_config_filename]
-default = "mise.toml"
-description = "The default config filename read. `mise use` and other commands that create new config files will use this value. This must be an env var."
+default = "nise.toml"
+description = "The default config filename read. `nise use` and other commands that create new config files will use this value. This must be an env var."
 env = "MISE_DEFAULT_CONFIG_FILENAME"
 type = "String"
 
@@ -1755,14 +1755,14 @@ type = "String"
 
 [override_config_filenames]
 default = []
-description = "If set, mise will ignore default config files like `mise.toml` and use these filenames instead."
+description = "If set, nise will ignore default config files like `nise.toml` and use these filenames instead."
 docs = """
-If set, mise will ignore default config files like `mise.toml` and use these
+If set, nise will ignore default config files like `nise.toml` and use these
 filenames instead.
 
 This is an early-init setting: it must be set in `.miserc.toml`, environment
-variables, or CLI flags. Setting it in `mise.toml` will have no effect because
-config file discovery has already occurred by the time `mise.toml` is read.
+variables, or CLI flags. Setting it in `nise.toml` will have no effect because
+config file discovery has already occurred by the time `nise.toml` is read.
 """
 env = "MISE_OVERRIDE_CONFIG_FILENAMES"
 parse_env = "list_by_colon"

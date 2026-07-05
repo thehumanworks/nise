@@ -302,6 +302,6 @@ impl TasksLs {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tasks ls</bold>
+    $ <bold>nise tasks ls</bold>
 "#
 );

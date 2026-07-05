@@ -582,7 +582,7 @@ async fn detect_config_file_type(path: &Path) -> Option<ConfigFileType> {
     match path
         .file_name()
         .and_then(|f| f.to_str())
-        .unwrap_or("mise.toml")
+        .unwrap_or("nise.toml")
     {
         f if env::MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES
             .as_ref()
@@ -644,6 +644,7 @@ mod tests {
     #[tokio::test]
     async fn test_detect_config_file_type() {
         env::set_var("MISE_EXPERIMENTAL", "true");
+        crate::backend::load_tools().await.unwrap();
         assert!(matches!(
             detect_config_file_type(Path::new("/foo/bar/.nvmrc")).await,
             Some(ConfigFileType::IdiomaticVersion(_))
@@ -657,7 +658,7 @@ mod tests {
             Some(ConfigFileType::ToolVersions)
         );
         assert_eq!(
-            detect_config_file_type(Path::new("/foo/bar/mise.toml")).await,
+            detect_config_file_type(Path::new("/foo/bar/nise.toml")).await,
             Some(ConfigFileType::MiseToml)
         );
         assert!(matches!(

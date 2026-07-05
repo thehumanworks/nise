@@ -36,7 +36,7 @@ impl ToolAliasGet {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise tool-alias get node lts-hydrogen</bold>
+    $ <bold>nise tool-alias get node lts-hydrogen</bold>
     20.0.0
 "#
 );

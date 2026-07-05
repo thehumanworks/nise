@@ -86,9 +86,9 @@ impl DotfilesApply {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise dotfiles apply</bold>
-    $ <bold>mise bootstrap dotfiles apply</bold>
-    $ <bold>mise dotfiles apply --dry-run</bold>
-    $ <bold>mise dotfiles apply --force --yes</bold>
+    $ <bold>nise dotfiles apply</bold>
+    $ <bold>nise bootstrap dotfiles apply</bold>
+    $ <bold>nise dotfiles apply --dry-run</bold>
+    $ <bold>nise dotfiles apply --force --yes</bold>
 "#
 );

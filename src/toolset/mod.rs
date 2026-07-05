@@ -46,6 +46,7 @@ pub mod env_cache;
 mod helpers;
 mod install_options;
 pub(crate) mod install_state;
+pub(crate) mod installed_versions;
 pub(crate) mod outdated_info;
 mod tool_deps;
 pub(crate) mod tool_request;

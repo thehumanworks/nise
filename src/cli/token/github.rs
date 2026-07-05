@@ -75,16 +75,16 @@ impl Github {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise token github</bold>
+    $ <bold>nise token github</bold>
     github.com: ghp_…xxxx (source: GITHUB_TOKEN)
 
-    $ <bold>mise token github --unmask</bold>
+    $ <bold>nise token github --unmask</bold>
     github.com: ghp_xxxxxxxxxxxx (source: GITHUB_TOKEN)
 
-    $ <bold>mise token github github.mycompany.com</bold>
+    $ <bold>nise token github github.mycompany.com</bold>
     github.mycompany.com: (none)
 
-    $ <bold>mise token github --oauth --refresh</bold>
+    $ <bold>nise token github --oauth --refresh</bold>
     github.com: gho_…xxxx (source: GitHub OAuth)
 "#
 );

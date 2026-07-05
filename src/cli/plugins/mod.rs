@@ -20,7 +20,7 @@ pub struct Plugins {
 
     /// list all available remote plugins
     ///
-    /// same as `mise plugins ls-remote`
+    /// same as `nise plugins ls-remote`
     #[clap(short, long, hide = true)]
     pub all: bool,
 

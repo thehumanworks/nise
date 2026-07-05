@@ -8,7 +8,7 @@ members = [
 ]
 
 [package]
-name = "mise"
+name = "nise"
 version = "2026.7.0"
 edition = "2024"
 description = "Dev tools, env vars, and tasks in one CLI"
@@ -40,11 +40,12 @@ include = [
 ]
 build = "build.rs"
 rust-version = "1.91"
+autobins = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "mise"
+name = "nise"
 path = "src/main.rs"
 
 #[[bench]]

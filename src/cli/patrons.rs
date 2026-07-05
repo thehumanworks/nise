@@ -7,7 +7,7 @@ use crate::file::modified_duration;
 use crate::http::HTTP;
 use crate::{dirs, duration, file};
 
-/// Show the individuals supporting mise as Patron-tier members
+/// Show the individuals supporting nise as Patron-tier members
 ///
 /// Lists the individuals on the Patron tier from <https://jdx.dev/patrons.json>.
 /// The list refreshes daily; supporting terminals will render each patron's
@@ -123,7 +123,7 @@ fn render_human(payload: &PatronsPayload) -> Result<()> {
 fn hyperlink(url: &str, text: &str) -> String {
     // Use `on(Stream::Stdout)` so we also verify stdout is a TTY — bare
     // `supports_hyperlinks()` only inspects env vars and would still emit
-    // escapes into pipes like `mise patrons | cat`.
+    // escapes into pipes like `nise patrons | cat`.
     //
     // Callers are responsible for stripping control bytes from `url` /
     // `text` if they come from untrusted sources; we don't strip here so
@@ -146,7 +146,7 @@ fn strip_control(s: &str) -> String {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise patrons</bold>
-    $ <bold>mise patrons -J</bold>
-    $ <bold>mise patrons --refresh</bold>"#
+    $ <bold>nise patrons</bold>
+    $ <bold>nise patrons -J</bold>
+    $ <bold>nise patrons --refresh</bold>"#
 );

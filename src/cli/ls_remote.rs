@@ -26,7 +26,7 @@ struct VersionOutputAll {
 
 /// List runtime versions available for install.
 ///
-/// Note that the results may be cached, run `mise cache clean` to clear the cache and get fresh results.
+/// Note that the results may be cached, run `nise cache clean` to clear the cache and get fresh results.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP, aliases = ["list-all", "list-remote"]
 )]
@@ -210,22 +210,22 @@ fn filter_versions_by_date(
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise ls-remote node</bold>
+    $ <bold>nise ls-remote node</bold>
     18.0.0
     20.0.0
 
-    $ <bold>mise ls-remote node@20</bold>
+    $ <bold>nise ls-remote node@20</bold>
     20.0.0
     20.1.0
 
-    $ <bold>mise ls-remote node 20</bold>
+    $ <bold>nise ls-remote node 20</bold>
     20.0.0
     20.1.0
 
-    $ <bold>mise ls-remote node --minimum-release-age 2024-01-01</bold>
+    $ <bold>nise ls-remote node --minimum-release-age 2024-01-01</bold>
     20.0.0
 
-    $ <bold>mise ls-remote github:cli/cli --json</bold>
+    $ <bold>nise ls-remote github:cli/cli --json</bold>
     [{"version":"2.62.0","created_at":"2024-11-14T15:40:35Z","prerelease":false},{"version":"2.61.0","created_at":"2024-10-23T19:22:15Z","prerelease":false}]
 "#
 );

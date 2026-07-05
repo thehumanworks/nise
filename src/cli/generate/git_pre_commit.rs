@@ -5,7 +5,7 @@ use crate::git::Git;
 
 /// Generate a git pre-commit hook
 ///
-/// This command generates a git pre-commit hook that runs a mise task like `mise run pre-commit`
+/// This command generates a git pre-commit hook that runs a mise task like `nise run pre-commit`
 /// when you commit changes to your repository.
 ///
 /// Staged files are passed to the task as `STAGED`.
@@ -63,7 +63,7 @@ exec mise run {task}
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise generate git-pre-commit --write --task=pre-commit</bold>
-    $ <bold>git commit -m "feat: add new feature"</bold> <dim># runs `mise run pre-commit`</dim>
+    $ <bold>nise generate git-pre-commit --write --task=pre-commit</bold>
+    $ <bold>git commit -m "feat: add new feature"</bold> <dim># runs `nise run pre-commit`</dim>
 "#
 );

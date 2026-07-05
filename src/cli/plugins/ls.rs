@@ -17,7 +17,7 @@ use crate::ui::table;
 #[clap(visible_alias = "list", after_long_help = AFTER_LONG_HELP, verbatim_doc_comment)]
 pub struct PluginsLs {
     /// List all available remote plugins
-    /// Same as `mise plugins ls-remote`
+    /// Same as `nise plugins ls-remote`
     #[clap(short, long, hide = true, verbatim_doc_comment)]
     pub all: bool,
 
@@ -198,11 +198,11 @@ struct OutdatedRow {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise plugins ls</bold>
+    $ <bold>nise plugins ls</bold>
     cmake
     poetry
 
-    $ <bold>mise plugins ls --urls</bold>
+    $ <bold>nise plugins ls --urls</bold>
     cmake     https://github.com/mise-plugins/vfox-cmake.git
     poetry    https://github.com/mise-plugins/vfox-poetry.git
 "#

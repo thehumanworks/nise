@@ -485,6 +485,6 @@ struct TestToolResult {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise test-tool ripgrep</bold>
+    $ <bold>nise test-tool ripgrep</bold>
 "#
 );

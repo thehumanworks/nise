@@ -20,6 +20,7 @@ mod completion;
 mod config;
 mod current;
 mod deactivate;
+mod develop;
 mod direnv;
 mod doctor;
 mod dotfiles;
@@ -52,6 +53,7 @@ mod oci;
 mod outdated;
 mod patrons;
 mod plugins;
+mod profile;
 mod prune;
 mod registry;
 #[cfg(debug_assertions)]
@@ -66,6 +68,7 @@ mod settings;
 mod shell;
 mod shell_alias;
 mod sponsors;
+mod store;
 mod sync;
 mod system;
 mod tasks;
@@ -97,7 +100,7 @@ pub enum LevelFilter {
 }
 
 #[derive(clap::Parser)]
-#[clap(name = "mise", about, long_about = LONG_ABOUT, after_long_help = AFTER_LONG_HELP, author = "Jeff Dickey <@jdx>", arg_required_else_help = true)]
+#[clap(name = "nise", about, long_about = LONG_ABOUT, after_long_help = AFTER_LONG_HELP, author = "Jeff Dickey <@jdx>", arg_required_else_help = true)]
 pub struct Cli {
     #[clap(subcommand)]
     pub command: Option<Commands>,
@@ -115,7 +118,7 @@ pub struct Cli {
     /// Change directory before running command
     #[clap(short='C', long, global=true, value_name="DIR", value_hint=clap::ValueHint::DirPath)]
     pub cd: Option<PathBuf>,
-    /// Set the environment for loading `mise.<ENV>.toml`
+    /// Set the environment for loading `nise.<ENV>.toml`
     #[clap(short = 'E', long, global = true)]
     pub env: Option<Vec<String>>,
     /// Force the operation
@@ -135,7 +138,7 @@ pub struct Cli {
     pub quiet: bool,
     #[clap(long, short, hide = true)]
     pub shell: Option<String>,
-    /// Tool(s) to run in addition to what is in mise.toml files
+    /// Tool(s) to run in addition to what is in nise.toml files
     /// e.g.: node@20 python@3.10
     #[clap(
         short,
@@ -190,7 +193,7 @@ pub struct Cli {
     /// Can also be enabled via MISE_LOCKED=1 or settings.locked=true
     #[clap(long, global = true, verbatim_doc_comment)]
     pub locked: bool,
-    /// Suppress all task output and mise non-error messages
+    /// Suppress all task output and nise non-error messages
     #[clap(long, global = true, overrides_with_all = &["quiet", "trace", "verbose", "debug", "log_level"])]
     pub silent: bool,
     /// Shows elapsed time after each task completes
@@ -244,7 +247,9 @@ pub enum Commands {
     Outdated(outdated::Outdated),
     Patrons(patrons::Patrons),
     Plugins(plugins::Plugins),
+    Profile(profile::Profile),
     Deps(deps::Deps),
+    Develop(develop::Develop),
     Prune(prune::Prune),
     Registry(registry::Registry),
     #[cfg(debug_assertions)]
@@ -258,6 +263,7 @@ pub enum Commands {
     Shell(shell::Shell),
     ShellAlias(shell_alias::ShellAlias),
     Sponsors(sponsors::Sponsors),
+    Store(store::Store),
     Sync(sync::Sync),
     Tasks(tasks::Tasks),
     TestTool(test_tool::TestTool),
@@ -319,7 +325,9 @@ impl Commands {
             Self::Outdated(cmd) => cmd.run().await,
             Self::Patrons(cmd) => cmd.run().await,
             Self::Plugins(cmd) => cmd.run().await,
+            Self::Profile(cmd) => cmd.run().await,
             Self::Deps(cmd) => cmd.run().await,
+            Self::Develop(cmd) => cmd.run().await,
             Self::Prune(cmd) => cmd.run().await,
             Self::Registry(cmd) => cmd.run().await,
             #[cfg(debug_assertions)]
@@ -333,6 +341,7 @@ impl Commands {
             Self::Shell(cmd) => cmd.run().await,
             Self::ShellAlias(cmd) => cmd.run().await,
             Self::Sponsors(cmd) => cmd.run(),
+            Self::Store(cmd) => cmd.run(),
             Self::Sync(cmd) => cmd.run().await,
             Self::Tasks(cmd) => cmd.run().await,
             Self::TestTool(cmd) => cmd.run().await,
@@ -479,7 +488,7 @@ fn warn_deprecated_backends_alias(cmd: &clap::Command, args: &[String]) {
             "2026.4.0",
             "2027.4.0",
             "cli.backends.b",
-            "`mise b` is deprecated. Use `mise backends` instead."
+            "`nise b` is deprecated. Use `nise backends` instead."
         );
     }
 }
@@ -759,39 +768,39 @@ impl Cli {
     }
 }
 
-const LONG_ABOUT: &str = "mise prepares your development environment before each command runs. https://github.com/jdx/mise";
+const LONG_ABOUT: &str = "nise prepares your development environment before each command runs.";
 
 const LONG_TASK_ABOUT: &str = r#"Task to run.
 
-Shorthand for `mise tasks run <TASK>`."#;
+Shorthand for `nise tasks run <TASK>`."#;
 
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise install node@20.0.0</bold>       Install a specific node version
-    $ <bold>mise install node@20</bold>           Install a version matching a prefix
-    $ <bold>mise install node</bold>              Install the node version defined in config
-    $ <bold>mise install</bold>                   Install all plugins/tools defined in config
+    $ <bold>nise install node@20.0.0</bold>       Install a specific node version
+    $ <bold>nise install node@20</bold>           Install a version matching a prefix
+    $ <bold>nise install node</bold>              Install the node version defined in config
+    $ <bold>nise install</bold>                   Install all plugins/tools defined in config
 
-    $ <bold>mise install cargo:ripgrep</bold>     Install something via cargo
-    $ <bold>mise install npm:prettier</bold>      Install something via npm
+    $ <bold>nise install cargo:ripgrep</bold>     Install something via cargo
+    $ <bold>nise install npm:prettier</bold>      Install something via npm
 
-    $ <bold>mise use node@20</bold>               Use node-20.x in current project
-    $ <bold>mise use -g node@20</bold>            Use node-20.x as default
-    $ <bold>mise use node@latest</bold>           Use latest node in current directory
+    $ <bold>nise use node@20</bold>               Use node-20.x in current project
+    $ <bold>nise use -g node@20</bold>            Use node-20.x as default
+    $ <bold>nise use node@latest</bold>           Use latest node in current directory
 
-    $ <bold>mise up --interactive</bold>          Show a menu to upgrade tools
+    $ <bold>nise up --interactive</bold>          Show a menu to upgrade tools
 
-    $ <bold>mise x -- npm install</bold>          `npm install` w/ config loaded into PATH
-    $ <bold>mise x node@20 -- node app.js</bold>  `node app.js` w/ config + node-20.x on PATH
+    $ <bold>nise x -- npm install</bold>          `npm install` w/ config loaded into PATH
+    $ <bold>nise x node@20 -- node app.js</bold>  `node app.js` w/ config + node-20.x on PATH
 
-    $ <bold>mise set NODE_ENV=production</bold>   Set NODE_ENV=production in config
+    $ <bold>nise set NODE_ENV=production</bold>   Set NODE_ENV=production in config
 
-    $ <bold>mise run build</bold>                 Run `build` tasks
-    $ <bold>mise watch build</bold>               Run `build` tasks repeatedly when files change
+    $ <bold>nise run build</bold>                 Run `build` tasks
+    $ <bold>nise watch build</bold>               Run `build` tasks repeatedly when files change
 
-    $ <bold>mise settings</bold>                  Show settings in use
-    $ <bold>mise settings color=0</bold>          Disable color by modifying global config file
+    $ <bold>nise settings</bold>                  Show settings in use
+    $ <bold>nise settings color=0</bold>          Disable color by modifying global config file
 "#
 );
 

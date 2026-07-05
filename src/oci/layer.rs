@@ -593,7 +593,7 @@ mod tests {
         let files = vec![
             ("etc/mise/config.toml".to_string(), b"foo\n".to_vec(), 0o644),
             (
-                "usr/local/bin/mise".to_string(),
+                "usr/local/bin/nise".to_string(),
                 b"#!/bin/sh\nexec true\n".to_vec(),
                 0o755,
             ),
@@ -616,7 +616,7 @@ mod tests {
         let files = vec![
             ("etc/mise/config.toml".to_string(), b"foo\n".to_vec(), 0o644),
             (
-                "usr/local/bin/mise".to_string(),
+                "usr/local/bin/nise".to_string(),
                 b"#!/bin/sh\nexec true\n".to_vec(),
                 0o755,
             ),

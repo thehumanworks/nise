@@ -2,7 +2,7 @@ mod forgejo;
 pub(crate) mod github;
 mod gitlab;
 
-/// Display git provider tokens mise will use
+/// Display git provider tokens nise will use
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment)]
 pub struct Token {

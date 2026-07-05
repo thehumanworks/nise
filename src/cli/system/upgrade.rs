@@ -11,7 +11,7 @@ use crate::system;
 /// version (apk, apt, and dnf honor a version pinned in config), brew pours the
 /// formula's current bottle and replaces the old keg, brew-cask installs
 /// the current cask artifact, and mas upgrades App Store apps. Packages that
-/// are not installed yet are skipped — use `mise bootstrap packages apply`
+/// are not installed yet are skipped — use `nise bootstrap packages apply`
 /// for those.
 ///
 /// Packages can also be given explicitly in `manager:package` form.
@@ -62,11 +62,11 @@ impl SystemUpgrade {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise bootstrap packages upgrade</bold>
-    $ <bold>mise bootstrap packages upgrade brew:postgresql@17</bold>
-    $ <bold>mise bootstrap packages upgrade --manager brew-cask</bold>
-    $ <bold>mise bootstrap packages upgrade --manager mas</bold>
-    $ <bold>mise bootstrap packages upgrade --manager apt --yes</bold>
-    $ <bold>mise bootstrap packages upgrade --dry-run</bold>
+    $ <bold>nise bootstrap packages upgrade</bold>
+    $ <bold>nise bootstrap packages upgrade brew:postgresql@17</bold>
+    $ <bold>nise bootstrap packages upgrade --manager brew-cask</bold>
+    $ <bold>nise bootstrap packages upgrade --manager mas</bold>
+    $ <bold>nise bootstrap packages upgrade --manager apt --yes</bold>
+    $ <bold>nise bootstrap packages upgrade --dry-run</bold>
 "#
 );

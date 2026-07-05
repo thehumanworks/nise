@@ -6,22 +6,22 @@ use std::path::PathBuf;
 use xx::file::display_path;
 use xx::regex;
 
-/// Generate a script to download+execute mise
+/// Generate a script to download+execute nise
 ///
-/// This is designed to be used in a project where contributors may not have mise installed.
+/// This is designed to be used in a project where contributors may not have nise installed.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Bootstrap {
-    /// Sandboxes mise internal directories like MISE_DATA_DIR and MISE_CACHE_DIR into a `.mise` directory in the project
+    /// Sandboxes nise internal directories like MISE_DATA_DIR and MISE_CACHE_DIR into a `.mise` directory in the project
     ///
-    /// This is necessary if users may use a different version of mise outside the project.
+    /// This is necessary if users may use a different version of nise outside the project.
     #[clap(long, short, verbatim_doc_comment)]
     localize: bool,
-    /// Specify mise version to fetch
+    /// Specify nise version to fetch
     #[clap(long, short = 'V', verbatim_doc_comment)]
     version: Option<String>,
     /// instead of outputting the script to stdout, write to a file and make it executable
-    #[clap(long, short, verbatim_doc_comment, num_args=0..=1, default_missing_value = "./bin/mise")]
+    #[clap(long, short, verbatim_doc_comment, num_args=0..=1, default_missing_value = "./bin/nise")]
     write: Option<PathBuf>,
     /// Directory to put localized data into
     #[clap(long, verbatim_doc_comment, default_value=".mise", value_hint=ValueHint::DirPath)]
@@ -112,8 +112,8 @@ exec -a "$0" "$MISE_INSTALL_PATH" "$@"
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise generate bootstrap >./bin/mise</bold>
-    $ <bold>chmod +x ./bin/mise</bold>
-    $ <bold>./bin/mise install</bold> – automatically downloads mise to .mise if not already installed
+    $ <bold>nise generate bootstrap >./bin/nise</bold>
+    $ <bold>chmod +x ./bin/nise</bold>
+    $ <bold>./bin/nise install</bold> – automatically downloads nise to .mise if not already installed
 "#
 );

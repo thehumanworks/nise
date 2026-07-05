@@ -9,10 +9,10 @@ use crate::toolset::{InstallOptions, Toolset, ToolsetBuilder};
 use crate::wildcard::wildcard_match;
 use indexmap::IndexSet;
 
-/// Exports env vars to activate mise a single time
+/// Exports env vars to activate nise a single time
 ///
-/// Use this if you don't want to permanently install mise. It's not necessary to
-/// use this if you have `mise activate` in your shell rc file.
+/// Use this if you don't want to permanently install nise. It's not necessary to
+/// use this if you have `nise activate` in your shell rc file.
 #[derive(Debug, clap::Args)]
 #[clap(visible_alias = "e", verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Env {
@@ -243,7 +243,7 @@ static AFTER_LONG_HELP: &str = color_print::cstr!(
 
     $ <bold>eval "$(mise env -s bash)"</bold>
     $ <bold>eval "$(mise env -s zsh)"</bold>
-    $ <bold>mise env -s fish | source</bold>
+    $ <bold>nise env -s fish | source</bold>
     $ <bold>execx($(mise env -s xonsh))</bold>
 "#
 );

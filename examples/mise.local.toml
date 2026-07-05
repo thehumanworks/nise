@@ -1,0 +1,4 @@
+[tools]
+"aqua:vercel-labs/agent-browser" = "latest"
+bun = "latest"
+python = "latest"

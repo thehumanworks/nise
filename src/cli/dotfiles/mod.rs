@@ -15,7 +15,7 @@ pub(crate) use status::DotfilesStatus;
 /// Dotfiles are config files symlinked, copied, or rendered to target paths,
 /// plus marker-delimited blocks or single lines in files mise doesn't own.
 /// Unlike `[tools]`, dotfiles are only acted on when explicitly requested with
-/// `mise dotfiles apply`, `mise bootstrap dotfiles apply`, or `mise bootstrap`.
+/// `nise dotfiles apply`, `nise bootstrap dotfiles apply`, or `nise bootstrap`.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment)]
 pub struct Dotfiles {

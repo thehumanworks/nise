@@ -6,7 +6,7 @@ mod python;
 mod ruby;
 
 #[derive(Debug, clap::Args)]
-#[clap(about = "Synchronize tools from other version managers with mise")]
+#[clap(about = "Synchronize tools from other version managers with nise")]
 pub struct Sync {
     #[clap(subcommand)]
     command: Commands,

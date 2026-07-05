@@ -14,19 +14,19 @@ source_code_link_template #"""
 https://github.com/jdx/mise/blob/main/src/cli/{{path}}
 """#
 
-complete "alias" run="mise alias ls {{words[PREV]}} | awk '{print $2}'"
+complete "alias" run="nise alias ls {{words[PREV]}} | awk '{print $2}'"
 complete "config_file" type="file"
-complete "new_plugin" run="mise plugins --all"
-complete "installed_tool" run="mise ls -i | awk '{print $1}' | uniq"
-complete "plugin" run="mise plugins --core --user"
-complete "prefix" run="mise ls-remote {{words[PREV]}}"
-complete "setting" run="mise settings --complete" descriptions=#true
-complete "task" run="mise tasks ls --complete" descriptions=#true
-complete "tool" run="mise registry --complete" descriptions=#true
-complete "env_var" run=#"mise set --complete | awk '{print $1"="}'"#
-complete "env_key" run="mise set --complete"
-complete "backend" run="mise backends"
-complete "bin_name" run="mise which --complete"
+complete "new_plugin" run="nise plugins --all"
+complete "installed_tool" run="nise ls -i | awk '{print $1}' | uniq"
+complete "plugin" run="nise plugins --core --user"
+complete "prefix" run="nise ls-remote {{words[PREV]}}"
+complete "setting" run="nise settings --complete" descriptions=#true
+complete "task" run="nise tasks ls --complete" descriptions=#true
+complete "tool" run="nise registry --complete" descriptions=#true
+complete "env_var" run=#"nise set --complete | awk '{print $1"="}'"#
+complete "env_key" run="nise set --complete"
+complete "backend" run="nise backends"
+complete "bin_name" run="nise which --complete"
 
 complete "tool@version" run=#"""
 cur="{{words[CURRENT]}}"
@@ -35,14 +35,14 @@ case $cur in
     tool="$(echo "$cur" | cut -d'@' -f1)"
     prefix="$(echo "$cur" | cut -d'@' -f2)"
 
-    versions=$(mise ls-remote $tool $prefix | sed '1!G;h;$!d')
+    versions=$(nise ls-remote $tool $prefix | sed '1!G;h;$!d')
 
     for version in $versions; do
       echo "$tool@$version"
     done
     ;;
   *)
-    plugins=$(mise registry | awk '{print $1}')
+    plugins=$(nise registry | awk '{print $1}')
     for plugin in $plugins; do
       echo "$plugin@"
     done
@@ -60,14 +60,14 @@ case $cur in
     if [ ! -z "$prefix" ]; then
       prefix="--prefix $prefix"
     fi
-    versions=$(mise ls --installed $tool $prefix | awk '{print $2}' | sed '1!G;h;$!d')
+    versions=$(nise ls --installed $tool $prefix | awk '{print $2}' | sed '1!G;h;$!d')
 
     for version in $versions; do
       echo "$tool@$version"
     done
     ;;
   *)
-    plugins=$(mise ls --installed | awk '{print $1}' | uniq | sed '1!G;h;$!d')
+    plugins=$(nise ls --installed | awk '{print $1}' | uniq | sed '1!G;h;$!d')
     for plugin in $plugins; do
       echo "$plugin@"
     done

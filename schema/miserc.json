@@ -35,7 +35,7 @@
     },
     "override_config_filenames": {
       "default": [],
-      "description": "If set, mise will ignore default config files like `mise.toml` and use these filenames instead.",
+      "description": "If set, nise will ignore default config files like `nise.toml` and use these filenames instead.",
       "type": "array",
       "items": {
         "type": "string"

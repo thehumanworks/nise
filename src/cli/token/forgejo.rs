@@ -39,13 +39,13 @@ impl Forgejo {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise token forgejo</bold>
+    $ <bold>nise token forgejo</bold>
     codeberg.org: a180…61f6 (source: FORGEJO_TOKEN)
 
-    $ <bold>mise token forgejo --unmask</bold>
+    $ <bold>nise token forgejo --unmask</bold>
     codeberg.org: a18099ca69064be387fbe37b8ad1d333758361f6 (source: FORGEJO_TOKEN)
 
-    $ <bold>mise token forgejo forgejo.mycompany.com</bold>
+    $ <bold>nise token forgejo forgejo.mycompany.com</bold>
     forgejo.mycompany.com: (none)
 "#
 );

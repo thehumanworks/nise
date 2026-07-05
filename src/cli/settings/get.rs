@@ -8,7 +8,7 @@ use eyre::bail;
 /// This is the contents of a single entry in ~/.config/mise/config.toml
 ///
 /// Note that aliases are also stored in this file
-/// but managed separately with `mise tool-alias get`
+/// but managed separately with `nise tool-alias get`
 #[derive(Debug, clap::Args)]
 #[clap(after_long_help = AFTER_LONG_HELP, verbatim_doc_comment)]
 pub struct SettingsGet {
@@ -64,7 +64,7 @@ fn is_known_setting(key: &str) -> bool {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise settings get idiomatic_version_file</bold>
+    $ <bold>nise settings get idiomatic_version_file</bold>
     true
 "#
 );

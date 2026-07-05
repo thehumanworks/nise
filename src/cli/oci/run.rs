@@ -10,14 +10,14 @@ use crate::config::Settings;
 use crate::file;
 use crate::oci::{BuildOptions, LayerOwner};
 
-/// [experimental] Build an OCI image from the current mise.toml and run a command in it
+/// [experimental] Build an OCI image from the current nise.toml and run a command in it
 ///
-/// Equivalent to `mise oci build` followed by `docker run` / `podman run`.
+/// Equivalent to `nise oci build` followed by `docker run` / `podman run`.
 /// The built image is loaded into the local container engine (podman is
 /// preferred; docker works via skopeo) and the given command is executed
 /// inside it with stdin/stdout/stderr inherited.
 ///
-/// Requires `mise settings experimental=true` (or `MISE_EXPERIMENTAL=1`) and
+/// Requires `nise settings experimental=true` (or `MISE_EXPERIMENTAL=1`) and
 /// one of: `podman`, `docker+skopeo`.
 #[derive(Debug, clap::Args)]
 #[clap(verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
@@ -33,21 +33,21 @@ pub struct Run {
     from: Option<String>,
 
     /// Use an already-built OCI image layout instead of building fresh
-    #[clap(long, value_hint = ValueHint::DirPath, conflicts_with_all = &["from", "mount_point", "no_mise", "owner", "include_global"])]
+    #[clap(long, value_hint = ValueHint::DirPath, conflicts_with_all = &["from", "mount_point", "no_nise", "owner", "include_global"])]
     image_dir: Option<PathBuf>,
 
     /// Also include tools from the global / system config (default: project-only)
     ///
-    /// See `mise oci build --help` for details.
+    /// See `nise oci build --help` for details.
     #[clap(long)]
     include_global: bool,
 
     /// Keep the loaded image in the engine's storage after the run
     ///
     /// By default, both the container (`--rm`) and the loaded image are
-    /// removed when the command exits, so repeated `mise oci run` calls
+    /// removed when the command exits, so repeated `nise oci run` calls
     /// don't accumulate images in podman / docker storage. Pass `--keep`
-    /// to retain the image under the tag mise used (`mise-oci:run-*` for
+    /// to retain the image under the tag mise used (`nise-oci:run-*` for
     /// docker; the pulled image ID for podman).
     #[clap(long)]
     keep: bool,
@@ -56,9 +56,9 @@ pub struct Run {
     #[clap(long)]
     mount_point: Option<String>,
 
-    /// Don't embed the mise binary (ignored with --image-dir)
-    #[clap(long)]
-    no_mise: bool,
+    /// Don't embed the nise binary (ignored with --image-dir)
+    #[clap(long = "no-nise", alias = "no-mise")]
+    no_nise: bool,
 
     /// UID[:GID] to assign to every tar entry when building (conflicts with --image-dir)
     ///
@@ -106,7 +106,7 @@ enum Engine {
 
 impl Run {
     pub async fn run(self) -> Result<()> {
-        Settings::get().ensure_experimental("mise oci run")?;
+        Settings::get().ensure_experimental("nise oci run")?;
 
         // 1. Validate arguments first so bad args win over "engine missing".
         if let Some(d) = &self.image_dir
@@ -129,16 +129,16 @@ impl Run {
             if let Some(d) = &self.image_dir {
                 (d.clone(), None)
             } else {
-                let td = TempDir::with_prefix("mise-oci-run-")
+                let td = TempDir::with_prefix("nise-oci-run-")
                     .wrap_err("creating temp dir for oci build output")?;
                 let out_dir = td.path().join("image");
                 let opts = BuildOptions {
                     out_dir: out_dir.clone(),
                     from: self.from.clone(),
-                    tag: Some("mise-oci:run".to_string()),
+                    tag: Some("nise-oci:run".to_string()),
                     mount_point: self.mount_point.clone(),
                     owner: self.owner,
-                    include_mise: !self.no_mise,
+                    include_mise: !self.no_nise,
                 };
                 let built = perform_build(opts, self.include_global).await?;
                 info!("built image: {}", built.manifest_digest);
@@ -292,12 +292,12 @@ fn load_image(engine: Engine, image_dir: &Path) -> Result<String> {
         }
         Engine::Docker => {
             // skopeo is the portable way to get an OCI layout into a docker
-            // daemon. Pick a per-invocation tag so concurrent `mise oci run`
-            // calls don't clobber each other — a shared `mise-oci:run` tag
+            // daemon. Pick a per-invocation tag so concurrent `nise oci run`
+            // calls don't clobber each other — a shared `nise-oci:run` tag
             // would otherwise race: the second skopeo copy would overwrite
             // the first image before the first container started.
             let tag = format!(
-                "mise-oci:run-{}-{}",
+                "nise-oci:run-{}-{}",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
@@ -325,15 +325,15 @@ fn load_image(engine: Engine, image_dir: &Path) -> Result<String> {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    Build the current mise.toml and drop into bash:
-    $ <bold>mise oci run -it -- bash</bold>
+    Build the current nise.toml and drop into bash:
+    $ <bold>nise oci run -it -- bash</bold>
 
     Run a one-shot command with env + volume (note: `-v` is reserved
     for --verbose, so use `--volume`):
-    $ <bold>mise oci run -e DEBUG=1 --volume $PWD:/work -w /work -- npm test</bold>
+    $ <bold>nise oci run -e DEBUG=1 --volume $PWD:/work -w /work -- npm test</bold>
 
     Re-use a previously built layout (skip the build step):
-    $ <bold>mise oci build -o ./img && mise oci run --image-dir ./img -- node -e 'console.log(process.version)'</bold>
+    $ <bold>nise oci build -o ./img && nise oci run --image-dir ./img -- node -e 'console.log(process.version)'</bold>
 
 <bold><underline>Engines:</underline></bold>
 

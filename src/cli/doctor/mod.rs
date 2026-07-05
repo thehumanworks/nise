@@ -29,7 +29,7 @@ use std::env::split_paths;
 use std::path::{Path, PathBuf};
 use strum::IntoEnumIterator;
 
-/// Check mise installation for possible problems
+/// Check nise installation for possible problems
 #[derive(Debug, clap::Args)]
 #[clap(visible_alias = "dr", verbatim_doc_comment, after_long_help = AFTER_LONG_HELP)]
 pub struct Doctor {
@@ -213,7 +213,7 @@ impl Doctor {
                             tool.insert("version".into(), tv.version.to_string().into());
                             tool.insert("missing".into(), true.into());
                             self.errors.push(format!(
-                                "tool {tv} is not installed, install with `mise install`"
+                                "tool {tv} is not installed, install with `nise install`"
                             ));
                         }
                     }
@@ -469,7 +469,7 @@ impl Doctor {
         }
         if total_missing > 0 {
             self.warnings.push(format!(
-                "{total_missing} system package(s) are missing, install them with `mise bootstrap packages apply`"
+                "{total_missing} system package(s) are missing, install them with `nise bootstrap packages apply`"
             ));
         }
         Some(map.into())
@@ -503,7 +503,7 @@ impl Doctor {
                     .count();
                 if out_of_sync > 0 {
                     self.warnings.push(format!(
-                        "{out_of_sync} macOS default(s) are out of sync, apply them with `mise bootstrap macos defaults apply`"
+                        "{out_of_sync} macOS default(s) are out of sync, apply them with `nise bootstrap macos defaults apply`"
                     ));
                 }
                 Some(SystemDefaultsDiagnosis::Checked {
@@ -588,7 +588,7 @@ impl Doctor {
                 let out_of_sync = status.state != crate::system::login_shell::LoginShellState::Set;
                 if out_of_sync {
                     self.warnings.push(
-                        "login shell is out of sync, apply it with `mise bootstrap user apply`"
+                        "login shell is out of sync, apply it with `nise bootstrap user apply`"
                             .to_string(),
                     );
                 }
@@ -705,7 +705,7 @@ impl Doctor {
         }
         if total_missing > 0 {
             self.warnings.push(format!(
-                "{total_missing} system package(s) are missing, install them with `mise bootstrap packages apply`"
+                "{total_missing} system package(s) are missing, install them with `nise bootstrap packages apply`"
             ));
         }
         info::section("system_packages", lines.join("\n"))?;
@@ -721,7 +721,7 @@ impl Doctor {
                 true => (tv.to_string(), style::nstyle("")),
                 false => {
                     self.errors.push(format!(
-                        "tool {tv} is not installed, install with `mise install`"
+                        "tool {tv} is not installed, install with `nise install`"
                     ));
                     (tv.to_string(), style::ndim("(missing)"))
                 }
@@ -916,7 +916,7 @@ impl Doctor {
             r#"mise tool paths are not first in PATH. These paths take precedence:
               {paths_display}
             This may cause system-installed tools to be used instead of mise-managed versions.
-            Ensure `mise activate` runs after other PATH modifications in your shell rc file."#
+            Ensure `nise activate` runs after other PATH modifications in your shell rc file."#
         ));
     }
 }
@@ -1123,7 +1123,7 @@ fn aqua_registry_count_str() -> String {
 static AFTER_LONG_HELP: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</underline></bold>
 
-    $ <bold>mise doctor</bold>
+    $ <bold>nise doctor</bold>
     [WARN] plugin node is not installed
 "#
 );
